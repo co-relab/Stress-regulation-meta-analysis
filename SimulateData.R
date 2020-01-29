@@ -9,13 +9,7 @@ database <-sample(c(1,2,3,4,5),346, replace=T)
 # 1=psychinfo, 2=pubmed, 3=scopus, 4=google scholar, 5=hand search
 country <- NA
 
-######################################################################
-
-#Risk of bias-assessment code
-randomization <-sample(c(1,2),346, replace=T)
-# 1=randomized, 2=non-randomized
-
-######################################################################
+############################################################################################
 
 #Intervention characteristics 
 
@@ -39,13 +33,21 @@ type_of_component <-sample(c(1,2,3,4,5,6),346, replace=T)
 #5= cognitive component 6=physiological component 
 exact_type_of_population <- NA
 frequency_of_intervention <- NA
+#how many times each week the participants receive the intervention
 duration_of_intervention <- NA
+#total duration of the intervention
+number_of_intervention <- NA
+#total number of SEM session, biofeedback trainings, exposure to nature, social support received
+Instrument <- NA
+#Type of scale used in the experiment (e.g. PSS)
+Type_of_stressor <- NA
+#Type of stressor present in the study (e.g. workstress, disease stress)
+
 nationality <- NA
 
 ######################################################################
 
 #Specific coding for categories
-
 set.seed(234)
 category <-sample(c(1,2,3,4),346, replace=T)
 #Divide each article by categories for the meta-analysis: 1= self-administered mindfulness, 2=biofeedback 3= being in nature 4=social support
@@ -70,8 +72,11 @@ type_of_SocialSupport <-ifelse(data1$category==4,
                                c(1,2,3,4), NA) 
 data1$type_of_SocialSupport<-type_of_SocialSupport
 #If the article is on social support I code 1 =no support 2= physical contact 3= verbal social support 4= mixed 
+data1$source_of_SocialSupport <- NA 
+                            
+#Code the source of SocialSupport 
 
-MetaData <-cbind(research_design,journal,database,country,randomization,presence_of_individual_differences,timing_intervention,MASdata,type_of_population,type_of_comparison_group,type_of_component,exact_type_of_population,frequency_of_intervention,duration_of_intervention,nationality,data1)
+MetaData <-cbind(research_design,journal,database,country,number_of_intervention,Instrument,Type_of_stressor,presence_of_individual_differences,timing_intervention,MASdata,type_of_population,type_of_comparison_group,type_of_component,exact_type_of_population,frequency_of_intervention,duration_of_intervention,nationality,data1)
 #Create the first simulated dataset with the info encoded until now
 View(MetaData)
 
@@ -86,7 +91,6 @@ StressData <- cbind(MetaData, dat$F, dat$log.reg.B,dat$B,dat$t,dat$r,dat$Chisq,d
 View(StressData)
 
 
-
 rob2 <- read.csv("rob2.csv", sep = ";")
 #bringing-in the Rob2 for each study, after having used the Rob2 excel sheet for each study
 View(rob2)
@@ -95,4 +99,4 @@ StressData <-cbind(StressData, rob2)
 View(StressData)
 #Merging the simulated dataset with the Rob2 simulated dataset 
 
-test
+
