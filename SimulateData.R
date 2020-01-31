@@ -78,7 +78,7 @@ data1$source_of_SocialSupport <- NA
 
 MetaData <-cbind(research_design,journal,database,country,number_of_intervention,Instrument,Type_of_stressor,presence_of_individual_differences,timing_intervention,MASdata,type_of_population,type_of_comparison_group,type_of_component,exact_type_of_population,frequency_of_intervention,duration_of_intervention,nationality,data1)
 #Create the first simulated dataset with the info encoded until now
-View(MetaData)
+
 
 dat <- read.csv("MA data oct 2018 IR.csv", sep = ";")
 # Read in the social thermoregulation dataset in order to merge it with the one simulated for stress.
@@ -88,15 +88,18 @@ published <-sample(c(1,2),346, replace=T)
 
 StressData <- cbind(MetaData, dat$F, dat$log.reg.B,dat$B,dat$t,dat$r,dat$Chisq,dat$beta,dat$Waldchisq,dat$df1,dat$df2,dat$Design,published)
 #Merging a simulated dataset on stress, with the real dataset of social thermoregulation (in order to take the effect sizes from that and other statistics)
-View(StressData)
 
 
-rob2 <- read.csv("rob2.csv", sep = ";")
+
+rob2 <- read.csv("Rob_3.csv", sep = ";")
 #bringing-in the Rob2 for each study, after having used the Rob2 excel sheet for each study
-View(rob2)
 
+rob2 <- rob2[ , which(names(rob2) %in% c("Domain.1.risk.of.bias","Domain.2.risk.of.bias","Domain.3.risk.of.bias","Domain.4.risk.of.bias","Domain.5.risk.of.bias","Overall.risk.of.bias"))]
+#taking from the raw Rob2 dataset just the columns we need (Rob for all domains and overall)
+View(rob2)
 StressData <-cbind(StressData, rob2)
 View(StressData)
 #Merging the simulated dataset with the Rob2 simulated dataset 
 
+#deidentifieddata_testweek2019 <- identified_testweekdata2019[ , -which(names(identified_testweekdata2019) %in% c("sex","age", "studyyear", "height", "weight"))]
 
