@@ -48,7 +48,7 @@ nationality <- NA
 ######################################################################
 
 #Specific coding for categories
-set.seed(234)
+
 category <-sample(c(1,2,3,4),346, replace=T)
 #Divide each article by categories for the meta-analysis: 1= self-administered mindfulness, 2=biofeedback 3= being in nature 4=social support
 data1<-as.data.frame(category)
@@ -91,7 +91,7 @@ StressData <- cbind(MetaData, dat$F, dat$log.reg.B,dat$B,dat$t,dat$r,dat$Chisq,d
 
 
 
-rob2 <- read.csv("Rob_3.csv", sep = ";")
+rob2 <- read.csv("Rob_2.csv", sep = ";")
 #bringing-in the Rob2 for each study, after having used the Rob2 excel sheet for each study
 
 rob2 <- rob2[ , which(names(rob2) %in% c("Domain.1.risk.of.bias","Domain.2.risk.of.bias","Domain.3.risk.of.bias","Domain.4.risk.of.bias","Domain.5.risk.of.bias","Overall.risk.of.bias"))]
