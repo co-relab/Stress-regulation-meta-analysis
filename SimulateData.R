@@ -1,3 +1,4 @@
+library(dplyr)
 #simulate a dataset for the stress meta-analysis 
 
 #General info of a study
@@ -94,12 +95,34 @@ StressData <- cbind(MetaData, dat$F, dat$log.reg.B,dat$B,dat$t,dat$r,dat$Chisq,d
 rob2 <- read.csv("Rob_2.csv", sep = ";")
 #bringing-in the Rob2 for each study, after having used the Rob2 excel sheet for each study
 
+
+
 rob2 <- rob2[ , which(names(rob2) %in% c("Domain.1.risk.of.bias","Domain.2.risk.of.bias","Domain.3.risk.of.bias","Domain.4.risk.of.bias","Domain.5.risk.of.bias","Overall.risk.of.bias"))]
 #taking from the raw Rob2 dataset just the columns we need (Rob for all domains and overall)
-View(rob2)
-StressData <-cbind(StressData, rob2)
-View(StressData)
-#Merging the simulated dataset with the Rob2 simulated dataset 
 
-#deidentifieddata_testweek2019 <- identified_testweekdata2019[ , -which(names(identified_testweekdata2019) %in% c("sex","age", "studyyear", "height", "weight"))]
+#rob2 <- rob2 %>%
+#select("Domain.1.risk.of.bias","Domain.2.risk.of.bias","Domain.3.risk.of.bias","Domain.4.risk.of.bias","Domain.5.risk.of.bias","Overall.risk.of.bias")
+#View(rob2)
+#Here I tried to do the same with dplyr, it was just and exercise
+
+StressData <-cbind(StressData, rob2)
+#View(rob2)
+
+#Merging the simulated dataset with the Rob2 simulated dataset 
+gender <- c("MALE","FEMALE","FEMALE","UNKNOWN","MALE")
+ifelse(gender == "MALE", 1, ifelse(gender == "FEMALE", 2, 3))
+
+StressData$Domain.1.risk.of.bias<- ifelse(StressData$Domain.1.risk.of.bias == "Low", 1, ifelse(StressData$Domain.1.risk.of.bias == "High",3,2))
+StressData$Domain.2.risk.of.bias<- ifelse(StressData$Domain.2.risk.of.bias == "Low", 1, ifelse(StressData$Domain.2.risk.of.bias == "High",3,2))
+StressData$Domain.3.risk.of.bias<- ifelse(StressData$Domain.3.risk.of.bias == "Low", 1, ifelse(StressData$Domain.3.risk.of.bias == "High",3,2))
+StressData$Domain.4.risk.of.bias<- ifelse(StressData$Domain.4.risk.of.bias == "Low", 1, ifelse(StressData$Domain.4.risk.of.bias == "High",3,2))
+StressData$Domain.5.risk.of.bias<- ifelse(StressData$Domain.5.risk.of.bias == "Low", 1, ifelse(StressData$Domain.5.risk.of.bias == "High",3,2))
+StressData$Overall.risk.of.bias<- ifelse(StressData$Overall.risk.of.bias == "Low", 1, ifelse(StressData$Overall.risk.of.bias == "High", 3, 2))
+StressData$`dat$Design`<- ifelse(StressData$`dat$Design` == "Within", 1,2)
+
+View(StressData)
+
+#recoded to numeric values items for RoB2 and type of design 
+View(StressData)
+
 
