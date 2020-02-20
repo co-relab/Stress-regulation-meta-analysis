@@ -2,7 +2,7 @@
 # Filtering options -------------------------------------------------------
 
 # Not wishing to filter by a given criterion is represented by an NA
-mood.opt <- NA
+mood.opt <- rep(1, 99)
 comp.prim.opt <- NA # 0 == compensatory, 1 = priming
 method.opt <- NA # 1 to 7
 methods.opt.label <- ifelse(is.na(method.opt), NA, c("Physical.Temperature.Manipulation.", "Visual.Verbal.Temperature.Prime.", "Outside.Temperature.", "Temperature.Estimate.", "Subjective.Warmth.Judgment", "Core.Temperature.Measurement.", "Skin.Temperature.Measurement.")[method.opt])
