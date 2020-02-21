@@ -2,7 +2,7 @@ library(dplyr)
 #simulate a dataset for the stress meta-analysis 
 
 #General info of a study
-set.seed(1234)
+set.seed(5555)
 research_design <-sample(c(1,2,3),346, replace=T)
 # 1=RCT, 2=observational, 3=correlational design 
 journal <- NA
