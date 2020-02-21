@@ -126,6 +126,7 @@ View(StressData)
 
 #recoded to numeric values items for RoB2 and type of design 
 View(StressData)
+dat <- StressData
 
 #StressData <- StressData %>%
   #mutate (Domain.1.risk.of.bias = ifelse(Domain.1.risk.of.bias == "Low", 1,
