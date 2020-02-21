@@ -16,6 +16,8 @@ country <- NA
 
 presence_of_individual_differences <-sample(c(1,2),346, replace=T)
 # 1=if there are individual differences in the study, 2= If there aren't individual differences in the study
+focal_variable <-sample(c(0,1),346, replace=T)
+# Added the focal variable; 0= not a focal variable, 1= it is a focal variable
 timing_intervention <-sample(c(1,2,3),346, replace=T)
 # 1= before stressor, 2= after the stressor, 3= both
 presence_of_stressTest <-sample(c(1,2),346, replace=T)
@@ -77,7 +79,7 @@ data1$source_of_SocialSupport <- NA
                             
 #Code the source of SocialSupport 
 
-MetaData <-cbind(research_design,journal,database,country,number_of_intervention,Instrument,Type_of_stressor,presence_of_individual_differences,timing_intervention,MASdata,type_of_population,type_of_comparison_group,type_of_component,exact_type_of_population,frequency_of_intervention,duration_of_intervention,nationality,data1)
+MetaData <-cbind(research_design,focal_variable,journal,database,country,number_of_intervention,Instrument,Type_of_stressor,presence_of_individual_differences,timing_intervention,MASdata,type_of_population,type_of_comparison_group,type_of_component,exact_type_of_population,frequency_of_intervention,duration_of_intervention,nationality,data1)
 #Create the first simulated dataset with the info encoded until now
 
 
@@ -87,7 +89,7 @@ dat <- read.csv("MA data oct 2018 IR.csv", sep = ";")
 published <-sample(c(1,2),346, replace=T)
 #1=published, 2=unpublished
 
-StressData <- cbind(MetaData, dat$F, dat$log.reg.B,dat$B,dat$t,dat$r,dat$Chisq,dat$beta,dat$Waldchisq,dat$df1,dat$df2,dat$Design,published)
+StressData <- cbind(MetaData,dat$F, dat$log.reg.B,dat$B,dat$t,dat$r,dat$Chisq,dat$beta,dat$Waldchisq,dat$df1,dat$df2,dat$Design,published)
 #Merging a simulated dataset on stress, with the real dataset of social thermoregulation (in order to take the effect sizes from that and other statistics)
 
 
@@ -125,4 +127,6 @@ View(StressData)
 #recoded to numeric values items for RoB2 and type of design 
 View(StressData)
 
-
+#StressData <- StressData %>%
+  #mutate (Domain.1.risk.of.bias = ifelse(Domain.1.risk.of.bias == "Low", 1,
+                                       # ifelse(Domain.1.risk.of.bias == "High",3,2)) altro modo di fare ifelse
