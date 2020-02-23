@@ -4,6 +4,7 @@ library(dplyr)
 #General info of a study
 
 set.seed(8888)
+
 research_design <-sample(c(1,2,3),346, replace=T)
 # 1=RCT, 2=observational, 3=correlational design 
 journal <- NA
