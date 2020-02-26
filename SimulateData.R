@@ -124,10 +124,7 @@ StressData$Domain.5.risk.of.bias<- ifelse(StressData$Domain.5.risk.of.bias == "L
 StressData$Overall.risk.of.bias<- ifelse(StressData$Overall.risk.of.bias == "Low", 1, ifelse(StressData$Overall.risk.of.bias == "High", 3, 2))
 StressData$`dat$Design`<- ifelse(StressData$`dat$Design` == "Within", 1,2)
 
-View(StressData)
-
 #recoded to numeric values items for RoB2 and type of design 
-View(StressData)
 dat <- StressData
 
 #StressData <- StressData %>%
