@@ -6,7 +6,7 @@ library(dplyr)
 set.seed(8888)
 
 research_design <-sample(c(1,2),346, replace=T)
-# 1=RCT, 2=observational
+# 1=RCT, 2=observationalf
 journal <- NA
 database <-sample(c(1,2,3,4,5),346, replace=T)
 # 1=psychinfo, 2=pubmed, 3=scopus, 4=google scholar, 5=hand search
@@ -77,8 +77,10 @@ type_of_SocialSupport <-ifelse(data1$category==4,
                                c(1,2,3,4), NA) 
 data1$type_of_SocialSupport<-type_of_SocialSupport
 #If the article is on social support I code 1 =no support 2= physical contact 3= verbal social support 4= mixed 
-data1$source_of_SocialSupport <- NA 
-                            
+source_of_SocialSupport <-ifelse(data1$category==4,                               
+                                 c(1,2,3), NA) 
+data1$source_of_SocialSupport <- source_of_SocialSupport
+#If the article is on social support I code 1 =partner 2= friends 3=stranger                            
 #Code the source of SocialSupport 
 
 MetaData <-cbind(research_design,focal_variable,journal,database,country,number_of_intervention,Instrument,Type_of_stressor,presence_of_individual_differences,timing_intervention,MASdata,type_of_population,type_of_comparison_group,type_of_component,exact_type_of_population,frequency_of_intervention,duration_of_intervention,nationality,data1)
@@ -126,7 +128,7 @@ StressData$`dat$Design`<- ifelse(StressData$`dat$Design` == "Within", 1,2)
 
 #recoded to numeric values items for RoB2 and type of design 
 dat <- StressData
-
+View(dat)
 #StressData <- StressData %>%
   #mutate (Domain.1.risk.of.bias = ifelse(Domain.1.risk.of.bias == "Low", 1,
                                        # ifelse(Domain.1.risk.of.bias == "High",3,2)) altro modo di fare ifelse
