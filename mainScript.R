@@ -127,5 +127,5 @@ table(is.na(dat$g.calc))
 #'There is very little missing data. Regardless of what imputation procedure is applied, it won't have much effect.
 #paste(round(sum(is.na(dat[,1:34]))/prod(dim(dat[,1:34]))*100, 3), "%", sep = "") # insert collumn numbers
 #missmap(dat, rank.order = TRUE, margins = c(5, 0), legend = F)    # insert collumn numbers
-
+e
 

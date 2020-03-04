@@ -6,7 +6,7 @@ library(dplyr)
 set.seed(8888)
 
 research_design <-sample(c(1,2),346, replace=T)
-# 1=RCT, 2=observationalf
+# 1=RCT, 2=observational
 journal <- NA
 database <-sample(c(1,2,3,4,5),346, replace=T)
 # 1=psychinfo, 2=pubmed, 3=scopus, 4=google scholar, 5=hand search

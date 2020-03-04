@@ -200,3 +200,4 @@ Publication.bias <- list("p-curve mean p-values" = as.data.frame(describe(pcurve
                                  "PET-PEESE p-value" = pp[4],
                                  "Median power for detecting PEESE estimate" = pwr.peese.result,
                                  "Median power for detecting 3PSM estimate" = pwr.3PSM.result)
+
