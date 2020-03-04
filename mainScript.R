@@ -54,6 +54,18 @@ for(i in 1:length(rmaObjects)){
 results <- setNames(results, nm = namesObjects)
 results
 
+#############
+w1 <- tryCatch(
+  weightfunct(g, v, steps = c(0.025, 0.5, 1), mods = NULL, weights = NULL, fe = FALSE, table = TRUE),
+  error = function(e) NULL
+)
+
+attributes(w1)
+# CUTPOINTS VYSKUSAT IBA .025
+table(cut(w1$p, breaks=c(0, .025, 0.5, 1)))
+
+##############š
+
 # Published vs unpublished studies 
 publishedRMA <- rmaCustom(dat[!is.na(dat$g.calc) & dat$published == 1,])
 unpublishedRMA <- rmaCustom(dat[!is.na(dat$g.calc) & dat$published == 2,])
@@ -86,19 +98,38 @@ for(i in 1:length(rmaRnd)){
 RoBResults <- setNames(RoBResults, nm = namesObjects)
 RoBResults
 
-# Example: Comparison of categories after controlling for prognostic factors w.r.t. the effect sizes
-# What moderator/meta-regression analyses shall we conduct is a substantial question to discuss.
-rmaCompareNull <- robust.rma.mv(rma.mv(yi = g.calc, V = g.var.calc, mods = research_design + type_of_population + type_of_comparison_group + published + Overall.risk.of.bias - 1, struct="DIAG", data = dat[!is.na(dat$g.calc),], method = "ML", random = ~ factor(category) | result), cluster = dat[!is.na(dat$g.calc),]$study)
-rmaCompare <- robust.rma.mv(rma.mv(yi = g.calc, V = g.var.calc, mods = ~factor(category) + research_design + type_of_population + type_of_comparison_group + published + Overall.risk.of.bias - 1,struct="DIAG", data = dat[!is.na(dat$g.calc),], method = "ML", random = ~ factor(category) | result), cluster = dat[!is.na(dat$g.calc),]$study)
-rmaCompare
+# Defining the null model for moderator analyses
+rmaNull <- robust.rma.mv(rma.mv(yi = g.calc, V = g.var.calc, mods = research_design + type_of_population + type_of_comparison_group + published + Overall.risk.of.bias - 1, struct="DIAG", data = dat[!is.na(dat$g.calc),], method = "ML", random = ~ factor(category) | result), cluster = dat[!is.na(dat$g.calc),]$study)
 
+# Categories
+# Comparison of categories after controlling for prognostic factors w.r.t. the effect sizes
+# What moderator/meta-regression analyses shall we conduct is a substantial question to discuss.
+rmaCat <- robust.rma.mv(rma.mv(yi = g.calc, V = g.var.calc, mods = ~factor(category) + research_design + type_of_population + type_of_comparison_group + published + Overall.risk.of.bias - 1,struct="DIAG", data = dat[!is.na(dat$g.calc),], method = "ML", random = ~ factor(category) | result), cluster = dat[!is.na(dat$g.calc),]$study)
+rmaCat
 
 # Likelihood ratio test for the differences between categories
 # Omnibus test
-anova(rmaCompareNull, rmaCompare)
+anova(rmaNull, rmaCat)
 
 # Contrasts 
 # p-values adjusted using Holm's method
-summary(glht(rmaCompare, linfct=cbind(contrMat(c("Self-administered mindfulness" = 1, "Biofeedback" = 1, "Being in nature" = 1, "Social support" = 1), type="Tukey"), 0, 0, 0, 0, 0)), test=adjusted("holm"))
+summary(glht(rmaCat, linfct=cbind(contrMat(c("Self-administered mindfulness" = 1, "Biofeedback" = 1, "Being in nature" = 1, "Social support" = 1), type="Tukey"), 0, 0, 0, 0, 0)), test=adjusted("holm"))
 
+# Components
+# Comparison of components after controlling for prognostic factors w.r.t. the effect sizes
+rmaComp <- robust.rma.mv(rma.mv(yi = g.calc, V = g.var.calc, mods = ~factor(type_of_component) + research_design + type_of_population + type_of_comparison_group + published + Overall.risk.of.bias - 1, struct="DIAG", data = dat[!is.na(dat$g.calc),], method = "ML", random = ~ factor(category) | result), cluster = dat[!is.na(dat$g.calc),]$study)
+rmaComp
+
+# Likelihood ratio test for the differences between categories
+# Omnibus test
+anova(rmaNull, rmaComp)
+
+# Contrasts 
+# p-values adjusted using Holm's method
+summary(glht(rmaComp, linfct=cbind(contrMat(c("AFloAneV" = 1, "AFhiAneV" = 1, "AFloApoV" = 1, "AFhiApoV" = 1, "cognitiveComp" = 1, "physiologicalComp" = 1), type="Tukey"), 0, 0, 0, 0, 0)), test=adjusted("holm"))
+
+# Social Support
+# Moderator analysis for type of social support
+rmaSocSupp <- robust.rma.mv(rma.mv(yi = g.calc, V = g.var.calc, mods = ~factor(type_of_SocialSupport) + research_design + type_of_population + type_of_comparison_group + published + Overall.risk.of.bias - 1, struct="DIAG", data = dat[!is.na(dat$g.calc) & dat$type_of_component == 4,], method = "ML", random = ~ factor(type_of_SocialSupport) | result), cluster = dat[!is.na(dat$g.calc) & dat$type_of_component == 4,]$study)
+rmaSocSupp <- robust.rma.mv(rma.mv(yi = g.calc, V = g.var.calc, mods = ~factor(type_of_SocialSupport) - 1, struct="DIAG", data = dat[!is.na(dat$g.calc) & dat$type_of_component == 4,], method = "ML", random = ~ factor(type_of_SocialSupport) | result), cluster = dat[!is.na(dat$g.calc) & dat$type_of_component == 4,]$study)
 

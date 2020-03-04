@@ -109,7 +109,7 @@ bias <- function(rmaObject = NA, alpha = .05, briefBias = TRUE){
   esPrec <- cor(rmaObject$yi, sqrt(rmaObject$vi), method = "kendall")
   # Small-study effects correction
   # 3-parameter selection model
-  threePSM <- threePSM.est(rmaObject$yi, rmaObject$vi)
+  fourPSM <- fourPSM.est(rmaObject$yi, rmaObject$vi)
   
   # PET-PEESE
   pp <- pet.peese(rmaObject$yi, rmaObject$vi, rmaObject$mf.r[[1]]$study, rmaObject$mf.r[[1]]$result)
@@ -118,35 +118,35 @@ bias <- function(rmaObject = NA, alpha = .05, briefBias = TRUE){
   puniform.out <- puniform(yi = rmaObject$yi, vi = rmaObject$vi, alpha = alpha, side = "right", method = "P")
   
   if(briefBias == TRUE){
-         return(list("3PSM ES estimate" = threePSM[1, 4],
-              "3PSM confidence interval" = c(threePSM[5, 4], threePSM[6, 4]),
-              "3PSM p-value" = threePSM[4, 4],
-              "Whether PET or PEESE was used" = ifelse(threePSM$value[4] < .05 & threePSM$value[1] > 0, "PEESE", "PET"),
+         return(list("4PSM ES estimate" = fourPSM[1, 4],
+              "4PSM confidence interval" = c(fourPSM[5, 4], fourPSM[6, 4]),
+              "4PSM p-value" = fourPSM[4, 4],
+              "Whether PET or PEESE was used" = ifelse(fourPSM$value[4] < .05 & fourPSM$value[1] > 0, "PEESE", "PET"),
               "PET-PEESE ES estimate" = as.numeric(pp[1]),
               "PET-PEESE confidence interval" = as.numeric(c(pp[5], pp[6])),
               "PET-PEESE p-value" = pp[4]))}
   else{
-         return(list("Three PSM" = threePSM, 
+         return(list("4PSM" = fourPSM, 
                "PET-PEESE" = pp,
                "p-uniform" = puniform.out))
   }
 }
 
-# Power based on PEESE and 3PSM parameter estimates
+# Power based on PEESE and 4PSM parameter estimates
 powerEst <- function(rmaObject = NA, ni = NA){
   powerPEESE <- NA
   peeseEst <- pet.peese(rmaObject$yi, rmaObject$vi, rmaObject$mf.r[[1]]$study, rmaObject$mf.r[[1]]$result)[1]
-  power3PSM <- NA
-  tpsmEst <- threePSM.est(rmaObject$yi, rmaObject$vi)$value[1]
+  power4PSM <- NA
+  fpsmEst <- fourPSM.est(rmaObject$yi, rmaObject$vi)$value[1]
 
   for(i in 1:rmaObject$k.all){
     powerPEESE[i] <- pwr::pwr.t.test(n = ni, d = peeseEst)$power[i]
-    power3PSM[i] <- pwr::pwr.t.test(n = ni, d = tpsmEst)$power[i]
+    power4PSM[i] <- pwr::pwr.t.test(n = ni, d = fpsmEst)$power[i]
   }
   powerPEESEresult <- median(powerPEESE)*100
-  power3PSMresult <- median(power3PSM)*100
+  power4PSMresult <- median(power4PSM)*100
   c("Median power for detecting PET-PEESE estimate" = powerPEESEresult, 
-    "Median power for detecting 3PSM estimate" = power3PSMresult)
+    "Median power for detecting 4PSM estimate" = power4PSMresult)
 }
 
 maResults <- function(rmaObject = NA, data = NA, alpha = .05, briefBias = F){
@@ -157,7 +157,7 @@ maResults <- function(rmaObject = NA, data = NA, alpha = .05, briefBias = F){
     "p-curve" = pcurve(data),
     "Proportion of significant results" = propSig(data$p),
     "Publication bias" = bias(rmaObject, briefBias = briefBias),
-    "Power based on PEESE and 3PSM parameter estimates" = powerEst(rmaObject, ni = data$N))
+    "Power based on PEESE and 4PSM parameter estimates" = powerEst(rmaObject, ni = data$N))
 }
 
 ################
@@ -185,7 +185,7 @@ maResults <- function(rmaObject = NA, data = NA, alpha = .05, briefBias = F){
 
 
 # PET-PEESE plot
-# if(threePSM$value[4] < .05 & threePSM$value[1] > 0)
+# if(fourPSM$value[4] < .05 & fourPSM$value[1] > 0)
 # {plot(data$g.var.calc, data$g.calc, main="PEESE", xlab = "Variance", ylab = "Effect size", pch = 19, cex.main = 1.3, cex = .6, xlim = c(0, .27),xaxs="i")} else {plot(sqrt(data$g.var.calc), data$g.calc, main="PET", xlab = "Standard error", ylab = "Effect size", pch = 19, cex.main = 1.3, cex = .6, xaxs="i")}
-# abline((if(threePSM$value[4] < .05 & threePSM$value[1] > 0) {peese} else {pet}), lwd=3, lty = 2, col = "red")
+# abline((if(fourPSM$value[4] < .05 & fourPSM$value[1] > 0) {peese} else {pet}), lwd=3, lty = 2, col = "red")
 # PP.plot <- recordPlot()

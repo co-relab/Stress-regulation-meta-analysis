@@ -40,7 +40,11 @@ returnRes <- function(res, long=TRUE, reduce=TRUE) {
 }
 
 ######################
+# Code adapted from Carter, E. C., Schönbrodt, F. D., Hilgard, J., & Gervais, W. (2018). Correcting for bias in psychology: A comparison of meta-analytic methods. Retrieved from https://osf.io/rf3ys/.
+# https://github.com/nicebread/meta-showdown/blob/master/MA-methods/7-Selection%20Models.R
+######################
 # 3-parameter selection model (3PSM)
+# p-value intervals may be re-specified if they contain too few values
 if (!require(weightr)) {
   install.packages('weightr') #Library to process string variables (text of the entered tests)
 }
@@ -91,6 +95,54 @@ threePSM.est <- function(d, v, min.pvalues=1, long=FALSE) {
   return(returnRes(res.wide))
 }
 
+fourPSM.est <- function(d, v, min.pvalues=0, long=TRUE, fallback = FALSE) {	
+  w1 <- tryCatch(
+    weightfunct(d, v, steps = c(0.025, 0.5, 1), mods = NULL, weights = NULL, fe = FALSE, table = TRUE),
+    error = function(e) NULL
+  )
+  
+  res.NA <- data.frame(
+    method = "4PSM",
+    term = c("tau2", "b0", "pr.nonsig", "pr.opposite"),
+    estimate = NA,
+    std.error = NA,
+    statistic = NA,
+    p.value = NA,
+    conf.low = NA,
+    conf.high = NA
+  )
+  
+  if (is.null(w1)) return(returnRes(res.NA))
+  
+  # if <= min.pvalues p-values in an interval: return NA
+  p.table <- table(cut(w1$p, breaks=c(0, .025, 0.5, 1)))
+  if (any(p.table < min.pvalues)) {
+    if (fallback==TRUE) {
+      return(threePSM.est(d, v, min.pvalues=min.pvalues, long=long))
+    } else {
+      return(returnRes(res.NA))
+    }	  
+  } else {
+    est <- w1[[2]]$par
+    
+    # compute standard errors from hessian
+    std.err <- sqrt(abs(diag(solve(w1[[2]]$hessian))))
+    
+    res.wide <- data.frame(
+      method = "4PSM",
+      term = c("tau2", "b0", "pr.nonsig", "pr.opposite"),
+      estimate = round(est, 4),
+      std.error = round(std.err, 4),
+      statistic = round(est/std.err, 4),
+      p.value = round(pnorm(est/std.err, lower.tail=FALSE)*2, 4),
+      conf.low = round(est + qnorm(.025)*std.err, 4),
+      conf.high = round(est + qnorm(1-.025)*std.err, 4)
+    )
+  }
+  
+  return(returnRes(res.wide))
+}
+
 #################
 #PET-PEESE with 3PSM as the conditional estimator instead of PET
 
@@ -104,9 +156,9 @@ pet.peese <- function(d, v, study, result){
   peese.out <- round(c(peese$b[1], peese$se[1], peese$zval[1], peese$pval[1], peese$ci.lb[1], peese$ci.ub[1]), 3)
   names(peese.out) <- c("PEESE estimate", "se", "zval", "pval", "ci.lb", "ci.ub")
 
-  threePSM <- threePSM.est(d, v)
+  fourPSM <- fourPSM.est(d, v)
 
-  ifelse(threePSM$value[4] < .05 & threePSM$value[1] > 0,
+  ifelse(fourPSM$value[4] < .05 & fourPSM$value[1] > 0,
          return(peese.out),  return(pet.out))
 }
 
