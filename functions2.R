@@ -20,7 +20,6 @@ rmaCustom <- function(data = NA){
   rmaObject
 }
 
-
 # Permutation p-curve -----------------------------------------------------
 
 # Evidential value; Permutation p-curve
@@ -50,8 +49,6 @@ pi95 <- function(rmaObject = NA){
   pi95Out <- c("95% PI LB" = round(predict.rma(rmaObject)$cr.lb, 3), "95% PI UB" = round(predict.rma(rmaObject)$cr.ub, 3))
   pi95Out
 }
-
-
 
 # Heterogeneity -----------------------------------------------------------
 
@@ -143,10 +140,7 @@ powerEst <- function(rmaObject = NA, ni = NA){
     "Median power for detecting 4PSM estimate" = power4PSMresult)
 }
 
-
 # Summary results ---------------------------------------------------------
-
-
 
 maResults <- function(rmaObject = NA, data = NA, alpha = .05, briefBias = F){
   list(
@@ -158,7 +152,6 @@ maResults <- function(rmaObject = NA, data = NA, alpha = .05, briefBias = F){
     "Publication bias" = bias(rmaObject, briefBias = briefBias),
     "Power based on PEESE and 4PSM parameter estimates" = powerEst(rmaObject, ni = data$N))
 }
-
 
 # General Grim Test -------------------------------------------------------
 
@@ -181,7 +174,6 @@ grimTest <- function (n, mean, items = 1, decimals = 2) {
     return(consistent)
   }
 }
-
 
 # General Grimmer Test ----------------------------------------------------
 
