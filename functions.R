@@ -20,14 +20,17 @@ duplicated.random = function(x, incomparables = FALSE, ...)
   }
 }
 
-####################
+######################
+# Code adapted from Carter, E. C., Schönbrodt, F. D., Hilgard, J., & Gervais, W. (2018). Correcting for bias in psychology: A comparison of meta-analytic methods. Retrieved from https://osf.io/rf3ys/.
+# https://github.com/nicebread/meta-showdown/blob/master/MA-methods/7-Selection%20Models.R
+######################
 # Return a result data frame either in wide or long format (for the 3PSM output)
 returnRes <- function(res, long=TRUE, reduce=TRUE) {
   if (is.null(res)) return(NULL)
-
+  
   # convert all factor columns to characters
   res %>% mutate_if(is.factor, as.character) -> res
-
+  
   if (long==FALSE) {
     # return wide format
     return(res)
@@ -39,14 +42,10 @@ returnRes <- function(res, long=TRUE, reduce=TRUE) {
   }
 }
 
-######################
-# Code adapted from Carter, E. C., Schönbrodt, F. D., Hilgard, J., & Gervais, W. (2018). Correcting for bias in psychology: A comparison of meta-analytic methods. Retrieved from https://osf.io/rf3ys/.
-# https://github.com/nicebread/meta-showdown/blob/master/MA-methods/7-Selection%20Models.R
-######################
 # 3-parameter selection model (3PSM)
 # p-value intervals may be re-specified if they contain too few values
 if (!require(weightr)) {
-  install.packages('weightr') #Library to process string variables (text of the entered tests)
+  install.packages('weightr')
 }
 
 threePSM.est <- function(d, v, min.pvalues=1, long=FALSE) {

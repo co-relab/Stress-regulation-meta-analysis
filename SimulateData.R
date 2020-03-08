@@ -5,7 +5,7 @@ library(dplyr)
 
 set.seed(8888)
 
-research_design <-sample(c(1,2,3),346, replace=T)
+design <-sample(c(1,2,3),346, replace=T)
 # 1=RCT, 2=observational, 3=correlational design 
 journal <- NA
 database <-sample(c(1,2,3,4,5),346, replace=T)
@@ -81,15 +81,15 @@ data1$source_of_SocialSupport <- NA
                             
 #Code the source of SocialSupport 
 
-MetaData <-cbind(research_design,focal_variable,journal,database,country,number_of_intervention,Instrument,Type_of_stressor,presence_of_individual_differences,timing_intervention,MASdata,type_of_population,type_of_comparison_group,type_of_component,exact_type_of_population,frequency_of_intervention,duration_of_intervention,nationality,data1)
+MetaData <-cbind(design,focal_variable,journal,database,country,number_of_intervention,Instrument,Type_of_stressor,presence_of_individual_differences,timing_intervention,MASdata,type_of_population,type_of_comparison_group,type_of_component,exact_type_of_population,frequency_of_intervention,duration_of_intervention,nationality,data1)
 #Create the first simulated dataset with the info encoded until now
 
 
 dat <- read.csv("MA data oct 2018 IR.csv", sep = ";")
 # Read in the social thermoregulation dataset in order to merge it with the one simulated for stress.
 
-published <-sample(c(1,2),346, replace=T)
-#1=published, 2=unpublished
+published <-sample(c(0,1),346, replace=T)
+#1=published, 0=unpublished
 
 StressData <- cbind(MetaData,dat$F, dat$log.reg.B,dat$B,dat$t,dat$r,dat$Chisq,dat$beta,dat$Waldchisq,dat$df1,dat$df2,dat$Design,published)
 #Merging a simulated dataset on stress, with the real dataset of social thermoregulation (in order to take the effect sizes from that and other statistics)
