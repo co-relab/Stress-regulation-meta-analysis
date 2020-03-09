@@ -111,8 +111,8 @@ paperID <- 1:nrow(MetaData)
 dat <- read.csv("MA data oct 2018 IR.csv", sep = ";")
 # Read in the social thermoregulation dataset in order to merge it with the one simulated for stress.
 
-published <-sample(c(1,2),346, replace=T)
-#1=published, 2=unpublished
+published <-sample(c(0,1),346, replace=T)
+#1=published, 0=unpublished
 
 StressData <- cbind(MetaData,paperID,dat$F, dat$log.reg.B,dat$B,dat$t,dat$r,dat$Chisq,dat$beta,dat$Waldchisq,dat$df1,dat$df2,dat$Design,published)
 #Merging a simulated dataset on stress, with the real dataset of social thermoregulation (in order to take the effect sizes from that and other statistics)
@@ -149,7 +149,7 @@ StressData$`dat$Design`<- ifelse(StressData$`dat$Design` == "Within", 1,2)
 
 #recoded to numeric values items for RoB2 and type of design 
 dat <- StressData
-View(dat)
-#StressData <- StressData %>%
+# View(dat)
+# StressData <- StressData %>%
   #mutate (Domain.1.risk.of.bias = ifelse(Domain.1.risk.of.bias == "Low", 1,
                                        # ifelse(Domain.1.risk.of.bias == "High",3,2)) altro modo di fare ifelse
