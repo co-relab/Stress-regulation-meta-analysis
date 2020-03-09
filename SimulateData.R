@@ -3,7 +3,7 @@ library(dplyr)
 
 #General info of a study
 
-set.seed(8888)
+set.seed(123)
 
 research_design <-sample(c(1,2),346, replace=T)
 # 1=RCT, 2=observational
@@ -11,10 +11,33 @@ journal <- NA
 database <-sample(c(1,2,3,4,5),346, replace=T)
 # 1=psychinfo, 2=pubmed, 3=scopus, 4=google scholar, 5=hand search
 country <- NA
+studyID <-NA
+nMale <-NA
+nFemale <-NA
+journalH5 <- NA
+useMeta <-sample(c(0,1),346, replace=T)
+useBias <-sample(c(0,1),346, replace=T)
+predictedDirection <-sample(c(-1,1),346, replace=T)
+items <-NA
+# for items=  (0 if the DV is not a discrete/likert variable, 
+#otherwise an integer count of, e.g., Likert scale items comprising the DV)
+
+mean1 <- rnorm(346,5,1)
+mean2 <- rnorm(346,5,2)
+#mean of group1 (experimental) and of group2 (control)
+sd1 <- rnorm(346,2,1)
+sd2 <- rnorm(346,2,1)
+#sd of group1 (experimental) and of group2 (control)
+n1 <- as.integer(runif(346,min=1, max=100))
+n2 <- as.integer(runif(346,min=1, max=100))
+n3 <- as.integer(runif(346,min=1, max=100))
+#sample size per cells, n1,n2,n3
 
 ############################################################################################
 
 #Intervention characteristics 
+
+
 
 presence_of_individual_differences <-sample(c(1,2),346, replace=T)
 # 1=if there are individual differences in the study, 2= If there aren't individual differences in the study
@@ -45,8 +68,6 @@ number_of_intervention <- NA
 #total number of SEM session, biofeedback trainings, exposure to nature, social support received
 Instrument <- NA
 #Type of scale used in the experiment (e.g. PSS)
-Type_of_stressor <- NA
-#Type of stressor present in the study (e.g. workstress, disease stress)
 
 nationality <- NA
 
@@ -83,9 +104,9 @@ data1$source_of_SocialSupport <- source_of_SocialSupport
 #If the article is on social support I code 1 =partner 2= friends 3=stranger                            
 #Code the source of SocialSupport 
 
-MetaData <-cbind(research_design,focal_variable,journal,database,country,number_of_intervention,Instrument,Type_of_stressor,presence_of_individual_differences,timing_intervention,MASdata,type_of_population,type_of_comparison_group,type_of_component,exact_type_of_population,frequency_of_intervention,duration_of_intervention,nationality,data1)
+MetaData <-cbind(studyID,nMale,nFemale,journalH5,useMeta,useBias,predictedDirection,items,mean1,mean2,sd1,sd2,n1,n2,n3,research_design,focal_variable,journal,database,country,number_of_intervention,Instrument,presence_of_individual_differences,timing_intervention,MASdata,type_of_population,type_of_comparison_group,type_of_component,exact_type_of_population,frequency_of_intervention,duration_of_intervention,nationality,data1)
 #Create the first simulated dataset with the info encoded until now
-
+paperID <- 1:nrow(MetaData)
 
 dat <- read.csv("MA data oct 2018 IR.csv", sep = ";")
 # Read in the social thermoregulation dataset in order to merge it with the one simulated for stress.
@@ -93,7 +114,7 @@ dat <- read.csv("MA data oct 2018 IR.csv", sep = ";")
 published <-sample(c(1,2),346, replace=T)
 #1=published, 2=unpublished
 
-StressData <- cbind(MetaData,dat$F, dat$log.reg.B,dat$B,dat$t,dat$r,dat$Chisq,dat$beta,dat$Waldchisq,dat$df1,dat$df2,dat$Design,published)
+StressData <- cbind(MetaData,paperID,dat$F, dat$log.reg.B,dat$B,dat$t,dat$r,dat$Chisq,dat$beta,dat$Waldchisq,dat$df1,dat$df2,dat$Design,published)
 #Merging a simulated dataset on stress, with the real dataset of social thermoregulation (in order to take the effect sizes from that and other statistics)
 
 
