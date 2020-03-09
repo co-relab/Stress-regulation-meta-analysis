@@ -39,8 +39,8 @@ n3 <- as.integer(runif(346,min=1, max=100))
 
 
 
-presence_of_individual_differences <-sample(c(1,2),346, replace=T)
-# 1=if there are individual differences in the study, 2= If there aren't individual differences in the study
+presence_of_individual_differences <-sample(c(1,0),346, replace=T)
+# 1=if there are individual differences in the study, 0= If there aren't individual differences in the study
 focal_variable <-sample(c(0,1),346, replace=T)
 # Added the focal variable; 0= not a focal variable, 1= it is a focal variable
 timing_intervention <-sample(c(1,2,3),346, replace=T)
