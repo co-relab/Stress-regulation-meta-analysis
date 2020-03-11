@@ -7,18 +7,17 @@ set.seed(123)
 
 research_design <-sample(c(1,2),346, replace=T)
 # 1=RCT, 2=observational
-journal <- NA
+journal <-sample(c("Psychological Bulletin","Trends in Cognitive Sciences","American Psychologist","Child Development"),346, replace=T)
 database <-sample(c(1,2,3,4,5),346, replace=T)
 # 1=psychinfo, 2=pubmed, 3=scopus, 4=google scholar, 5=hand search
-country <- NA
-studyID <-NA
-nMale <-NA
-nFemale <-NA
-journalH5 <- NA
+country <-sample(c(NA,"italy","france","singapore","US","slovakia","netherlands"),346, replace=T)
+nMale <-as.integer(runif(346,min=1, max=60))
+nFemale <-as.integer(runif(346,min=1, max=60))
+journalH5 <-as.integer(runif(346,min=0, max=10))
 useMeta <-sample(c(0,1),346, replace=T)
 useBias <-sample(c(0,1),346, replace=T)
 predictedDirection <-sample(c(-1,1),346, replace=T)
-items <-NA
+items <-as.integer(runif(346,min=0, max=10))
 # for items=  (0 if the DV is not a discrete/likert variable, 
 #otherwise an integer count of, e.g., Likert scale items comprising the DV)
 
@@ -59,17 +58,17 @@ type_of_comparison_group <-sample(c(1,2),346, replace=T)
 type_of_component <-sample(c(1,2,3,4,5,6),346, replace=T)
 #1= Affect: low arousal, negative valence, 2= Affect: high arousal, negative valence, 3= Affect: low arousal, positive valence 4= Affect: high arousal, positive valence, 
 #5= cognitive component 6=physiological component 
-exact_type_of_population <- NA
-frequency_of_intervention <- NA
+exact_type_of_population <- sample(c(NA,"nursersy students","employers","psychology students","patients with depression","COPD patients","managers"),346, replace=T)
+frequency_of_intervention <- as.integer(runif(346,min=0, max=5))
 #how many times each week the participants receive the intervention
-duration_of_intervention <- NA
-#total duration of the intervention
-number_of_intervention <- NA
+duration_of_intervention <- as.integer(runif(346,min=0, max=80))
+#total duration of the intervention in hours
+number_of_intervention <- as.integer(runif(346,min=0, max=90))
 #total number of SEM session, biofeedback trainings, exposure to nature, social support received
-Instrument <- NA
+Instrument <-sample(c("PSS","STAI","cortisol","heart-rate","RSS","HADS"),346, replace=T)
 #Type of scale used in the experiment (e.g. PSS)
 
-nationality <- NA
+nationality <-sample(c(NA,"italian","french","american","dutch","slovakian"),346, replace=T)
 
 ######################################################################
 
@@ -104,9 +103,10 @@ data1$source_of_SocialSupport <- source_of_SocialSupport
 #If the article is on social support I code 1 =partner 2= friends 3=stranger                            
 #Code the source of SocialSupport 
 
-MetaData <-cbind(studyID,nMale,nFemale,journalH5,useMeta,useBias,predictedDirection,items,mean1,mean2,sd1,sd2,n1,n2,n3,research_design,focal_variable,journal,database,country,number_of_intervention,Instrument,presence_of_individual_differences,timing_intervention,MASdata,type_of_population,type_of_comparison_group,type_of_component,exact_type_of_population,frequency_of_intervention,duration_of_intervention,nationality,data1)
+MetaData <-cbind(nMale,nFemale,journalH5,useMeta,useBias,predictedDirection,items,mean1,mean2,sd1,sd2,n1,n2,n3,research_design,focal_variable,journal,database,country,number_of_intervention,Instrument,presence_of_individual_differences,timing_intervention,MASdata,type_of_population,type_of_comparison_group,type_of_component,exact_type_of_population,frequency_of_intervention,duration_of_intervention,nationality,data1)
 #Create the first simulated dataset with the info encoded until now
 paperID <- 1:nrow(MetaData)
+studyID <-1:nrow(MetaData)
 
 dat <- read.csv("MA data oct 2018 IR.csv", sep = ";")
 # Read in the social thermoregulation dataset in order to merge it with the one simulated for stress.
@@ -114,7 +114,7 @@ dat <- read.csv("MA data oct 2018 IR.csv", sep = ";")
 published <-sample(c(0,1),346, replace=T)
 #1=published, 0=unpublished
 
-StressData <- cbind(MetaData,paperID,dat$F, dat$log.reg.B,dat$B,dat$t,dat$r,dat$Chisq,dat$beta,dat$Waldchisq,dat$df1,dat$df2,dat$Design,published)
+StressData <- cbind(MetaData,studyID,paperID,dat$F, dat$log.reg.B,dat$B,dat$t,dat$r,dat$Chisq,dat$beta,dat$Waldchisq,dat$df1,dat$df2,dat$Design,published)
 #Merging a simulated dataset on stress, with the real dataset of social thermoregulation (in order to take the effect sizes from that and other statistics)
 
 
@@ -149,7 +149,7 @@ StressData$`dat$Design`<- ifelse(StressData$`dat$Design` == "Within", 1,2)
 
 #recoded to numeric values items for RoB2 and type of design 
 dat <- StressData
-# View(dat)
+View(dat)
 # StressData <- StressData %>%
   #mutate (Domain.1.risk.of.bias = ifelse(Domain.1.risk.of.bias == "Low", 1,
                                        # ifelse(Domain.1.risk.of.bias == "High",3,2)) altro modo di fare ifelse
