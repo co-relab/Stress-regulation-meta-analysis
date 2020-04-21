@@ -5,11 +5,11 @@ library(dplyr)
 
 set.seed(123)
 
-research_design <-sample(c(1,2),346, replace=T)
-# 1=RCT, 2=observational
+research_design <-sample(c(1,2,3),346, replace=T)
+# 1=RCT, 2=observational, 3=other
 journal <-sample(c("Psychological Bulletin","Trends in Cognitive Sciences","American Psychologist","Child Development"),346, replace=T)
-database <-sample(c(1,2,3,4,5),346, replace=T)
-# 1=psychinfo, 2=pubmed, 3=scopus, 4=google scholar, 5=hand search
+database <-sample(c(1,2,3,4),346, replace=T)
+# 1=proquest, 2=pubmed, 3=scopus, 4=hand search
 country <-sample(c(NA,"italy","france","singapore","US","slovakia","netherlands"),346, replace=T)
 nMale <-as.integer(runif(346,min=1, max=60))
 nFemale <-as.integer(runif(346,min=1, max=60))
@@ -55,7 +55,7 @@ type_of_population <-sample(c(1,2),346, replace=T)
 # 1=normal, 2= clinical
 type_of_comparison_group <-sample(c(1,2),346, replace=T)
 # 1=passive control group, 2= active control group
-type_of_component <-sample(c(1,2,3,4,5,6),346, replace=T)
+type_of_response_to_stress <-sample(c(1,2,3,4,5,6),346, replace=T)
 #1= Affect: low arousal, negative valence, 2= Affect: high arousal, negative valence, 3= Affect: low arousal, positive valence 4= Affect: high arousal, positive valence, 
 #5= cognitive component 6=physiological component 
 exact_type_of_population <- sample(c(NA,"nursersy students","employers","psychology students","patients with depression","COPD patients","managers"),346, replace=T)
@@ -69,41 +69,43 @@ Instrument <-sample(c("PSS","STAI","cortisol","heart-rate","RSS","HADS"),346, re
 #Type of scale used in the experiment (e.g. PSS)
 
 nationality <-sample(c(NA,"italian","french","american","dutch","slovakian"),346, replace=T)
+#code the most frequent nationality across participants
+
 
 ######################################################################
 
 #Specific coding for categories
 
-category <-sample(c(1,2,3,4),346, replace=T)
+strategy <-sample(c(1,2),346, replace=T)
 #Divide each article by categories for the meta-analysis: 1= self-administered mindfulness, 2=biofeedback 3= being in nature 4=social support
-data1<-as.data.frame(category)
+data1<-as.data.frame(strategy)
 
-Type_of_Sam<-ifelse(data1$category==1, 
+Type_of_Sam<-ifelse(data1$strategy==1, 
                     c(1,2,3,4,5), NA)
 #If the article is on self-administered mindfulness, I code 1 = internet 2= smartphone app 3=book 4= audio 5= mixed
 data1$Type_of_Sam<-Type_of_Sam
-type_of_environmet <-ifelse(data1$category==2, 
-                            c(1,2), NA)
+#type_of_environmet <-ifelse(data1$strategy==2, 
+                           # c(1,2), NA)
 #If the article is on being in nature, I code 1 = nature env, 2= built environment
-data1$type_of_environmet <-type_of_environmet 
+#data1$type_of_environmet <-type_of_environmet 
 
-type_of_exposure <-ifelse(data1$category==2, 
-                          c(1,2,3), NA)
+#type_of_exposure <-ifelse(data1$strategy==2, 
+                          #c(1,2,3), NA)
 #If the article is on being in nature, I code 1 = outdoor walk 2 = nature viewing 3= outdoor gardening 
-data1$type_of_exposure<-type_of_exposure
+#data1$type_of_exposure<-type_of_exposure
 
 
-type_of_SocialSupport <-ifelse(data1$category==4, 
-                               c(1,2,3,4), NA) 
-data1$type_of_SocialSupport<-type_of_SocialSupport
+#type_of_SocialSupport <-ifelse(data1$strategy==4, 
+                              # c(1,2,3,4), NA) 
+#data1$type_of_SocialSupport<-type_of_SocialSupport
 #If the article is on social support I code 1 =no support 2= physical contact 3= verbal social support 4= mixed 
-source_of_SocialSupport <-ifelse(data1$category==4,                               
-                                 c(1,2,3), NA) 
-data1$source_of_SocialSupport <- source_of_SocialSupport
+#source_of_SocialSupport <-ifelse(data1$strategy==4,                               
+                                 #c(1,2,3), NA) 
+#data1$source_of_SocialSupport <- source_of_SocialSupport
 #If the article is on social support I code 1 =partner 2= friends 3=stranger                            
 #Code the source of SocialSupport 
 
-MetaData <-cbind(nMale,nFemale,journalH5,useMeta,useBias,predictedDirection,items,mean1,mean2,sd1,sd2,n1,n2,n3,research_design,focal_variable,journal,database,country,number_of_intervention,Instrument,presence_of_individual_differences,timing_intervention,MASdata,type_of_population,type_of_comparison_group,type_of_component,exact_type_of_population,frequency_of_intervention,duration_of_intervention,nationality,data1)
+MetaData <-cbind(nMale,nFemale,journalH5,useMeta,useBias,predictedDirection,items,mean1,mean2,sd1,sd2,n1,n2,n3,research_design,focal_variable,journal,database,country,number_of_intervention,Instrument,presence_of_individual_differences,timing_intervention,MASdata,type_of_population,type_of_comparison_group,type_of_response_to_stress,exact_type_of_population,frequency_of_intervention,duration_of_intervention,nationality,data1)
 #Create the first simulated dataset with the info encoded until now
 paperID <- 1:nrow(MetaData)
 studyID <-1:nrow(MetaData)
@@ -150,6 +152,6 @@ StressData$`dat$Design`<- ifelse(StressData$`dat$Design` == "Within", 1,2)
 #recoded to numeric values items for RoB2 and type of design 
 dat <- StressData
 View(dat)
-# StressData <- StressData %>%
+  # StressData <- StressData %>%
   #mutate (Domain.1.risk.of.bias = ifelse(Domain.1.risk.of.bias == "Low", 1,
                                        # ifelse(Domain.1.risk.of.bias == "High",3,2)) altro modo di fare ifelse
