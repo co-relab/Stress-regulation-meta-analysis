@@ -5,21 +5,26 @@ library(dplyr)
 
 set.seed(123)
 
-research_design <-sample(c(1,2,3),346, replace=T)
-# 1=RCT, 2=observational, 3=other
+research_design <-sample(c(1,2,3,4,5),346, replace=T)
+# 1 = RCT, between-subjects design 2 = between-subjects design, comparing pre-existing groups (no randomization into groups) 3 = within-subjects design
+#4 = correlational study 5 = mixed-effects (multilevel) model.
 journal <-sample(c("Psychological Bulletin","Trends in Cognitive Sciences","American Psychologist","Child Development"),346, replace=T)
-database <-sample(c(1,2,3,4),346, replace=T)
+source <-sample(c(1,2,3,4),346, replace=T)
 # 1=proquest, 2=pubmed, 3=scopus, 4=hand search
 country <-sample(c(NA,"italy","france","singapore","US","slovakia","netherlands"),346, replace=T)
 nMale <-as.integer(runif(346,min=1, max=60))
 nFemale <-as.integer(runif(346,min=1, max=60))
 journalH5 <-as.integer(runif(346,min=0, max=10))
 useMeta <-sample(c(0,1),346, replace=T)
-useBias <-sample(c(0,1),346, replace=T)
 predictedDirection <-sample(c(-1,1),346, replace=T)
 items <-as.integer(runif(346,min=0, max=10))
 # for items=  (0 if the DV is not a discrete/likert variable, 
 #otherwise an integer count of, e.g., Likert scale items comprising the DV)
+inLabAdministration <-sample(c(1,2,3),346, replace=T)
+#1 = lab study; 2 = field study; 3 = online data collection
+doi <-sample(c(NA,"http://dx.doi.org/10.1037/a0028242","http://dx.doi.org/10.1037/a02328240"),346, replace=T)
+citations <-NA
+#citations by Google Scholar
 
 mean1 <- rnorm(346,5,1)
 mean2 <- rnorm(346,5,2)
@@ -51,13 +56,16 @@ Type_of_StressTest<-ifelse(MASdata$presence_of_stressTest==1,
                     c(1,2,3,NA), NA)
 MASdata$Type_of_StressTest <-Type_of_StressTest
 #If the stressTest is present I code: 1= TSST, 2=stroop task, 3=others 999= no stress test
-type_of_population <-sample(c(1,2),346, replace=T)
-# 1=normal, 2= clinical
+type_of_population <-sample(c(1,2,3),346, replace=T)
+#1=students, 2=general population, 3=clinical.
 type_of_comparison_group <-sample(c(1,2),346, replace=T)
 # 1=passive control group, 2= active control group
-type_of_response_to_stress <-sample(c(1,2,3,4,5,6),346, replace=T)
+type_of_stress_component <-sample(c(1,2,3,4,5,6),346, replace=T)
 #1= Affect: low arousal, negative valence, 2= Affect: high arousal, negative valence, 3= Affect: low arousal, positive valence 4= Affect: high arousal, positive valence, 
 #5= cognitive component 6=physiological component 
+Affective_consequences_of_stress <-sample(c(1,2,3,4),346, replace=T)
+#1= Low arousal, negative valence, 2= High arousal, negative valence, 3= Low arousal, positive valence 4= High arousal, positive valence.
+
 exact_type_of_population <- sample(c(NA,"nursersy students","employers","psychology students","patients with depression","COPD patients","managers"),346, replace=T)
 frequency_of_intervention <- as.integer(runif(346,min=0, max=5))
 #how many times each week the participants receive the intervention
@@ -105,7 +113,7 @@ data1$Type_of_Sam<-Type_of_Sam
 #If the article is on social support I code 1 =partner 2= friends 3=stranger                            
 #Code the source of SocialSupport 
 
-MetaData <-cbind(nMale,nFemale,journalH5,useMeta,useBias,predictedDirection,items,mean1,mean2,sd1,sd2,n1,n2,n3,research_design,focal_variable,journal,database,country,number_of_intervention,Instrument,presence_of_individual_differences,timing_intervention,MASdata,type_of_population,type_of_comparison_group,type_of_response_to_stress,exact_type_of_population,frequency_of_intervention,duration_of_intervention,nationality,data1)
+MetaData <-cbind(nMale,nFemale,doi,citations,inLabAdministration, journalH5,useMeta,predictedDirection,items,mean1,mean2,sd1,sd2,n1,n2,n3,research_design,focal_variable,journal,database,country,number_of_intervention,Instrument,presence_of_individual_differences,timing_intervention,MASdata,type_of_population,type_of_comparison_group,type_of_stress_component,Affective_consequences_of_stress,exact_type_of_population,frequency_of_intervention,duration_of_intervention,nationality,data1)
 #Create the first simulated dataset with the info encoded until now
 paperID <- 1:nrow(MetaData)
 studyID <-1:nrow(MetaData)
