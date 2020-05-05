@@ -5,6 +5,7 @@ library(dplyr)
 
 set.seed(123)
 
+publication_year <- NA
 research_design <-sample(c(1,2,3,4,5),346, replace=T)
 # 1 = RCT, between-subjects design 2 = between-subjects design, comparing pre-existing groups (no randomization into groups) 3 = within-subjects design
 #4 = correlational study 5 = mixed-effects (multilevel) model.
@@ -16,7 +17,7 @@ nMale <-as.integer(runif(346,min=1, max=60))
 nFemale <-as.integer(runif(346,min=1, max=60))
 journalH5 <-as.integer(runif(346,min=0, max=10))
 useMeta <-sample(c(0,1),346, replace=T)
-predictedDirection <-sample(c(-1,1),346, replace=T)
+predictedDirection <-sample(c(-1,1,0),346, replace=T)
 items <-as.integer(runif(346,min=0, max=10))
 # for items=  (0 if the DV is not a discrete/likert variable, 
 #otherwise an integer count of, e.g., Likert scale items comprising the DV)
@@ -32,6 +33,13 @@ mean2 <- rnorm(346,5,2)
 sd1 <- rnorm(346,2,1)
 sd2 <- rnorm(346,2,1)
 #sd of group1 (experimental) and of group2 (control)
+se1 <- rnorm(346,2,1)
+se2 <- rnorm(346,2,1)
+#se of group1 (experimental) and of group2 (control)
+p.reported <- NA
+mean_age <-as.integer(runif(346,min=18, max=60))
+
+
 n1 <- as.integer(runif(346,min=1, max=100))
 n2 <- as.integer(runif(346,min=1, max=100))
 n3 <- as.integer(runif(346,min=1, max=100))
@@ -47,8 +55,6 @@ presence_of_individual_differences <-sample(c(1,0),346, replace=T)
 # 1=if there are individual differences in the study, 0= If there aren't individual differences in the study
 focal_variable <-sample(c(0,1),346, replace=T)
 # Added the focal variable; 0= not a focal variable, 1= it is a focal variable
-timing_intervention <-sample(c(1,2,3),346, replace=T)
-# 1= before stressor, 2= after the stressor, 3= both
 presence_of_stressTest <-sample(c(1,2),346, replace=T)
 # 1=present, 2=absent
 MASdata<-as.data.frame(presence_of_stressTest)
@@ -113,7 +119,7 @@ data1$Type_of_Sam<-Type_of_Sam
 #If the article is on social support I code 1 =partner 2= friends 3=stranger                            
 #Code the source of SocialSupport 
 
-MetaData <-cbind(nMale,nFemale,doi,citations,inLabAdministration, journalH5,useMeta,predictedDirection,items,mean1,mean2,sd1,sd2,n1,n2,n3,research_design,focal_variable,journal,database,country,number_of_intervention,Instrument,presence_of_individual_differences,timing_intervention,MASdata,type_of_population,type_of_comparison_group,type_of_stress_component,Affective_consequences_of_stress,exact_type_of_population,frequency_of_intervention,duration_of_intervention,nationality,data1)
+MetaData <-cbind(publication_year,nMale,nFemale,mean_age,doi,citations,inLabAdministration, journalH5,useMeta,predictedDirection,items,mean1,mean2,sd1,sd2,se1,se2,p.reported,n1,n2,n3,research_design,focal_variable,journal,database,country,number_of_intervention,Instrument,presence_of_individual_differences,MASdata,type_of_population,type_of_comparison_group,type_of_stress_component,Affective_consequences_of_stress,exact_type_of_population,frequency_of_intervention,duration_of_intervention,nationality,data1)
 #Create the first simulated dataset with the info encoded until now
 paperID <- 1:nrow(MetaData)
 studyID <-1:nrow(MetaData)
