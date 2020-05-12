@@ -16,7 +16,6 @@ country <-sample(c(NA,"italy","france","singapore","US","slovakia","netherlands"
 nMale <-as.integer(runif(346,min=1, max=60))
 nFemale <-as.integer(runif(346,min=1, max=60))
 journalH5 <-as.integer(runif(346,min=0, max=10))
-useMeta <-sample(c(0,1),346, replace=T)
 predictedDirection <-sample(c(-1,1,0),346, replace=T)
 items <-as.integer(runif(346,min=0, max=10))
 # for items=  (0 if the DV is not a discrete/likert variable, 
@@ -63,7 +62,7 @@ Type_of_StressTest<-ifelse(MASdata$presence_of_stressTest==1,
 MASdata$Type_of_StressTest <-Type_of_StressTest
 #If the stressTest is present I code: 1= TSST, 2=stroop task, 3=others 999= no stress test
 type_of_population <-sample(c(1,2,3),346, replace=T)
-#1=students, 2=general population, 3=clinical.
+#1=student non-clinical 2= non-student non-clinical 3= clinical
 type_of_comparison_group <-sample(c(1,2),346, replace=T)
 # 1=passive control group, 2= active control group
 type_of_stress_component <-sample(c(1,2,3,4,5,6),346, replace=T)
@@ -71,7 +70,6 @@ type_of_stress_component <-sample(c(1,2,3,4,5,6),346, replace=T)
 #5= cognitive component 6=physiological component 
 Affective_consequences_of_stress <-sample(c(1,2,3,4),346, replace=T)
 #1= Low arousal, negative valence, 2= High arousal, negative valence, 3= Low arousal, positive valence 4= High arousal, positive valence.
-
 exact_type_of_population <- sample(c(NA,"nursersy students","employers","psychology students","patients with depression","COPD patients","managers"),346, replace=T)
 frequency_of_intervention <- as.integer(runif(346,min=0, max=5))
 #how many times each week the participants receive the intervention
@@ -81,9 +79,10 @@ number_of_intervention <- as.integer(runif(346,min=0, max=90))
 #total number of SEM session, biofeedback trainings, exposure to nature, social support received
 Instrument <-sample(c("PSS","STAI","cortisol","heart-rate","RSS","HADS"),346, replace=T)
 #Type of scale used in the experiment (e.g. PSS)
-
-nationality <-sample(c(NA,"italian","french","american","dutch","slovakian"),346, replace=T)
-#code the most frequent nationality across participants
+nationality <-sample(c(1,2),346, replace=T)
+#is it coded? 1= yes 2= no
+timing_of_effect <-sample(c(1,2),346, replace=T)
+#whether the effect size is measured 1= after intervention, 2=after last follow up
 
 
 ######################################################################
@@ -119,7 +118,7 @@ data1$Type_of_Sam<-Type_of_Sam
 #If the article is on social support I code 1 =partner 2= friends 3=stranger                            
 #Code the source of SocialSupport 
 
-MetaData <-cbind(publication_year,nMale,nFemale,mean_age,doi,citations,inLabAdministration, journalH5,useMeta,predictedDirection,items,mean1,mean2,sd1,sd2,se1,se2,p.reported,n1,n2,n3,research_design,focal_variable,journal,database,country,number_of_intervention,Instrument,presence_of_individual_differences,MASdata,type_of_population,type_of_comparison_group,type_of_stress_component,Affective_consequences_of_stress,exact_type_of_population,frequency_of_intervention,duration_of_intervention,nationality,data1)
+MetaData <-cbind(publication_year,nMale,nFemale,mean_age,doi,citations,inLabAdministration,journalH5,source,predictedDirection,items,mean1,mean2,sd1,sd2,se1,se2,p.reported,n1,n2,n3,research_design,focal_variable,journal,country,number_of_intervention,Instrument,presence_of_individual_differences,MASdata,type_of_population,type_of_comparison_group,type_of_stress_component,Affective_consequences_of_stress,exact_type_of_population,frequency_of_intervention,duration_of_intervention,nationality,timing_of_effect,data1)
 #Create the first simulated dataset with the info encoded until now
 paperID <- 1:nrow(MetaData)
 studyID <-1:nrow(MetaData)
