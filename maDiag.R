@@ -1,4 +1,4 @@
-# These procedures will be used to do the diagnostics
+# These procedures will be used to do the model diagnostics
 
 #+eval = FALSE
 # Initial outlier diagnostics

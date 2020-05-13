@@ -8,8 +8,12 @@ rm(list = ls())
 # E.g., for corr = c(.10, .30, .50, .70, 90).
 corr <- 0.5
 
+# No of simulations for the permutation p-curve and 4PSM model
+nsim <- 5 # Set to 5 just to make code checking/running fast. For the final paper, it needs to be set to at least 1000 and run overnight.
+
+
 # Install required R libraries if not installed already
-list.of.packages <- c("metafor", "lme4", "ggplot2", "knitr", "psych", "puniform", "kableExtra", "lmerTest", "pwr", "Amelia", "multcomp")
+list.of.packages <- c("metafor", "lme4", "ggplot2", "knitr", "psych", "puniform", "kableExtra", "lmerTest", "pwr", "Amelia", "multcomp", "magrittr")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 
@@ -23,20 +27,33 @@ lapply(list.of.packages, require, quietly = TRUE, warn.conflicts = FALSE, charac
 # Sourcing and data -----------------------------------------------------------------
 esData <- readRDS("esData.RDS") # For script testing purposes only, adding some empirical effect size data
 source("functions.R")
-source("functions2.R")
 source("SimulateData.R")
 dat <- cbind(data, esData)
+
+# GRIM & GRIMMER Test -----------------------------------------------------
+
+outGrimM1 <- NA
+outGrimM2 <- NA
+outGrimmerSD1 <- NA
+outGrimmerSD2 <- NA
+for(i in 1:nrow(dat)){
+  outGrimM1[i] <- grimTest(n = dat[i,]$n1, mean = dat[i,]$mean1, items = dat[i,]$items, decimals = 2)
+  outGrimM2[i] <- grimTest(n = dat[i,]$n2, mean = dat[i,]$mean2, items = dat[i,]$items, decimals = 2)
+  outGrimmerSD1[i] <- grimmerTest(n = dat[i,]$n1, mean = dat[i,]$mean1, SD = dat[i,]$sd1, items = dat[i,]$items, decimals_mean = 2, decimals_SD = 2)
+  outGrimmerSD2[i] <- grimmerTest(n = dat[i,]$n2, mean = dat[i,]$mean2, SD = dat[i,]$sd2, items = dat[i,]$items, decimals_mean = 2, decimals_SD = 2)
+  
+}
+dat$outGrimM1 <- outGrimM1
+dat$outGrimM2 <- outGrimM2
+dat$outGrimmerSD1 <- outGrimmerSD1
+dat$outGrimmerSD2 <- outGrimmerSD2
+dat$inconsistenciesCount <- rowSums(dat[,c("outGrimM1", "outGrimM2")], na.rm = TRUE)
+
+# Meta-analysis -----------------------------------------------------------
 
 # Subset
 dataMind <- dat[dat$strategy == 1 & !is.na(dat$yi),]
 dataBio <- dat[dat$strategy == 2 & !is.na(dat$yi),]
-
-#####
-data[data$focal_variable == 1,]$label[!duplicated.random(data[data$focal_variable == 1,]$study)]
-head(dat[!duplicated.random(dat$study),], 10)
-#####
-
-# Meta-analysis -----------------------------------------------------------
 
 #'## Meta-analysis
 #'
@@ -51,7 +68,7 @@ rmaObjects <- setNames(lapply(dataObjects, function(x){rmaCustom(x)}), nm = name
 briefBias <- TRUE # For a more elaborate output from the pub bias tests, set to FALSE
 results <- list(NA)
 for(i in 1:length(rmaObjects)){
-  results[[i]] <- maResults(rmaObject = rmaObjects[[i]], data = dataObjects[[i]], alpha = .05, briefBias = T)
+  results[[i]] <- maResults(data = dataObjects[[i]], rmaObject = rmaObjects[[i]], alpha = .05, briefBias = T)
 }
 
 results <- setNames(results, nm = namesObjects)
@@ -75,34 +92,12 @@ for(i in 1:length(rmaRnd)){
 rndResults <- setNames(rndResults, nm = namesObjects)
 rndResults
 
-# GRIM & GRIMMER Test -----------------------------------------------------
-
-outGrimM1 <- NA
-outGrimM2 <- NA
-outGrimmerSD1 <- NA
-outGrimmerSD2 <- NA
-for(i in 1:nrow(dat)){
-  outGrimM1[i] <- grimTest(n = dat[i,]$n1, mean = dat[i,]$mean1, items = dat[i,]$items, decimals = 2)
-  outGrimM2[i] <- grimTest(n = dat[i,]$n2, mean = dat[i,]$mean2, items = dat[i,]$items, decimals = 2)
-  outGrimmerSD1[i] <- grimmerTest(n = dat[i,]$n1, mean = dat[i,]$mean1, SD = dat[i,]$sd1, items = dat[i,]$items, decimals_mean = 2, decimals_SD = 2)
-  outGrimmerSD2[i] <- grimmerTest(n = dat[i,]$n2, mean = dat[i,]$mean2, SD = dat[i,]$sd2, items = dat[i,]$items, decimals_mean = 2, decimals_SD = 2)
-  
-}
-dat$outGrimM1 <- outGrimM1
-dat$outGrimM2 <- outGrimM2
-dat$outGrimmerSD1 <- outGrimmerSD1
-dat$outGrimmerSD2 <- outGrimmerSD2
-dat$inconsistenciesCount
-
-rowSums(dat[,c("outGrimM1", "outGrimM2")], na.rm = TRUE)
-
-
 # Sensitivity analysis excluding effects based on inconsistent means or SDs -------
 
-rmaRnd <- setNames(lapply(dataObjects, function(x){rmaCustom(x[x$researchDesign == 1,])}), nm = namesObjects)
+rmaRnd <- setNames(lapply(dataObjects, function(x){rmaCustom(x[x$inconsistenciesCount == 0,])}), nm = namesObjects)
 rndResults <- list(NA)
 for(i in 1:length(rmaRnd)){
-  rndResults[[i]] <- maResults(rmaObject = rmaRnd[[i]], data = dataObjects[[i]][dataObjects[[i]]$researchDesign == 1,], briefBias = T)
+  rndResults[[i]] <- maResults(rmaObject = rmaRnd[[i]], data = dataObjects[[i]][dataObjects[[i]]$inconsistenciesCount == 0,], briefBias = T)
 }
 rndResults <- setNames(rndResults, nm = namesObjects)
 rndResults
@@ -131,12 +126,12 @@ rmaCompare <- robust.rma.mv(rma.mv(yi = yi, V = vi, mods = ~factor(strategy), da
 rmaCompare
 
 # Defining the null model for moderator analyses
-rmaNull <- robust.rma.mv(rma.mv(yi = yi, V = vi, mods = researchDesign + populationType + typeComparisonGroup + published + overallRiskOfBias - 1, struct="DIAG", data = dat[!is.na(dat$yi),], method = "ML", random = ~ factor(strategy) | result), cluster = dat[!is.na(dat$yi),]$study)
+rmaNull <- robust.rma.mv(rma.mv(yi = yi, V = vi, mods = researchDesign + typePopulation + typeComparisonGroup + published + overallRiskOfBias - 1, struct="DIAG", data = dat[!is.na(dat$yi),], method = "ML", random = ~ factor(strategy) | result), cluster = dat[!is.na(dat$yi),]$study)
 
 # Strategies
 # Comparison of categories of strategies after controlling for prognostic factors w.r.t. the effect sizes
 # What moderator/meta-regression analyses shall we conduct is a substantial question to discuss.
-rmaCat <- robust.rma.mv(rma.mv(yi = yi, V = vi, mods = ~factor(strategy) + researchDesign + populationType + typeComparisonGroup + published + overallRiskOfBias - 1,struct="DIAG", data = dat[!is.na(dat$yi),], method = "ML", random = ~ factor(strategy) | result), cluster = dat[!is.na(dat$yi),]$study)
+rmaCat <- robust.rma.mv(rma.mv(yi = yi, V = vi, mods = ~factor(strategy) + researchDesign + typePopulation + typeComparisonGroup + published + overallRiskOfBias - 1,struct="DIAG", data = dat[!is.na(dat$yi),], method = "ML", random = ~ factor(strategy) | result), cluster = dat[!is.na(dat$yi),]$study)
 rmaCat
 
 # Likelihood ratio test for the differences between categories
@@ -149,7 +144,7 @@ summary(glht(rmaCat, linfct=cbind(contrMat(c("Self-administered mindfulness" = 1
 
 # Components
 # Comparison of components after controlling for prognostic factors w.r.t. the effect sizes
-rmaComp <- robust.rma.mv(rma.mv(yi = yi, V = vi, mods = ~factor(typeStressComponent) + researchDesign + populationType + typeComparisonGroup + published + overallRiskOfBias - 1, struct="DIAG", data = dat[!is.na(dat$yi),], method = "ML", random = ~ factor(strategy) | result), cluster = dat[!is.na(dat$yi),]$study)
+rmaComp <- robust.rma.mv(rma.mv(yi = yi, V = vi, mods = ~factor(typeStressComponent) + researchDesign + typePopulation + typeComparisonGroup + published + overallRiskOfBias - 1, struct="DIAG", data = dat[!is.na(dat$yi),], method = "ML", random = ~ factor(strategy) | result), cluster = dat[!is.na(dat$yi),]$study)
 rmaComp
 
 # Likelihood ratio test for the differences between categories
