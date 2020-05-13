@@ -6,7 +6,7 @@ library(dplyr)
 set.seed(123)
 
 publication_year <- NA
-research_design <-sample(c(1,2,3,4,5),346, replace=T)
+researchDesign <-sample(c(1,2,3,4,5),346, replace=T)
 # 1 = RCT, between-subjects design 2 = between-subjects design, comparing pre-existing groups (no randomization into groups) 3 = within-subjects design
 #4 = correlational study 5 = mixed-effects (multilevel) model.
 journal <-sample(c("Psychological Bulletin","Trends in Cognitive Sciences","American Psychologist","Child Development"),346, replace=T)
@@ -38,7 +38,6 @@ se2 <- rnorm(346,2,1)
 p.reported <- NA
 mean_age <-as.integer(runif(346,min=18, max=60))
 
-
 n1 <- as.integer(runif(346,min=1, max=100))
 n2 <- as.integer(runif(346,min=1, max=100))
 n3 <- as.integer(runif(346,min=1, max=100))
@@ -47,8 +46,6 @@ n3 <- as.integer(runif(346,min=1, max=100))
 ############################################################################################
 
 #Intervention characteristics 
-
-
 
 presence_of_individual_differences <-sample(c(1,0),346, replace=T)
 # 1=if there are individual differences in the study, 0= If there aren't individual differences in the study
@@ -61,11 +58,11 @@ Type_of_StressTest<-ifelse(MASdata$presence_of_stressTest==1,
                     c(1,2,3,NA), NA)
 MASdata$Type_of_StressTest <-Type_of_StressTest
 #If the stressTest is present I code: 1= TSST, 2=stroop task, 3=others 999= no stress test
-type_of_population <-sample(c(1,2,3),346, replace=T)
+typePopulation <-sample(c(1,2,3),346, replace=T)
 #1=student non-clinical 2= non-student non-clinical 3= clinical
-type_of_comparison_group <-sample(c(1,2),346, replace=T)
+typeComparisonGroup <-sample(c(1,2),346, replace=T)
 # 1=passive control group, 2= active control group
-type_of_stress_component <-sample(c(1,2,3,4,5,6),346, replace=T)
+typeStressComponent <-sample(c(1,2,3,4,5,6),346, replace=T)
 #1= Affect: low arousal, negative valence, 2= Affect: high arousal, negative valence, 3= Affect: low arousal, positive valence 4= Affect: high arousal, positive valence, 
 #5= cognitive component 6=physiological component 
 Affective_consequences_of_stress <-sample(c(1,2,3,4),346, replace=T)
@@ -118,7 +115,7 @@ data1$Type_of_Sam<-Type_of_Sam
 #If the article is on social support I code 1 =partner 2= friends 3=stranger                            
 #Code the source of SocialSupport 
 
-MetaData <-cbind(publication_year,nMale,nFemale,mean_age,doi,citations,inLabAdministration,journalH5,source,predictedDirection,items,mean1,mean2,sd1,sd2,se1,se2,p.reported,n1,n2,n3,research_design,focal_variable,journal,country,number_of_intervention,Instrument,presence_of_individual_differences,MASdata,type_of_population,type_of_comparison_group,type_of_stress_component,Affective_consequences_of_stress,exact_type_of_population,frequency_of_intervention,duration_of_intervention,nationality,timing_of_effect,data1)
+MetaData <-cbind(publication_year,nMale,nFemale,mean_age,doi,citations,inLabAdministration,journalH5,source,predictedDirection,items,mean1,mean2,sd1,sd2,se1,se2,p.reported,n1,n2,n3,researchDesign,focal_variable,journal,country,number_of_intervention,Instrument,presence_of_individual_differences,MASdata,typePopulation,typeComparisonGroup,typeStressComponent,Affective_consequences_of_stress,exact_type_of_population,frequency_of_intervention,duration_of_intervention,nationality,timing_of_effect,data1)
 #Create the first simulated dataset with the info encoded until now
 paperID <- 1:nrow(MetaData)
 studyID <-1:nrow(MetaData)
@@ -132,12 +129,8 @@ published <-sample(c(0,1),346, replace=T)
 StressData <- cbind(MetaData,studyID,paperID,dat$F, dat$log.reg.B,dat$B,dat$t,dat$r,dat$Chisq,dat$beta,dat$Waldchisq,dat$df1,dat$df2,published)
 #Merging a simulated dataset on stress, with the real dataset of social thermoregulation (in order to take the effect sizes from that and other statistics)
 
-
-
 rob2 <- read.csv("Rob_2.csv", sep = ";")
 #bringing-in the Rob2 for each study, after having used the Rob2 excel sheet for each study
-
-
 
 rob2 <- rob2[ , which(names(rob2) %in% c("Domain.1.risk.of.bias","Domain.2.risk.of.bias","Domain.3.risk.of.bias","Domain.4.risk.of.bias","Domain.5.risk.of.bias","Overall.risk.of.bias"))]
 #taking from the raw Rob2 dataset just the columns we need (Rob for all domains and overall)
@@ -159,11 +152,9 @@ StressData$Domain.2.risk.of.bias<- ifelse(StressData$Domain.2.risk.of.bias == "L
 StressData$Domain.3.risk.of.bias<- ifelse(StressData$Domain.3.risk.of.bias == "Low", 1, ifelse(StressData$Domain.3.risk.of.bias == "High",3,2))
 StressData$Domain.4.risk.of.bias<- ifelse(StressData$Domain.4.risk.of.bias == "Low", 1, ifelse(StressData$Domain.4.risk.of.bias == "High",3,2))
 StressData$Domain.5.risk.of.bias<- ifelse(StressData$Domain.5.risk.of.bias == "Low", 1, ifelse(StressData$Domain.5.risk.of.bias == "High",3,2))
-StressData$Overall.risk.of.bias<- ifelse(StressData$Overall.risk.of.bias == "Low", 1, ifelse(StressData$Overall.risk.of.bias == "High", 3, 2))
+StressData$overallRiskOfBias<- ifelse(StressData$Overall.risk.of.bias == "Low", 1, ifelse(StressData$Overall.risk.of.bias == "High", 3, 2))
 
-
-
-dat <- StressData
+data <- StressData
 
 StressData <- StressData %>% mutate (Domain.1.risk.of.bias = ifelse(Domain.1.risk.of.bias == "Low", 1,
                                     ifelse(Domain.1.risk.of.bias == "High",3,2))) #altro modo di fare ifelse

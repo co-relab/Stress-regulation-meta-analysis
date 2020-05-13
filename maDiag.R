@@ -1,10 +1,9 @@
-
-# Diag NOT EVEN "UNDER CONSTRUCTION" YET
+# These procedures will be used to do the diagnostics
 
 #+eval = FALSE
 # Initial outlier diagnostics
 # Univariate MA
-ma.uni <- rma(yi = g.calc, vi = g.var.calc, data = dat, method = "REML", slab = result)
+ma.uni <- rma(yi = yi, vi = vi, data = dat, method = "REML", slab = result)
 
 #+eval = FALSE
 # MA diagnostics
@@ -34,7 +33,6 @@ table(dat$Use.for.Meta == "Yes" & is.na(dat$g.calc))
 table(is.na(dat$g.calc))
 
 #'### Percentage of missing data
-#'There is very little missing data. Regardless of what imputation procedure is applied, it won't have much effect.
 #paste(round(sum(is.na(dat[,1:34]))/prod(dim(dat[,1:34]))*100, 3), "%", sep = "") # insert collumn numbers
 #missmap(dat, rank.order = TRUE, margins = c(5, 0), legend = F)    # insert collumn numbers
 

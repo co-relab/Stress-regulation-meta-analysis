@@ -14,9 +14,9 @@ if (!require(pwr)) {install.packages('pwr')}
 # Meta analysis run on a filtered dataset
 
 # Custom robust multivariate RE meta-analytic model
-# Needs specific naming of ES, variances and data on clustering; yi = g.calc, vi = g.var.calc, study, result
+# Needs specific naming of ES, variances and data on clustering; yi = yi, vi = vi, study, result
 rmaCustom <- function(data = NA){
-  rmaObject <- robust.rma.mv(rma.mv(yi = g.calc, V = g.var.calc, data = data, method = "REML", random = ~ 1|study/result), cluster = data$study)
+  rmaObject <- robust.rma.mv(rma.mv(yi = yi, V = vi, data = data, method = "REML", random = ~ 1|study/result), cluster = data$study)
   rmaObject
 }
 
@@ -275,9 +275,9 @@ grimmerTest <- function(n, mean, SD, items = 1, decimals_mean = 2, decimals_SD =
 
 
 # Forest plot
-# forest(x = data$g.calc, vi = data$g.var.calc,
+# forest(x = data$yi, vi = data$vi,
 #        xlim=c(-2.5,3.5),        ### adjust horizontal plot region limits
-#        subset=order(data$g.var.calc),        ### order by size of yi
+#        subset=order(data$vi),        ### order by size of yi
 #        slab=NA, annotate=FALSE, ### remove study labels and annotations
 #        efac=0,                  ### remove vertical bars at end of CIs
 #        pch=19,                  ### changing point symbol to filled circle
@@ -296,6 +296,6 @@ grimmerTest <- function(n, mean, SD, items = 1, decimals_mean = 2, decimals_SD =
 
 # PET-PEESE plot
 # if(fourPSM$value[4] < .05 & fourPSM$value[1] > 0)
-# {plot(data$g.var.calc, data$g.calc, main="PEESE", xlab = "Variance", ylab = "Effect size", pch = 19, cex.main = 1.3, cex = .6, xlim = c(0, .27),xaxs="i")} else {plot(sqrt(data$g.var.calc), data$g.calc, main="PET", xlab = "Standard error", ylab = "Effect size", pch = 19, cex.main = 1.3, cex = .6, xaxs="i")}
+# {plot(data$vi, data$yi, main="PEESE", xlab = "Variance", ylab = "Effect size", pch = 19, cex.main = 1.3, cex = .6, xlim = c(0, .27),xaxs="i")} else {plot(sqrt(data$vi), data$yi, main="PET", xlab = "Standard error", ylab = "Effect size", pch = 19, cex.main = 1.3, cex = .6, xaxs="i")}
 # abline((if(fourPSM$value[4] < .05 & fourPSM$value[1] > 0) {peese} else {pet}), lwd=3, lty = 2, col = "red")
 # PP.plot <- recordPlot()
