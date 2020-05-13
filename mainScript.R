@@ -32,6 +32,27 @@ vars <- subset(dat, select = c(g.calc, g.var.calc, p, N, study, result, label)) 
 source("SimulateData.R")
 dat <- cbind(dat, vars)
 
+# GRIM & GRIMMER Test -----------------------------------------------------
+
+outGrimM1 <- NA
+outGrimM2 <- NA
+outGrimmerSD1 <- NA
+outGrimmerSD2 <- NA
+for(i in 1:nrow(dat)){
+  outGrimM1[i] <- grimTest(n = dat[i,]$n1, mean = dat[i,]$mean1, items = dat[i,]$items, decimals = 2)
+  outGrimM2[i] <- grimTest(n = dat[i,]$n2, mean = dat[i,]$mean2, items = dat[i,]$items, decimals = 2)
+  outGrimmerSD1[i] <- grimmerTest(n = dat[i,]$n1, mean = dat[i,]$mean1, SD = dat[i,]$sd1, items = dat[i,]$items, decimals_mean = 2, decimals_SD = 2)
+  outGrimmerSD2[i] <- grimmerTest(n = dat[i,]$n2, mean = dat[i,]$mean2, SD = dat[i,]$sd2, items = dat[i,]$items, decimals_mean = 2, decimals_SD = 2)
+  
+}
+dat$outGrimM1 <- outGrimM1
+dat$outGrimM2 <- outGrimM2
+dat$outGrimmerSD1 <- outGrimmerSD1
+dat$outGrimmerSD2 <- outGrimmerSD2
+dat$inconsistenciesCount
+
+rowSums(dat[,c("outGrimM1", "outGrimM2")], na.rm = TRUE)
+
 # Subset
 dataMind <- dat[dat$category == 1 & !is.na(dat$g.calc),]
 dataBio <- dat[dat$category == 2 & !is.na(dat$g.calc),]
@@ -78,6 +99,24 @@ for(i in 1:length(rmaRnd)){
 }
 rndResults <- setNames(rndResults, nm = namesObjects)
 rndResults
+
+
+# Sensitivity analysis excluding effects based on inconsistent means or SDs -------
+
+
+
+
+rmaRnd <- setNames(lapply(dataObjects, function(x){rmaCustom(x[x$research_design == 1,])}), nm = namesObjects)
+rndResults <- list(NA)
+for(i in 1:length(rmaRnd)){
+  rndResults[[i]] <- maResults(rmaObject = rmaRnd[[i]], data = dataObjects[[i]][dataObjects[[i]]$research_design == 1,], briefBias = T)
+}
+rndResults <- setNames(rndResults, nm = namesObjects)
+rndResults
+
+
+
+
 
 
 # Sensitivity analysis excluding effects based on a high risk of bias -------------

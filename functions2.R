@@ -159,9 +159,11 @@ maResults <- function(rmaObject = NA, data = NA, alpha = .05, briefBias = F){
 # https://aurelienallard.netlify.com/post/anaytic-grimmer-possibility-standard-deviations/, by Aurélien Allard
 
 grimTest <- function (n, mean, items = 1, decimals = 2) {
-  if(n>10^decimals){
-    print("The sample size is too big compared to the precision of the reported mean, it is not possible to apply GRIM.")
-  } else {
+  # if(n>10^decimals){
+  #   print("The sample size is too big compared to the precision of the reported mean, it is not possible to apply GRIM.")
+  # } else {
+  if(items == 0){
+    return(NA)} else {
     N <- n*items
     dust <- 1e-12
     gMean <- mean
@@ -172,6 +174,7 @@ grimTest <- function (n, mean, items = 1, decimals = 2) {
     gMean <- round(int / N, decimals)
     consistent <- ifelse(gMean == mean, TRUE, FALSE)
     return(consistent)
+    #}
   }
 }
 
@@ -179,12 +182,14 @@ grimTest <- function (n, mean, items = 1, decimals = 2) {
 
 # Result: -1 = GRIM inconsistent, 0 = GRIMMER inconsistent, 1 = mean & sd consistent
 grimmerTest <- function(n, mean, SD, items = 1, decimals_mean = 2, decimals_SD = 2){
-  
-  if(n>10^decimals_mean){
-    print("Reported precision of mean too low, given N")
-  }
-  
+  # 
+  # if(n>10^decimals_mean){
+  #   print("Reported precision of mean too low, given N")
+  # } else {
+  # 
   #Applies the GRIM test, and computes the possible mean.
+  if(items == 0){
+    return(NA)} else {
   N <- n*items
   sum <- mean*N
   realsum <- round(sum)
@@ -262,6 +267,7 @@ grimmerTest <- function(n, mean, SD, items = 1, decimals_mean = 2, decimals_SD =
   return(ifelse(
     sum(Third_Test)==0, 0, 1)
   )
+  }
 }
 
 ################

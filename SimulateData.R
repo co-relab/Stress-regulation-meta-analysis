@@ -21,11 +21,11 @@ items <-as.integer(runif(346,min=0, max=10))
 # for items=  (0 if the DV is not a discrete/likert variable, 
 #otherwise an integer count of, e.g., Likert scale items comprising the DV)
 
-mean1 <- rnorm(346,5,1)
-mean2 <- rnorm(346,5,2)
+mean1 <- round(rnorm(346,5,1), 2)
+mean2 <- round(rnorm(346,5,2), 2)
 #mean of group1 (experimental) and of group2 (control)
-sd1 <- rnorm(346,2,1)
-sd2 <- rnorm(346,2,1)
+sd1 <- round(rnorm(346,2,1), 2)
+sd2 <- round(rnorm(346,2,1), 2)
 #sd of group1 (experimental) and of group2 (control)
 n1 <- as.integer(runif(346,min=1, max=100))
 n2 <- as.integer(runif(346,min=1, max=100))
@@ -149,7 +149,7 @@ StressData$`dat$Design`<- ifelse(StressData$`dat$Design` == "Within", 1,2)
 
 #recoded to numeric values items for RoB2 and type of design 
 dat <- StressData
-View(dat)
+# View(dat)
 # StressData <- StressData %>%
   #mutate (Domain.1.risk.of.bias = ifelse(Domain.1.risk.of.bias == "Low", 1,
                                        # ifelse(Domain.1.risk.of.bias == "High",3,2)) altro modo di fare ifelse
