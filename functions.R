@@ -20,28 +20,7 @@ rmaCustom <- function(data = NA){
   rmaObject
 }
 
-# Permutation p-curve -----------------------------------------------------
-
-# Evidential value; Permutation p-curve
-# Subseting only the effects that are focal for the published study
-
-pcurve <- function(data = NA){
-  #p-curve data export
-  set.seed(123)
-  pcurveData <- na.omit(gsub("^.*?: ",": ", x = data[data$focal_variable == 1,]$label[!duplicated.random(data[data$focal_variable == 1,]$study)], replacement = ""))
-  #write(pcurveData, "pcurve.data.txt")
-  
-  #Permutation p-curve
-  cols <- 15
-  pCurve <- matrix(ncol=cols, nrow=nsim)
-  for(i in 1:nsim){
-    pCurve[i,] <- pcurve_app(na.omit(gsub("^.*?: ",": ", x = data[data$focal_variable == 1,]$label[!duplicated.random(data[data$focal_variable == 1,]$study)], replacement = "")))
-  }
-  pCurveOut <- data.frame(pCurve)
-  as.data.frame(describe(pCurveOut[c(4, 6, 8, 10)]))[,3, drop = FALSE]
-}
-
-# 95% prediction interval
+# 95% prediction interval -------------------------------------------------
 pi95 <- function(rmaObject = NA){
   pi95Out <- c("95% PI LB" = round(predict.rma(rmaObject)$cr.lb, 3), "95% PI UB" = round(predict.rma(rmaObject)$cr.ub, 3))
   pi95Out
@@ -50,37 +29,36 @@ pi95 <- function(rmaObject = NA){
 # Heterogeneity -----------------------------------------------------------
 
 heterogeneity <- function(rmaObject = NA){
-
-# Total heterogeneity - tau
-tau <- sqrt(sum(rmaObject$sigma2))
-
-
-# I^2
-W <- diag(1/rmaObject$vi)
-X <- model.matrix(rmaObject)
-P <- W - W %*% X %*% solve(t(X) %*% W %*% X) %*% t(X) %*% W
-I2<- 100 * sum(rmaObject$sigma2) / (sum(rmaObject$sigma2) + (rmaObject$k-rmaObject$p)/sum(diag(P)))
-
-# Separate estimates of between- and within-cluster heterogeneity
-BW.hetero <- round(100 * rmaObject$sigma2 / (sum(rmaObject$sigma2) + (rmaObject$k-rmaObject$p)/sum(diag(P))), 2)
-
-studyID <- rmaObject$mf.r[[1]]$study
-resultID <- rmaObject$mf.r[[1]]$result
-resR <- rma.mv(yi = rmaObject$yi, V = rmaObject$vi, struct="UN", random = ~ 1|studyID/resultID)
-resF <- rma.mv(yi = rmaObject$yi, V = rmaObject$vi)
-
-# Jackson's approach to I^2
-JI2 <- round(c(100 * (vcov(resR)[1,1] - vcov(resF)[1,1]) / vcov(resR)[1,1]), 2)
-
-# Intra-class correlation of underlying true effects
-icc <- round(rmaObject$sigma2[1] / sum(rmaObject$sigma2), 2)
-
-c("Tau" = tau,
-     "I^2" = I2,
-     "Jackson's I^2" = JI2,
-     "Between-cluster heterogeneity" = BW.hetero[1],
-      "Within-cluster heterogeneity" = BW.hetero[2],
-      "ICC" = icc)
+  
+  # Total heterogeneity - tau
+  tau <- sqrt(sum(rmaObject$sigma2))
+  
+  # I^2
+  W <- diag(1/rmaObject$vi)
+  X <- model.matrix(rmaObject)
+  P <- W - W %*% X %*% solve(t(X) %*% W %*% X) %*% t(X) %*% W
+  I2<- 100 * sum(rmaObject$sigma2) / (sum(rmaObject$sigma2) + (rmaObject$k-rmaObject$p)/sum(diag(P)))
+  
+  # Separate estimates of between- and within-cluster heterogeneity
+  BW.hetero <- round(100 * rmaObject$sigma2 / (sum(rmaObject$sigma2) + (rmaObject$k-rmaObject$p)/sum(diag(P))), 2)
+  
+  studyID <- rmaObject$mf.r[[1]]$study
+  resultID <- rmaObject$mf.r[[1]]$result
+  resR <- rma.mv(yi = rmaObject$yi, V = rmaObject$vi, struct="UN", random = ~ 1|studyID/resultID)
+  resF <- rma.mv(yi = rmaObject$yi, V = rmaObject$vi)
+  
+  # Jackson's approach to I^2
+  JI2 <- round(c(100 * (vcov(resR)[1,1] - vcov(resF)[1,1]) / vcov(resR)[1,1]), 2)
+  
+  # Intra-class correlation of underlying true effects
+  icc <- round(rmaObject$sigma2[1] / sum(rmaObject$sigma2), 2)
+  
+  c("Tau" = tau,
+    "I^2" = I2,
+    "Jackson's I^2" = JI2,
+    "Between-cluster heterogeneity" = BW.hetero[1],
+    "Within-cluster heterogeneity" = BW.hetero[2],
+    "ICC" = icc)
 }
 
 # Proportion of significant results ---------------------------------------
@@ -89,73 +67,50 @@ propSig <- function(p.values = NA){
   as.integer(table(p.values < .05)[2])/length(p.values < .05)
 }
 
+# t-test for summary statistics -------------------------------------------
 
-# Publication bias --------------------------------------------------------
-
-bias <- function(data = NA, rmaObject = NA, alpha = .05, briefBias = TRUE){
-  # Correlation between the ES and precision (SE)
-  esPrec <- cor(rmaObject$yi, sqrt(rmaObject$vi), method = "kendall")
-  # Small-study effects correction
-  # 4-parameter selection model
-  result <- matrix(ncol = 4, nrow = nsim)
-  model <- matrix(ncol = 4, nrow = 24)
-  for(i in 1:nsim){
-    model <- dat[!duplicated.random(dat$study),] %$% fourPSM.est(yi, vi)
-    result[i,] <- c(model$value[1], "ciLB" = model$value[5], "ciUB" = model$value[6], "p-value" = model$value[4])
-  }
-  colnames(result) <- c("estimate", "ciLB", "ciUB", "p-value")
-  fourPSM <- describe(result)[,3, drop = FALSE]
-  
-  # PET-PEESE
-  pp <- pet.peese(rmaObject$yi, rmaObject$vi, rmaObject$mf.r[[1]]$study, rmaObject$mf.r[[1]]$result)
-  
-  # p-uniform
-  puniform.out <- puniform(yi = rmaObject$yi, vi = rmaObject$vi, alpha = alpha, side = "right", method = "P")
-  
-  if(briefBias == TRUE){
-         return(list("4PSM ES estimate" = fourPSM[1, 1],
-              "4PSM confidence interval" = c(fourPSM[2, 1], fourPSM[3, 1]),
-              "4PSM p-value" = fourPSM[4, 1],
-              "Whether PET or PEESE was used" = ifelse(fourPSM[4, 1] < .05 & fourPSM[1, 1] > 0, "PEESE", "PET"),
-              "PET-PEESE ES estimate" = as.numeric(pp[1]),
-              "PET-PEESE confidence interval" = as.numeric(c(pp[5], pp[6])),
-              "PET-PEESE p-value" = pp[4]))}
-  else{
-         return(list("4PSM" = fourPSM, 
-               "PET-PEESE" = pp,
-               "p-uniform" = puniform.out))
-  }
+tTestSummary <- function(mean1, mean2, sd1, sd2, n1, n2)
+{
+  # pooled standard deviation, scaled by the sample sizes
+  se <- sqrt((1/n1 + 1/n2) * ((n1 - 1) * sd1^2 + (n2 - 1) * sd2^2)/(n1 + n2 - 2)) 
+  df <- n1 + n2 - 2
+  t <- (mean1 - mean2)/se 
+  dat <- c(mean1 - mean2, se, t, 2*pt(-abs(t),df))    
+  names(dat) <- c("Difference in means", "SE", "t-statistic", "p-value")
+  return(dat) 
 }
 
-# Power based on PEESE and 4PSM parameter estimates
-powerEst <- function(data = NA){
-  powerPEESE <- NA
-  power4PSM <- NA
-  peeseEst <- with(data, pet.peese(yi, vi, study, result))[1]
-  result <- matrix(ncol = 4, nrow = nsim)
-  model <- matrix(ncol = 4, nrow = 24)
-  for(i in 1:nsim){
-    model <- data[!duplicated.random(data$study),] %$% fourPSM.est(yi, vi)
-    result[i,] <- c(model$value[1], "ciLB" = model$value[5], "ciUB" = model$value[6], "p-value" = model$value[4])
-  }
-  colnames(result) <- c("estimate", "ciLB", "ciUB", "p-value")
-  fourPSM <- describe(result)[,3, drop = FALSE]
-  fpsmEst <- fourPSM[1, 1]
+# Random selection of effects ---------------------------------------------
 
-  powerPEESEresult <- median(pwr::pwr.t.test(n = data[!is.na(data$N),]$N, d = peeseEst)$power)
-  power4PSMresult <- median(pwr::pwr.t.test(n = data[!is.na(data$N),]$N, d = fpsmEst)$power)
-  c("Median power for detecting PET-PEESE estimate" = powerPEESEresult, 
-    "Median power for detecting 4PSM estimate" = power4PSMresult)
+# Choose effects from a single study by random (for the purpose of permutation p-curve)
+duplicated.random = function(x, incomparables = FALSE, ...)
+{
+  if ( is.vector(x) )
+  {
+    permutation = sample(length(x))
+    x.perm      = x[permutation]
+    result.perm = duplicated(x.perm, incomparables, ...)
+    result      = result.perm[order(permutation)]
+    return(result)
+  }
+  else ( is.matrix(x) )
+  {
+    permutation = sample(nrow(x))
+    x.perm      = x[permutation,]
+    result.perm = duplicated(x.perm, incomparables, ...)
+    result      = result.perm[order(permutation)]
+    return(result)
+  }
 }
 
 # Summary results ---------------------------------------------------------
 
-maResults <- function(rmaObject = NA, data = NA, alpha = .05, briefBias = F){
+maResults <- function(rmaObject = NA, data = NA, alpha = .05, briefBias = F, pcurve = T){
   list(
     "RMA results" = rmaObject,
     "Prediction interval" = pi95(rmaObject),
     "Heterogeneity" = heterogeneity(rmaObject),
-    "p-curve" = pcurve(data),
+    "p-curve" = ifelse(pcurve == TRUE, pcurve(data), paste("p-curve analysis not carried out")),
     "Proportion of significant results" = propSig(data$p),
     "Publication bias" = bias(data, rmaObject, briefBias = briefBias),
     "Power based on PEESE and 4PSM parameter estimates" = powerEst(data))
@@ -170,7 +125,7 @@ grimTest <- function (n, mean, items = 1, decimals = 2) {
   # if(n>10^decimals){
   #   print("The sample size is too big compared to the precision of the reported mean, it is not possible to apply GRIM.")
   # } else {
-  if(items == 0){
+  if(items == 0 | is.na(items)){
     return(NA)} else {
     N <- n*items
     dust <- 1e-12
@@ -196,14 +151,12 @@ grimmerTest <- function(n, mean, SD, items = 1, decimals_mean = 2, decimals_SD =
   # } else {
   # 
   #Applies the GRIM test, and computes the possible mean.
-  if(items == 0){
+  if(items == 0 | is.na(items)){
     return(NA)} else {
   N <- n*items
   sum <- mean*N
   realsum <- round(sum)
   realmean <- realsum/N
-  
-  
   
   # Creates functions to round a number consistently up or down, when the last digit is 5
   
@@ -227,7 +180,6 @@ grimmerTest <- function(n, mean, SD, items = 1, decimals_mean = 2, decimals_SD =
   if(consistency_down+consistency_up==0){
     return(-1)
   }
-  
   
   #Computes the lower and upper bounds for the sd.
   
@@ -278,9 +230,7 @@ grimmerTest <- function(n, mean, SD, items = 1, decimals_mean = 2, decimals_SD =
   }
 }
 
-################
-# Plots
-
+# Plots -------------------------------------------------------------------
 
 # Forest plot
 # forest(x = data$yi, vi = data$vi,
@@ -300,40 +250,75 @@ grimmerTest <- function(n, mean, SD, items = 1, decimals_mean = 2, decimals_SD =
 # Contour enhanced funnel plot
 #funnel(robma, level=c(90, 95, 99), shade=c("white", "gray", "darkgray"), refline=0, pch = 20, yaxis = "sei")
 
-
-
 # PET-PEESE plot
 # if(fourPSM$value[4] < .05 & fourPSM$value[1] > 0)
 # {plot(data$vi, data$yi, main="PEESE", xlab = "Variance", ylab = "Effect size", pch = 19, cex.main = 1.3, cex = .6, xlim = c(0, .27),xaxs="i")} else {plot(sqrt(data$vi), data$yi, main="PET", xlab = "Standard error", ylab = "Effect size", pch = 19, cex.main = 1.3, cex = .6, xaxs="i")}
 # abline((if(fourPSM$value[4] < .05 & fourPSM$value[1] > 0) {peese} else {pet}), lwd=3, lty = 2, col = "red")
 # PP.plot <- recordPlot()
 
-###############
-# Choose effects from a single study by random (for the purpose of permutation p-curve)
-duplicated.random = function(x, incomparables = FALSE, ...)
-{
-  if ( is.vector(x) )
-  {
-    permutation = sample(length(x))
-    x.perm      = x[permutation]
-    result.perm = duplicated(x.perm, incomparables, ...)
-    result      = result.perm[order(permutation)]
-    return(result)
+# Publication bias --------------------------------------------------------
+
+bias <- function(data = NA, rmaObject = NA, alpha = .05, briefBias = TRUE){
+  # Correlation between the ES and precision (SE)
+  esPrec <- cor(rmaObject$yi, sqrt(rmaObject$vi), method = "kendall")
+  # Small-study effects correction
+  # 4-parameter selection model
+  result <- matrix(ncol = 4, nrow = nsim)
+  model <- matrix(ncol = 4, nrow = 24)
+  for(i in 1:nsim){
+    model <- dat[!duplicated.random(dat$study),] %$% fourPSM.est(yi, vi)
+    result[i,] <- c(model$value[1], "ciLB" = model$value[5], "ciUB" = model$value[6], "p-value" = model$value[4])
   }
-  else ( is.matrix(x) )
-  {
-    permutation = sample(nrow(x))
-    x.perm      = x[permutation,]
-    result.perm = duplicated(x.perm, incomparables, ...)
-    result      = result.perm[order(permutation)]
-    return(result)
+  colnames(result) <- c("estimate", "ciLB", "ciUB", "p-value")
+  fourPSM <- describe(result)[,3, drop = FALSE]
+  
+  # PET-PEESE
+  pp <- pet.peese(rmaObject$yi, rmaObject$vi, rmaObject$mf.r[[1]]$study, rmaObject$mf.r[[1]]$result)
+  
+  # p-uniform
+  puniform.out <- puniform(yi = rmaObject$yi, vi = rmaObject$vi, alpha = alpha, side = "right", method = "P")
+  
+  if(briefBias == TRUE){
+    return(list("4PSM ES estimate" = fourPSM[1, 1],
+                "4PSM confidence interval" = c(fourPSM[2, 1], fourPSM[3, 1]),
+                "4PSM p-value" = fourPSM[4, 1],
+                "Whether PET or PEESE was used" = ifelse(fourPSM[4, 1] < .05 & fourPSM[1, 1] > 0, "PEESE", "PET"),
+                "PET-PEESE ES estimate" = as.numeric(pp[1]),
+                "PET-PEESE confidence interval" = as.numeric(c(pp[5], pp[6])),
+                "PET-PEESE p-value" = pp[4]))}
+  else{
+    return(list("4PSM" = fourPSM, 
+                "PET-PEESE" = pp,
+                "p-uniform" = puniform.out))
   }
 }
 
-######################
+# Power based on PEESE and 4PSM parameter estimates -----------------------
+
+powerEst <- function(data = NA){
+  powerPEESE <- NA
+  power4PSM <- NA
+  peeseEst <- with(data, pet.peese(yi, vi, study, result))[1]
+  result <- matrix(ncol = 4, nrow = nsim)
+  model <- matrix(ncol = 4, nrow = 24)
+  for(i in 1:nsim){
+    model <- data[!duplicated.random(data$study),] %$% fourPSM.est(yi, vi)
+    result[i,] <- c(model$value[1], "ciLB" = model$value[5], "ciUB" = model$value[6], "p-value" = model$value[4])
+  }
+  colnames(result) <- c("estimate", "ciLB", "ciUB", "p-value")
+  fourPSM <- describe(result)[,3, drop = FALSE]
+  fpsmEst <- fourPSM[1, 1]
+  
+  powerPEESEresult <- median(pwr::pwr.t.test(n = data[!is.na(data$N),]$N, d = peeseEst)$power)
+  power4PSMresult <- median(pwr::pwr.t.test(n = data[!is.na(data$N),]$N, d = fpsmEst)$power)
+  c("Median power for detecting PET-PEESE estimate" = powerPEESEresult, 
+    "Median power for detecting 4PSM estimate" = power4PSMresult)
+}
+
+# Multiple-parameter selection models -------------------------------------
+
 # Code adapted from Carter, E. C., Schönbrodt, F. D., Hilgard, J., & Gervais, W. (2018). Correcting for bias in psychology: A comparison of meta-analytic methods. Retrieved from https://osf.io/rf3ys/.
 # https://github.com/nicebread/meta-showdown/blob/master/MA-methods/7-Selection%20Models.R
-######################
 # Return a result data frame either in wide or long format (for the 3PSM output)
 returnRes <- function(res, long=TRUE, reduce=TRUE) {
   if (is.null(res)) return(NULL)
@@ -452,7 +437,8 @@ fourPSM.est <- function(d, v, min.pvalues=0, long=TRUE, fallback = FALSE) {
   return(returnRes(res.wide))
 }
 
-#################
+# PET-PEESE ---------------------------------------------------------------
+
 #PET-PEESE with 3PSM as the conditional estimator instead of PET
 
 pet.peese <- function(d, v, study, result){
@@ -471,14 +457,33 @@ pet.peese <- function(d, v, study, result){
          return(peese.out),  return(pet.out))
 }
 
-###################################################################################################################
+# Permutation p-curve -----------------------------------------------------
+
+# Evidential value; Permutation p-curve
+# Subseting only the effects that are focal for the published study
+
+pcurve <- function(data = NA){
+  #p-curve data export
+  set.seed(123)
+  pcurveData <- na.omit(gsub("^.*?: ",": ", x = data[data$focalVariable == 1,]$label[!duplicated.random(data[data$focalVariable == 1,]$study)], replacement = ""))
+  #write(pcurveData, "pcurve.data.txt")
+  
+  #Permutation p-curve
+  cols <- 15
+  pCurve <- matrix(ncol=cols, nrow=nsim)
+  for(i in 1:nsim){
+    pCurve[i,] <- pcurve_app(na.omit(gsub("^.*?: ",": ", x = data[data$focalVariable == 1,]$label[!duplicated.random(data[data$focalVariable == 1,]$study)], replacement = "")))
+  }
+  pCurveOut <- data.frame(pCurve)
+  as.data.frame(describe(pCurveOut[c(4, 6, 8, 10)]))[,3, drop = FALSE]
+}
+
+# p-curve app code --------------------------------------------------------
+
 # Adapted p-curve code from p-curve.com
-#
 #This is the R Code behind the p-curve app 4.052
 #Last updated: 2017 03 17
 #Written by Uri Simonsohn (urisohn@gmail.com)
-#
-###################################################################################################################
 
 #The app is a single function, pcurve_app() .
 #To run it you need to store statistical tests in a textfile with the format from the example, see http://p-curve.com/app4/example.txt
@@ -489,8 +494,6 @@ pet.peese <- function(d, v, study, result){
 #This R Code was written specifically to run in the back-end of the online app and thus it may do things in a way that's not the most intuitive or most efficient
 #for a user actually interacting with the R Code. The goal is to exactly replicate what is done on the website, thus the R Code is left intact. The website runs the exact same code
 #below.
-
-###################################################################################################################
 
 if (!require(stringr)) {
   install.packages('stringr') #Library to process string variables (text of the entered tests)
