@@ -15,14 +15,16 @@ if (!require(pwr)) {install.packages('pwr')}
 
 # Custom robust multivariate RE meta-analytic model
 # Needs specific naming of ES, variances and data on clustering; yi = yi, vi = vi, study, result
-rmaCustom <- function(data = NA){
-  rmaObject <- robust.rma.mv(rma.mv(yi = yi, V = vi, data = data, method = "REML", random = ~ 1|study/result), cluster = data$study)
-  rmaObject
+rmaCustom <- function(data = NA, robust = TRUE){
+  viMatrix <- impute_covariance_matrix(data$vi, cluster = data$study, r = rho, smooth_vi = TRUE)
+  rmaObjectModBasedSE <- rma.mv(yi = yi, V = viMatrix, data = data, method = "REML", random = ~ 1|study/result, sparse = TRUE)
+  rmaObject <- robust.rma.mv(rmaObjectModBasedSE, cluster = data$study)
+  return(list("RMA.MV object with RVE SEs with n/(n-p) small-sample correction" = rmaObject, "RMA.MV object with model-based SEs" = rmaObjectModBasedSE))
 }
 
 # 95% prediction interval -------------------------------------------------
 pi95 <- function(rmaObject = NA){
-  pi95Out <- c("95% PI LB" = round(predict.rma(rmaObject)$cr.lb, 3), "95% PI UB" = round(predict.rma(rmaObject)$cr.ub, 3))
+  pi95Out <- c("95% PI LB" = round(predict.rma(rmaObject[[1]])$cr.lb, 3), "95% PI UB" = round(predict.rma(rmaObject[[1]])$cr.ub, 3))
   pi95Out
 }
 
@@ -31,27 +33,27 @@ pi95 <- function(rmaObject = NA){
 heterogeneity <- function(rmaObject = NA){
   
   # Total heterogeneity - tau
-  tau <- sqrt(sum(rmaObject$sigma2))
+  tau <- sqrt(sum(rmaObject[[1]]$sigma2))
   
   # I^2
-  W <- diag(1/rmaObject$vi)
-  X <- model.matrix(rmaObject)
+  W <- diag(1/rmaObject[[1]]$vi)
+  X <- model.matrix(rmaObject[[1]])
   P <- W - W %*% X %*% solve(t(X) %*% W %*% X) %*% t(X) %*% W
-  I2<- 100 * sum(rmaObject$sigma2) / (sum(rmaObject$sigma2) + (rmaObject$k-rmaObject$p)/sum(diag(P)))
+  I2<- 100 * sum(rmaObject[[1]]$sigma2) / (sum(rmaObject[[1]]$sigma2) + (rmaObject[[1]]$k-rmaObject[[1]]$p)/sum(diag(P)))
   
   # Separate estimates of between- and within-cluster heterogeneity
-  BW.hetero <- round(100 * rmaObject$sigma2 / (sum(rmaObject$sigma2) + (rmaObject$k-rmaObject$p)/sum(diag(P))), 2)
+  BW.hetero <- round(100 * rmaObject[[1]]$sigma2 / (sum(rmaObject[[1]]$sigma2) + (rmaObject[[1]]$k-rmaObject[[1]]$p)/sum(diag(P))), 2)
   
-  studyID <- rmaObject$mf.r[[1]]$study
-  resultID <- rmaObject$mf.r[[1]]$result
-  resR <- rma.mv(yi = rmaObject$yi, V = rmaObject$vi, struct="UN", random = ~ 1|studyID/resultID)
-  resF <- rma.mv(yi = rmaObject$yi, V = rmaObject$vi)
+  studyID <- rmaObject[[1]]$mf.r[[1]]$study
+  resultID <- rmaObject[[1]]$mf.r[[1]]$result
+  resR <- rma.mv(yi = rmaObject[[1]]$yi, V = rmaObject[[1]]$vi, struct="UN", random = ~ 1|studyID/resultID)
+  resF <- rma.mv(yi = rmaObject[[1]]$yi, V = rmaObject[[1]]$vi)
   
   # Jackson's approach to I^2
   JI2 <- round(c(100 * (vcov(resR)[1,1] - vcov(resF)[1,1]) / vcov(resR)[1,1]), 2)
   
   # Intra-class correlation of underlying true effects
-  icc <- round(rmaObject$sigma2[1] / sum(rmaObject$sigma2), 2)
+  icc <- round(rmaObject[[1]]$sigma2[1] / sum(rmaObject[[1]]$sigma2), 2)
   
   c("Tau" = tau,
     "I^2" = I2,
@@ -75,9 +77,9 @@ tTestSummary <- function(mean1, mean2, sd1, sd2, n1, n2)
   se <- sqrt((1/n1 + 1/n2) * ((n1 - 1) * sd1^2 + (n2 - 1) * sd2^2)/(n1 + n2 - 2)) 
   df <- n1 + n2 - 2
   t <- (mean1 - mean2)/se 
-  dat <- c(mean1 - mean2, se, t, 2*pt(-abs(t),df))    
-  names(dat) <- c("Difference in means", "SE", "t-statistic", "p-value")
-  return(dat) 
+  out <- c(mean1 - mean2, se, t, 2*pt(-abs(t),df))    
+  names(out) <- c("Difference in means", "SE", "t-statistic", "p-value")
+  return(out) 
 }
 
 # Random selection of effects ---------------------------------------------
@@ -107,7 +109,8 @@ duplicated.random = function(x, incomparables = FALSE, ...)
 
 maResults <- function(rmaObject = NA, data = NA, alpha = .05, briefBias = F, pcurve = T){
   list(
-    "RMA results" = rmaObject,
+    "RMA results with model-based SEs" = rmaObject[[2]],
+    "RVE SEs with Satterthwaite small-sample correction" = conf_int(rmaObject[[2]], vcov = "CR2", cluster = data$study),
     "Prediction interval" = pi95(rmaObject),
     "Heterogeneity" = heterogeneity(rmaObject),
     "p-curve" = ifelse(pcurve == TRUE, pcurve(data), paste("p-curve analysis not carried out")),
@@ -260,35 +263,41 @@ grimmerTest <- function(n, mean, SD, items = 1, decimals_mean = 2, decimals_SD =
 
 bias <- function(data = NA, rmaObject = NA, alpha = .05, briefBias = TRUE){
   # Correlation between the ES and precision (SE)
-  esPrec <- cor(rmaObject$yi, sqrt(rmaObject$vi), method = "kendall")
+  esPrec <- cor(rmaObject[[1]]$yi, sqrt(rmaObject[[1]]$vi), method = "kendall")
   # Small-study effects correction
   # 4-parameter selection model
-  result <- matrix(ncol = 4, nrow = nsim)
-  model <- matrix(ncol = 4, nrow = 24)
+  result4PSM <- matrix(ncol = 4, nrow = nsim)
+  model4PSM <- matrix(ncol = 4, nrow = 24)
   for(i in 1:nsim){
-    model <- dat[!duplicated.random(dat$study),] %$% fourPSM.est(yi, vi)
-    result[i,] <- c(model$value[1], "ciLB" = model$value[5], "ciUB" = model$value[6], "p-value" = model$value[4])
+    model4PSM <- data[!duplicated.random(data$study),] %$% fourPSM.est(yi, vi, fallback = T, min.pvalues = 2)
+    result4PSM[i,] <- c(model4PSM$value[1], "ciLB" = model4PSM$value[5], "ciUB" = model4PSM$value[6], "p-value" = model4PSM$value[4])
   }
-  colnames(result) <- c("estimate", "ciLB", "ciUB", "p-value")
-  fourPSM <- describe(result)[,3, drop = FALSE]
-  
+  colnames(result4PSM) <- c("estimate", "ciLB", "ciUB", "p-value")
+  fourPSM <- describe(result4PSM)[,3, drop = FALSE]
+
   # PET-PEESE
-  pp <- pet.peese(rmaObject$yi, rmaObject$vi, rmaObject$mf.r[[1]]$study, rmaObject$mf.r[[1]]$result)
+  petPeeseOut <- with(data, pet.peese(yi, vi, study, result))
   
   # p-uniform
-  puniform.out <- puniform(yi = rmaObject$yi, vi = rmaObject$vi, alpha = alpha, side = "right", method = "P")
-  
+  resultPuniform <- matrix(ncol = 4, nrow = nsim)
+  for(i in 1:nsim){
+    modelPuniform <- data[!duplicated.random(data$study),] %$% puniform(yi = yi, vi = vi, alpha = alpha, side = side, method = "P")
+    resultPuniform[i,] <- c("est" = modelPuniform[["est"]], "ciLB" = modelPuniform[["ci.lb"]], "ciUB" = modelPuniform[["ci.ub"]], "p-value" = modelPuniform[["pval.0"]])
+  }
+  colnames(resultPuniform) <- c("est", "ci.lb", "ci.ub", "pval.0")
+  puniform.out <- describe(resultPuniform)[,3, drop = FALSE]
+
   if(briefBias == TRUE){
     return(list("4PSM ES estimate" = fourPSM[1, 1],
                 "4PSM confidence interval" = c(fourPSM[2, 1], fourPSM[3, 1]),
                 "4PSM p-value" = fourPSM[4, 1],
                 "Whether PET or PEESE was used" = ifelse(fourPSM[4, 1] < .05 & fourPSM[1, 1] > 0, "PEESE", "PET"),
-                "PET-PEESE ES estimate" = as.numeric(pp[1]),
-                "PET-PEESE confidence interval" = as.numeric(c(pp[5], pp[6])),
-                "PET-PEESE p-value" = pp[4]))}
+                "PET-PEESE ES estimate" = as.numeric(petPeeseOut[1]),
+                "PET-PEESE confidence interval" = as.numeric(c(petPeeseOut[5], petPeeseOut[6])),
+                "PET-PEESE p-value" = petPeeseOut[4]))}
   else{
     return(list("4PSM" = fourPSM, 
-                "PET-PEESE" = pp,
+                "PET-PEESE" = petPeeseOut,
                 "p-uniform" = puniform.out))
   }
 }
@@ -302,15 +311,14 @@ powerEst <- function(data = NA){
   result <- matrix(ncol = 4, nrow = nsim)
   model <- matrix(ncol = 4, nrow = 24)
   for(i in 1:nsim){
-    model <- data[!duplicated.random(data$study),] %$% fourPSM.est(yi, vi)
+    model <- data[!duplicated.random(data$study),] %$% fourPSM.est(yi, vi, min.pvalues = 2, fallback = T)
     result[i,] <- c(model$value[1], "ciLB" = model$value[5], "ciUB" = model$value[6], "p-value" = model$value[4])
   }
   colnames(result) <- c("estimate", "ciLB", "ciUB", "p-value")
-  fourPSM <- describe(result)[,3, drop = FALSE]
-  fpsmEst <- fourPSM[1, 1]
+  fourPSM <- describe(result)[,3, drop = FALSE][1, 1]
   
   powerPEESEresult <- median(pwr::pwr.t.test(n = data[!is.na(data$N),]$N, d = peeseEst)$power)
-  power4PSMresult <- median(pwr::pwr.t.test(n = data[!is.na(data$N),]$N, d = fpsmEst)$power)
+  power4PSMresult <- median(pwr::pwr.t.test(n = data[!is.na(data$N),]$N, d = fourPSM)$power)
   c("Median power for detecting PET-PEESE estimate" = powerPEESEresult, 
     "Median power for detecting 4PSM estimate" = power4PSMresult)
 }
@@ -343,10 +351,10 @@ if (!require(weightr)) {
   install.packages('weightr')
 }
 
-threePSM.est <- function(d, v, min.pvalues=1, long=FALSE) {
+threePSM.est <- function(yi, vi, min.pvalues=2, long=TRUE) {
   
   w1 <- tryCatch(
-    weightfunct(d, v, steps = c(0.025, 1), mods = NULL, weights = NULL, fe = FALSE, table = TRUE),
+    weightfunct(yi, vi, steps = c(0.025, 1), mods = NULL, weights = NULL, fe = FALSE, table = TRUE),
     error = function(e) NULL
   )
   
@@ -365,7 +373,7 @@ threePSM.est <- function(d, v, min.pvalues=1, long=FALSE) {
   
   # If <= 3 p-values in an interval: return NA
   p.table <- table(cut(w1$p, breaks=c(0, .025, 1)))
-  if (any(p.table < min.pvalues)) {
+  if (any(p.table < 2)) {
     return(returnRes(res.NA))
   } else {
     est <- w1[[2]]$par
@@ -389,9 +397,9 @@ threePSM.est <- function(d, v, min.pvalues=1, long=FALSE) {
   return(returnRes(res.wide))
 }
 
-fourPSM.est <- function(d, v, min.pvalues=0, long=TRUE, fallback = FALSE) {	
+fourPSM.est <- function(yi, vi, min.pvalues=2, long=TRUE, fallback = FALSE) {	
   w1 <- tryCatch(
-    weightfunct(d, v, steps = c(0.025, 0.5, 1), mods = NULL, weights = NULL, fe = FALSE, table = TRUE),
+    weightfunct(yi, vi, steps = c(0.025, 0.5, 1), mods = NULL, weights = NULL, fe = FALSE, table = TRUE),
     error = function(e) NULL
   )
   
@@ -410,9 +418,9 @@ fourPSM.est <- function(d, v, min.pvalues=0, long=TRUE, fallback = FALSE) {
   
   # if <= min.pvalues p-values in an interval: return NA
   p.table <- table(cut(w1$p, breaks=c(0, .025, 0.5, 1)))
-  if (any(p.table < min.pvalues)) {
+  if (any(p.table < 2)) {
     if (fallback==TRUE) {
-      return(threePSM.est(d, v, min.pvalues=min.pvalues, long=long))
+      return(threePSM.est(yi, vi, min.pvalues=2, long=TRUE))
     } else {
       return(returnRes(res.NA))
     }	  
@@ -441,17 +449,18 @@ fourPSM.est <- function(d, v, min.pvalues=0, long=TRUE, fallback = FALSE) {
 
 #PET-PEESE with 3PSM as the conditional estimator instead of PET
 
-pet.peese <- function(d, v, study, result){
-  pet <<- robust.rma.mv(rma.mv(yi = d ~ sqrt(v), V = v, random = ~ 1|study/result, method="REML"), cluster = study)
+pet.peese <- function(yi, vi, study, result){
+  viMatrix <- impute_covariance_matrix(vi, cluster = study, r = rho, smooth_vi = TRUE)
+  pet <<- robust.rma.mv(rma.mv(yi = yi ~ sqrt(vi), V = viMatrix, random = ~ 1|study/result, method = "REML", sparse = TRUE), cluster = study)
   pet.out <- round(c(pet$b[1], pet$se[1], pet$zval[1], pet$pval[1], pet$ci.lb[1], pet$ci.ub[1]), 3)
   names(pet.out) <- c("PET estimate", "se", "zval", "pval", "ci.lb", "ci.ub")
   pet.out
   
-  peese <<- rma.mv(yi = d ~ v, V = v, random = ~ 1|study/result, method="REML")
+  peese <<- robust.rma.mv(rma.mv(yi = yi ~ vi, V = viMatrix, random = ~ 1|study/result, method = "REML", sparse = TRUE), cluster = study)
   peese.out <- round(c(peese$b[1], peese$se[1], peese$zval[1], peese$pval[1], peese$ci.lb[1], peese$ci.ub[1]), 3)
   names(peese.out) <- c("PEESE estimate", "se", "zval", "pval", "ci.lb", "ci.ub")
   
-  fourPSM <- fourPSM.est(d, v) # This is assuming independent effects
+  fourPSM <- fourPSM.est(yi, vi, fallback = TRUE) # This is assuming independent effects
   
   ifelse(fourPSM$value[4] < .05 & fourPSM$value[1] > 0,
          return(peese.out),  return(pet.out))
@@ -561,7 +570,7 @@ pcurve_app=function(x)
     
     #Overview:
     #Creates a vector of the same length as the number of tests submitted to p-curve, significant and not,
-    #    and computes the proportion of p-values expected to be smaller than {pc} given the d.f.
+    #    and computes the proportion of p-values expected to be smaller than {pc} given the yi.f.
     #    and outputs the entire vector, with NA values where needed
     
     #F-tests (& thus  t-tests)
@@ -665,7 +674,7 @@ pcurve_app=function(x)
   
   #2.3 Power of 33%
   #2.3.1 NCP for  f,c distributions
-  # NCP33 (noncentrality parameter giving each test in p-curve 33% power given the d.f. of the test)
+  # NCP33 (noncentrality parameter giving each test in p-curve 33% power given the yi.f. of the test)
   ncp33=mapply(getncp,df1=df1,df2=df2,power=1/3,family=family)  #See function 1 above
   
   #2.3.2 Full-p-curve

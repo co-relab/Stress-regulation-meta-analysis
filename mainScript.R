@@ -8,8 +8,14 @@ rm(list = ls())
 # E.g., for corr = c(.10, .30, .50, .70, 90).
 corr <- 0.5
 
+# Assumed constant sampling correlation
+rho <- 0.5
+
+# Side argument for the p-uniform
+side <- "left"
+
 # No of simulations for the permutation p-curve and 4PSM model
-nsim <- 10 # Set to 5 just to make code checking/running fast. For the final paper, it needs to be set to at least 1000 and run overnight.
+nsim <- 50 # Set to 5 just to make code checking/running fast. For the final paper, it needs to be set to at least 1000 and run overnight.
 
 #' Statistical analysis was carried out in R, version 3.4.3, using packages "metafor", "lme4", "ggplot2", "knitr", "psych", "puniform", "reshape2", "kableExtra", "lmerTest", "pwr", "Amelia".
 #'
@@ -56,7 +62,7 @@ dataObjects <- list("Mind" = dataMind, "Bio" = dataBio)
 rmaObjects <- setNames(lapply(dataObjects, function(x){rmaCustom(x)}), nm = namesObjects)
 
 # Further results
-briefBias <- FALSE # For a more elaborate output from the pub bias tests, set to FALSE
+briefBias <- TRUE # For a more elaborate output from the pub bias tests, set to FALSE
 results <- list(NA)
 for(i in 1:length(rmaObjects)){
   results[[i]] <- maResults(data = dataObjects[[i]], rmaObject = rmaObjects[[i]], alpha = .05, briefBias = briefBias, pcurve = F)
