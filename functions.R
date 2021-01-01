@@ -1,20 +1,18 @@
-# Load libraries
-if (!require(lme4)) {install.packages('lme4')}
-if (!require(ggplot2)) {install.packages('ggplot2')}
-if (!require(knitr)) {install.packages('knitr')}
-if (!require(psych)) {install.packages('psych')}
-if (!require(puniform)) {install.packages('puniform')}
-if (!require(reshape2)) {install.packages('reshape2')}
-if (!require(kableExtra)) {install.packages('kableExtra')}
-if (!require(lmerTest)) {install.packages('lmerTest')}
-if (!require(pwr)) {install.packages('pwr')}
+# Load libraries (and install if not installed already)
+list.of.packages <- c("car", "reshape", "tidyverse", "psych", "metafor", "esc", "lme4", "ggplot2", "knitr", "puniform", "kableExtra", "lmerTest", "pwr", "Amelia", "multcomp", "magrittr")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+
+# load required libraries
+lapply(list.of.packages, require, quietly = TRUE, warn.conflicts = FALSE, character.only = TRUE)
 
 # Meta-analysis -----------------------------------------------------------
 
 # Meta analysis run on a filtered dataset
 
-# Custom robust multivariate RE meta-analytic model
+# Custom robust (RVE) multivariate RE meta-analytic model (using the CHE working model)
 # Needs specific naming of ES, variances and data on clustering; yi = yi, vi = vi, study, result
+# Using n/(n-p) small-sample correction for RVE SEs
 rmaCustom <- function(data = NA, robust = TRUE){
   viMatrix <- impute_covariance_matrix(data$vi, cluster = data$study, r = rho, smooth_vi = TRUE)
   rmaObjectModBasedSE <- rma.mv(yi = yi, V = viMatrix, data = data, method = "REML", random = ~ 1|study/result, sparse = TRUE)
@@ -39,10 +37,10 @@ heterogeneity <- function(rmaObject = NA){
   W <- diag(1/rmaObject[[1]]$vi)
   X <- model.matrix(rmaObject[[1]])
   P <- W - W %*% X %*% solve(t(X) %*% W %*% X) %*% t(X) %*% W
-  I2<- 100 * sum(rmaObject[[1]]$sigma2) / (sum(rmaObject[[1]]$sigma2) + (rmaObject[[1]]$k-rmaObject[[1]]$p)/sum(diag(P)))
+  I2<- 100 * sum(rmaObject[[1]]$sigma2) / (sum(rmaObject[[1]]$sigma2) + (rmaObject[[1]]$k - rmaObject[[1]]$p)/sum(diag(P)))
   
   # Separate estimates of between- and within-cluster heterogeneity
-  BW.hetero <- round(100 * rmaObject[[1]]$sigma2 / (sum(rmaObject[[1]]$sigma2) + (rmaObject[[1]]$k-rmaObject[[1]]$p)/sum(diag(P))), 2)
+  BW.hetero <- round(100 * rmaObject[[1]]$sigma2 / (sum(rmaObject[[1]]$sigma2) + (rmaObject[[1]]$k - rmaObject[[1]]$p)/sum(diag(P))), 2)
   
   studyID <- rmaObject[[1]]$mf.r[[1]]$study
   resultID <- rmaObject[[1]]$mf.r[[1]]$result
@@ -50,10 +48,10 @@ heterogeneity <- function(rmaObject = NA){
   resF <- rma.mv(yi = rmaObject[[1]]$yi, V = rmaObject[[1]]$vi)
   
   # Jackson's approach to I^2
-  JI2 <- round(c(100 * (vcov(resR)[1,1] - vcov(resF)[1,1]) / vcov(resR)[1,1]), 2)
+  JI2 <- round(c(100 * (vcov(resR)[1,1] - vcov(resF)[1,1])/vcov(resR)[1,1]), 2)
   
   # Intra-class correlation of underlying true effects
-  icc <- round(rmaObject[[1]]$sigma2[1] / sum(rmaObject[[1]]$sigma2), 2)
+  icc <- round(rmaObject[[1]]$sigma2[1]/sum(rmaObject[[1]]$sigma2), 2)
   
   c("Tau" = tau,
     "I^2" = I2,
@@ -87,7 +85,7 @@ tTestSummary <- function(mean1, mean2, sd1, sd2, n1, n2)
 # Choose effects from a single study by random (for the purpose of permutation p-curve)
 duplicated.random = function(x, incomparables = FALSE, ...)
 {
-  if ( is.vector(x) )
+  if (is.vector(x))
   {
     permutation = sample(length(x))
     x.perm      = x[permutation]
@@ -95,7 +93,7 @@ duplicated.random = function(x, incomparables = FALSE, ...)
     result      = result.perm[order(permutation)]
     return(result)
   }
-  else ( is.matrix(x) )
+  else (is.matrix(x))
   {
     permutation = sample(nrow(x))
     x.perm      = x[permutation,]
@@ -196,7 +194,7 @@ grimmerTest <- function(n, mean, SD, items = 1, decimals_mean = 2, decimals_SD =
   
   #Checks that there is at least an integer between the lower and upperbound
   
-  FirstTest<- ifelse(ceiling(Lowerbound)>floor(Upperbound), FALSE, TRUE)
+  FirstTest <- ifelse(ceiling(Lowerbound)>floor(Upperbound), FALSE, TRUE)
   
   if(FirstTest==FALSE){
     return(0)
@@ -254,9 +252,9 @@ grimmerTest <- function(n, mean, SD, items = 1, decimals_mean = 2, decimals_SD =
 #funnel(robma, level=c(90, 95, 99), shade=c("white", "gray", "darkgray"), refline=0, pch = 20, yaxis = "sei")
 
 # PET-PEESE plot
-# if(fourPSM$value[4] < .05 & fourPSM$value[1] > 0)
+# if(fourPSM$value[4] < .05 & ifelse(exists("side") & side == "left", -1, 1) * fourPSM$value[1] > 0)
 # {plot(data$vi, data$yi, main="PEESE", xlab = "Variance", ylab = "Effect size", pch = 19, cex.main = 1.3, cex = .6, xlim = c(0, .27),xaxs="i")} else {plot(sqrt(data$vi), data$yi, main="PET", xlab = "Standard error", ylab = "Effect size", pch = 19, cex.main = 1.3, cex = .6, xaxs="i")}
-# abline((if(fourPSM$value[4] < .05 & fourPSM$value[1] > 0) {peese} else {pet}), lwd=3, lty = 2, col = "red")
+# abline((if(fourPSM$value[4] < .05 & ifelse(exists("side") & side == "left", -1, 1) * fourPSM$value[1] > 0) {peese} else {pet}), lwd=3, lty = 2, col = "red")
 # PP.plot <- recordPlot()
 
 # Publication bias --------------------------------------------------------
@@ -276,7 +274,7 @@ bias <- function(data = NA, rmaObject = NA, alpha = .05, briefBias = TRUE){
   fourPSM <- describe(result4PSM)[,3, drop = FALSE]
 
   # PET-PEESE
-  petPeeseOut <- with(data, pet.peese(yi, vi, study, result))
+  petPeeseOut <- petPeese(data)
   
   # p-uniform
   resultPuniform <- matrix(ncol = 4, nrow = nsim)
@@ -291,7 +289,7 @@ bias <- function(data = NA, rmaObject = NA, alpha = .05, briefBias = TRUE){
     return(list("4PSM ES estimate" = fourPSM[1, 1],
                 "4PSM confidence interval" = c(fourPSM[2, 1], fourPSM[3, 1]),
                 "4PSM p-value" = fourPSM[4, 1],
-                "Whether PET or PEESE was used" = ifelse(fourPSM[4, 1] < .05 & fourPSM[1, 1] > 0, "PEESE", "PET"),
+                "Whether PET or PEESE was used" = ifelse(fourPSM[4, 1] < .05 & ifelse(exists("side") & side == "left", -1, 1) * fourPSM[1, 1] > 0, "PEESE", "PET"),
                 "PET-PEESE ES estimate" = as.numeric(petPeeseOut[1]),
                 "PET-PEESE confidence interval" = as.numeric(c(petPeeseOut[5], petPeeseOut[6])),
                 "PET-PEESE p-value" = petPeeseOut[4]))}
@@ -307,7 +305,7 @@ bias <- function(data = NA, rmaObject = NA, alpha = .05, briefBias = TRUE){
 powerEst <- function(data = NA){
   powerPEESE <- NA
   power4PSM <- NA
-  peeseEst <- with(data, pet.peese(yi, vi, study, result))[1]
+  peeseEst <- petPeese(data)[1]
   result <- matrix(ncol = 4, nrow = nsim)
   model <- matrix(ncol = 4, nrow = 24)
   for(i in 1:nsim){
@@ -317,8 +315,8 @@ powerEst <- function(data = NA){
   colnames(result) <- c("estimate", "ciLB", "ciUB", "p-value")
   fourPSM <- describe(result)[,3, drop = FALSE][1, 1]
   
-  powerPEESEresult <- median(pwr::pwr.t.test(n = data[!is.na(data$N),]$N, d = peeseEst)$power)
-  power4PSMresult <- median(pwr::pwr.t.test(n = data[!is.na(data$N),]$N, d = fourPSM)$power)
+  powerPEESEresult <- median(pwr::pwr.t.test(n = data[!is.na(data$ni),]$ni, d = peeseEst)$power)
+  power4PSMresult <- median(pwr::pwr.t.test(n = data[!is.na(data$ni),]$ni, d = fourPSM)$power)
   c("Median power for detecting PET-PEESE estimate" = powerPEESEresult, 
     "Median power for detecting 4PSM estimate" = power4PSMresult)
 }
@@ -328,7 +326,7 @@ powerEst <- function(data = NA){
 # Code adapted from Carter, E. C., Schönbrodt, F. D., Hilgard, J., & Gervais, W. (2018). Correcting for bias in psychology: A comparison of meta-analytic methods. Retrieved from https://osf.io/rf3ys/.
 # https://github.com/nicebread/meta-showdown/blob/master/MA-methods/7-Selection%20Models.R
 # Return a result data frame either in wide or long format (for the 3PSM output)
-returnRes <- function(res, long=TRUE, reduce=TRUE) {
+returnRes <- function(res, long = TRUE, reduce = TRUE) {
   if (is.null(res)) return(NULL)
   
   # convert all factor columns to characters
@@ -448,22 +446,33 @@ fourPSM.est <- function(yi, vi, min.pvalues=2, long=TRUE, fallback = FALSE) {
 # PET-PEESE ---------------------------------------------------------------
 
 #PET-PEESE with 3PSM as the conditional estimator instead of PET
-
-pet.peese <- function(yi, vi, study, result){
-  viMatrix <- impute_covariance_matrix(vi, cluster = study, r = rho, smooth_vi = TRUE)
-  pet <<- robust.rma.mv(rma.mv(yi = yi ~ sqrt(vi), V = viMatrix, random = ~ 1|study/result, method = "REML", sparse = TRUE), cluster = study)
+petPeese <- function(data, nBased = TRUE, selModAsCondEst = TRUE){
+  viMatrix <- impute_covariance_matrix(data$vi, cluster = data$study, r = rho, smooth_vi = TRUE)
+  data$nTerm <- 2/data$ni
+  if(nBased == TRUE){
+    pet <<- robust.rma.mv(rma.mv(yi = yi ~ sqrt(nTerm), V = viMatrix, random = ~ 1|study/result, method = "REML", sparse = TRUE, data = data), cluster = data$study)
+  } else {
+    pet <<- robust.rma.mv(rma.mv(yi = yi ~ sqrt(vi), V = viMatrix, random = ~ 1|study/result, method = "REML", sparse = TRUE, data = data), cluster = data$study)
+  }
   pet.out <- round(c(pet$b[1], pet$se[1], pet$zval[1], pet$pval[1], pet$ci.lb[1], pet$ci.ub[1]), 3)
   names(pet.out) <- c("PET estimate", "se", "zval", "pval", "ci.lb", "ci.ub")
-  pet.out
   
-  peese <<- robust.rma.mv(rma.mv(yi = yi ~ vi, V = viMatrix, random = ~ 1|study/result, method = "REML", sparse = TRUE), cluster = study)
+  if(nBased == TRUE){
+    peese <<- robust.rma.mv(rma.mv(yi = yi ~ nTerm, V = viMatrix, random = ~ 1|study/result, method = "REML", sparse = TRUE, data = data), cluster = data$study)
+  } else {
+    peese <<- robust.rma.mv(rma.mv(yi = yi ~ vi, V = viMatrix, random = ~ 1|study/result, method = "REML", sparse = TRUE, data = data), cluster = data$study)
+  } 
   peese.out <- round(c(peese$b[1], peese$se[1], peese$zval[1], peese$pval[1], peese$ci.lb[1], peese$ci.ub[1]), 3)
   names(peese.out) <- c("PEESE estimate", "se", "zval", "pval", "ci.lb", "ci.ub")
   
-  fourPSM <- fourPSM.est(yi, vi, fallback = TRUE) # This is assuming independent effects
-  
-  ifelse(fourPSM$value[4] < .05 & fourPSM$value[1] > 0,
-         return(peese.out),  return(pet.out))
+  if(selModAsCondEst == TRUE){
+    fourPSM <- fourPSM.est(data$yi, data$vi, fallback = TRUE) # This is assuming independent effects
+    ifelse(fourPSM$value[4] < .05 & ifelse(exists("side") & side == "left", -1, 1) * fourPSM$value[1] > 0,
+           return(peese.out),  return(pet.out))
+  } else {
+    ifelse(pet$pval[1] < .05 & ifelse(exists("side") & side == "left", -1, 1) * pet$b[1] > 0,
+           return(peese.out),  return(pet.out))
+  } 
 }
 
 # Permutation p-curve -----------------------------------------------------
@@ -479,7 +488,7 @@ pcurve <- function(data = NA){
   
   #Permutation p-curve
   cols <- 15
-  pCurve <- matrix(ncol=cols, nrow=nsim)
+  pCurve <- matrix(ncol = cols, nrow = nsim)
   for(i in 1:nsim){
     pCurve[i,] <- pcurve_app(na.omit(gsub("^.*?: ",": ", x = data[data$focalVariable == 1,]$label[!duplicated.random(data[data$focalVariable == 1,]$study)], replacement = "")))
   }

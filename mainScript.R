@@ -11,11 +11,11 @@ corr <- 0.5
 # Assumed constant sampling correlation
 rho <- 0.5
 
-# Side argument for the p-uniform
+# Side argument for the p-uniform and conditional estimator of PET-PEESE. If the target effect should be in negative values, set to "left", otherwise "right".
 side <- "left"
 
 # No of simulations for the permutation p-curve and 4PSM model
-nsim <- 50 # Set to 5 just to make code checking/running fast. For the final paper, it needs to be set to at least 1000 and run overnight.
+nsim <- 10 # Set to 5 just to make code checking/running fast. For the final paper, it needs to be set to at least 1000 and run overnight.
 
 #' Statistical analysis was carried out in R, version 3.4.3, using packages "metafor", "lme4", "ggplot2", "knitr", "psych", "puniform", "reshape2", "kableExtra", "lmerTest", "pwr", "Amelia".
 #'
@@ -147,6 +147,11 @@ rmaComp
 # Likelihood ratio test for the differences between categories
 # Omnibus test
 anova(rmaNull, rmaComp)
+
+# Wald's robust F test
+# Wald_dv_multilevel <- Wald_test(rmaComp,
+#                                 constraints = constrain_equal(1:2), 
+#                                 vcov = "CR2")
 
 # Contrasts 
 # p-values adjusted using Holm's method

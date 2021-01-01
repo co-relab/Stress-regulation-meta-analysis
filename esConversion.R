@@ -56,15 +56,15 @@ dat$useCellN <- NA
 ####
 # F-Test between with df1 == 1 ---------------------------------------------------------------------
 ####
-# Specify the design, compute N and p
+# Specify the design, compute ni and p
 dat <- dat %>% mutate(finalDesign = case_when(!is.na(F) & !is.na(df1) & !is.na(df2) & df1 == 1 ~ "F1"))
-dat <- dat %>% mutate(N = ifelse(finalDesign == "F1", df2 + 2, NA))
+dat <- dat %>% mutate(ni = ifelse(finalDesign == "F1", df2 + 2, NA))
 
 # Decide whether n1+n2 approximately corresponds to the reported df (in order for n1 and n2 be used in equations).
-dat <- dat %>% mutate(useCellN = ifelse((dat$n1 + dat$n2) >= (dat$N - 2) & (dat$n1 + dat$n2) <= (dat$N + 2), 1, 0),
+dat <- dat %>% mutate(useCellN = ifelse((dat$n1 + dat$n2) >= (dat$ni - 2) & (dat$n1 + dat$n2) <= (dat$ni + 2), 1, 0),
                       useCellN = ifelse(is.na(useCellN), 0, useCellN))
 
-# Compute ES and var based on total N. Note to self: mutate not working due to a glitch in handling NAs by esc.
+# Compute ES and var based on total ni. Note to self: mutate not working due to a glitch in handling NAs by esc.
 dat[dat$finalDesign == "F1" & !is.na(dat$finalDesign),]$gConv <- dat %>% filter(dat$finalDesign == "F1") %$% esc_f(f = F, totaln = df2 + 2, es.type = "g")$es
 dat[dat$finalDesign == "F1" & !is.na(dat$finalDesign),]$gVarConv <- dat %>% filter(dat$finalDesign == "F1") %$% esc_f(f = F, totaln = df2 + 2, es.type = "g")$var
 
@@ -77,22 +77,22 @@ dat <- dat %>% mutate(label = ifelse(finalDesign == "F1" & focalVariable == 1, p
                                                         "F(", df1, ",", df2, ")=", F, sep = ""), NA))
 
 # Show the converted ESs
-dat %>% filter(finalDesign == "F1") %>% select(result, gConv, gConv, researchDesign, df2, n1, n2, N, useCellN, label)
+dat %>% filter(finalDesign == "F1") %>% select(result, gConv, gConv, researchDesign, df2, n1, n2, ni, useCellN, label)
 
 #View(dat[,c("result", "mean1", "mean2", "sd1", "sd2", "yi", "vi", "gConv", "label")])
 
 ####
 # t-tests between ---------------------------------------------------------
 ####
-# Specify the design, compute N and p
+# Specify the design, compute ni and p
 dat <- dat %>% mutate(finalDesign = ifelse(!is.na(t) & !is.na(df2), "tBtw", finalDesign))
-dat <- dat %>% mutate(N = ifelse(finalDesign == "tBtw", df2 + 2, N))
+dat <- dat %>% mutate(ni = ifelse(finalDesign == "tBtw", df2 + 2, ni))
 
 # Decide whether n1+n2 approximately corresponds to the reported df (in order for n1 and n2 be used in equations).
-dat <- dat %>% mutate(useCellN = ifelse((dat$n1 + dat$n2) >= (dat$N - 2) & (dat$n1 + dat$n2) <= (dat$N + 2), 1, useCellN),
+dat <- dat %>% mutate(useCellN = ifelse((dat$n1 + dat$n2) >= (dat$ni - 2) & (dat$n1 + dat$n2) <= (dat$ni + 2), 1, useCellN),
                       useCellN = ifelse(is.na(useCellN), 0, useCellN))
 
-# Compute ES and var based on total N. Note to self: mutate not working due to a glitch in handling NAs by esc.
+# Compute ES and var based on total ni. Note to self: mutate not working due to a glitch in handling NAs by esc.
 dat[dat$finalDesign == "tBtw" & !is.na(dat$finalDesign),]$gConv <- dat %>% filter(dat$finalDesign == "tBtw") %$% esc_t(t = abs(t), totaln = df2 + 2, es.type = "g")$es
 dat[dat$finalDesign == "tBtw" & !is.na(dat$finalDesign),]$gVarConv <- dat %>% filter(dat$finalDesign == "tBtw") %$% esc_t(t = abs(t), totaln = df2 + 2, es.type = "g")$var
 
@@ -105,20 +105,22 @@ dat <- dat %>% mutate(label = ifelse(finalDesign == "tBtw" & focalVariable == 1,
                                                                                      "t(", df2, ")=", t, sep = ""), label))
 
 # Show the converted ESs
-dat %>% filter(finalDesign == "tBtw") %>% select(gConv, gVarConv, researchDesign, df2, n1, n2, N, useCellN, label)
+dat %>% filter(finalDesign == "tBtw") %>% select(gConv, gVarConv, researchDesign, df2, n1, n2, ni, useCellN, label)
+
+dat <- dat %>% mutate(ni = ifelse(is.na(ni) & !is.na(yi), n1 + n2, NA))
 
 ####
 # Correlation -------------------------------------------------------------
 ####
 
-# # Specify the design, compute N and p
+# # Specify the design, compute ni and p
 # dat <- dat %>% mutate(finalDesign = ifelse(!is.na(r) & !is.na(df2), "cor", finalDesign))
 #
-# # Compute ES, var, N, and p
+# # Compute ES, var, ni, and p
 # dat[dat$finalDesign == "cor", ] <- dat[dat$finalDesign == "cor", ] %>% mutate(
 #   t.from.r = abs(r)*sqrt(df2 / (1 - r^2)),
 #   gConv = ((2*abs(r))/sqrt(1-r^2))*(1 - (3/(4*df2 - 1))),
-#   N = df2 + 2,
+#   ni = df2 + 2,
 #   rVar = escalc(measure = "COR", ri = r, ni = df2 + 2, data = dat[dat$finalDesign == "cor", ])$vi,
 #   gVarConv = (1 - (3/(4*df2 - 1))) * (4 * rVar/(1 - r^2)^3),
 #   p = 2*pt(abs(t.from.r), df2, lower.tail=FALSE)
@@ -128,7 +130,7 @@ dat %>% filter(finalDesign == "tBtw") %>% select(gConv, gVarConv, researchDesign
 # dat <- dat %>% mutate(label = ifelse(finalDesign == "cor" & focalVariable == 1, paste(paperID, "/", studyID, "/", effectID, ": ",
 #                                                                                       "r(", df2, ")=", r, sep = ""), label))
 # # Show the converted ESs
-# dat %>% filter(finalDesign == "cor") %>% select(gConv, gVarConv, r, researchDesign, df2, N, label)
+# dat %>% filter(finalDesign == "cor") %>% select(gConv, gVarConv, r, researchDesign, df2, ni, label)
 
 
 # ####
@@ -145,12 +147,12 @@ dat %>% filter(finalDesign == "tBtw") %>% select(gConv, gVarConv, researchDesign
 #   dCalc = abs(t)*sqrt((2 * (1 - corr)) / n.rep),
 #   gConv = (1 - (3/(4*n.rep - 3))) * dCalc,
 #   gVarConv = (1 - (3/(4*n.rep - 3)))^2 * ((1 / n.rep) + ((dCalc^2) / (2 * n.rep))) * 2 * (1 - corr),
-#   N = n.rep,
+#   ni = n.rep,
 #   p = 2*pt(abs(t), n.rep - 1, lower.tail = FALSE)
 # )
 # 
 # # Show the converted ESs
-# dat %>% filter(finalDesign == "within.t") %>% select(gConv, gVarConv, Design, d.reported, N, df2)
+# dat %>% filter(finalDesign == "within.t") %>% select(gConv, gVarConv, Design, d.reported, ni, df2)
 # 
 # # Create a "result label" to be used as an input for p-curve analysis
 # dat[dat$Use.for.Bias.Test == "Yes" & dat$Design == "Within" & !is.na(dat$t) & !is.na(dat$df2), "biasTest"] <- "within.t"
@@ -171,14 +173,14 @@ dat %>% filter(finalDesign == "tBtw") %>% select(gConv, gVarConv, researchDesign
 # dat[dat$finalDesign == "Beta.between", ] %<>% mutate(
 #   t.from.beta = abs(beta)*sqrt(df2 / (1 - beta^2)),
 #   gConv = ((2*abs(beta))/sqrt(1-beta^2))*(1 - (3/(4*df2 - 1))),
-#   N = df2 + 2,
+#   ni = df2 + 2,
 #   beta.var = escalc(measure = "COR", ri = beta, ni = df2 + 2, data = dat[dat$finalDesign == "Beta.between", ])$vi,
 #   gVarConv = (1 - (3/(4*df2 - 1))) * (4 * beta.var)/((1 - beta^2)^3),
 #   p = 2*pt(abs(t.from.beta), df2, lower.tail=FALSE)
 # )
 # 
 # # Show the converted ESs
-# dat %>% filter(finalDesign == "Beta.between") %>% select(gConv, beta, gVarConv, finalDesign, N)
+# dat %>% filter(finalDesign == "Beta.between") %>% select(gConv, beta, gVarConv, finalDesign, ni)
 # 
 # # Create a "result label" to be used as an input for p-curve analysis
 # dat[dat$Use.for.Bias.Test == "Yes" & (dat$Design == "Between" | dat$Design == "Continuous") & !is.na(dat$beta) & !is.na(dat$p.reported), "biasTest"] <- "Beta.between"
@@ -189,16 +191,16 @@ dat %>% filter(finalDesign == "tBtw") %>% select(gConv, gVarConv, researchDesign
 # # chi^2 -------------------------------------------------------------------
 # ####
 # 
-# # Specify the design, compute ES, var, N, and p
+# # Specify the design, compute ES, var, ni, and p
 # dat[dat$Use.for.Meta == "Yes" & dat$Design == "Between" & !is.na(dat$Chisq) & !is.na(dat$n.rep), "finalDesign"] <- "between.chisq"
 # 
 # dat[dat$finalDesign == "between.chisq", ]$gConv <- esc_chisq(chisq = dat[dat$finalDesign == "between.chisq", ]$Chisq, totaln = dat[dat$finalDesign == "between.chisq", ]$n.rep, es.type = "g")$es
 # dat[dat$finalDesign == "between.chisq", ]$gVarConv <- esc_chisq(chisq = dat[dat$finalDesign == "between.chisq", ]$Chisq, totaln = dat[dat$finalDesign == "between.chisq", ]$n.rep, es.type = "g")$var
-# dat[dat$finalDesign == "between.chisq", ]$N <- dat[dat$finalDesign == "between.chisq", ]$n.rep
+# dat[dat$finalDesign == "between.chisq", ]$ni <- dat[dat$finalDesign == "between.chisq", ]$n.rep
 # dat[dat$finalDesign == "between.chisq", ]$p <- with(dat[dat$finalDesign == "between.chisq", ], 1 - pchisq(Chisq, 1))
 # 
 # # Show the converted ESs
-# dat %>% filter(finalDesign == "between.chisq") %>% select(gConv, gVarConv, Chisq, N)
+# dat %>% filter(finalDesign == "between.chisq") %>% select(gConv, gVarConv, Chisq, ni)
 # 
 # # Create a "result label" to be used as an input for p-curve analysis
 # dat[dat$Use.for.Bias.Test == "Yes" & dat$Design == "Between" & !is.na(dat$Chisq) & !is.na(dat$n.rep), "biasTest"] <- "between.chisq"
@@ -209,16 +211,16 @@ dat %>% filter(finalDesign == "tBtw") %>% select(gConv, gVarConv, researchDesign
 # # t for B in continuous designs -------------------------------------------
 # ####
 # 
-# # Specify the design, compute ES, var, N, and p
+# # Specify the design, compute ES, var, ni, and p
 # dat[dat$Use.for.Meta == "Yes" & (dat$Design == "Continuous" |  dat$Design == "Correlation") & !is.na(dat$B) & !is.na(dat$t) & !is.na(dat$df2) & is.na(dat$beta), "finalDesign"] <- "t.from.B"
 # 
 # dat[dat$finalDesign == "t.from.B", ]$gConv <- esc_t(t = abs(dat[dat$finalDesign == "t.from.B", ]$t), totaln = dat[dat$finalDesign == "t.from.B", ]$df2 + 2, es.type = "g")$es
 # dat[dat$finalDesign == "t.from.B", ]$gVarConv <- esc_t(t = dat[dat$finalDesign == "t.from.B", ]$t, totaln = dat[dat$finalDesign == "t.from.B", ]$df2 + 2, es.type = "g")$var
-# dat[dat$finalDesign == "t.from.B", ]$N <- dat[dat$finalDesign == "t.from.B", ]$df2 + 2
-# dat[dat$finalDesign == "t.from.B", ]$p <- with(dat[dat$finalDesign == "t.from.B", ], 2*pt(abs(t), N - 1, lower.tail = FALSE))
+# dat[dat$finalDesign == "t.from.B", ]$ni <- dat[dat$finalDesign == "t.from.B", ]$df2 + 2
+# dat[dat$finalDesign == "t.from.B", ]$p <- with(dat[dat$finalDesign == "t.from.B", ], 2*pt(abs(t), ni - 1, lower.tail = FALSE))
 # 
 # # Show the converted ESs
-# dat %>% filter(finalDesign == "t.from.B") %>% select(gConv, gVarConv, B, t, N)
+# dat %>% filter(finalDesign == "t.from.B") %>% select(gConv, gVarConv, B, t, ni)
 # 
 # # Create a "result label" to be used as an input for p-curve analysis
 # dat[dat$Use.for.Bias.Test == "Yes" & (dat$Design == "Continuous" |  dat$Design == "Correlation") & !is.na(dat$B) & !is.na(dat$t) & !is.na(dat$df2) & is.na(dat$beta), "biasTest"] <- "t.from.B"
