@@ -1,3 +1,5 @@
+# Check SE -> SD calc
+
 # install required R libraries if not installed already
 list.of.packages <- c("car", "tidyverse", "psych", "metafor", "esc", "lme4", "ggplot2", "knitr", "puniform", "kableExtra", "lmerTest", "pwr", "Amelia", "multcomp", "magrittr")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
@@ -106,9 +108,15 @@ dat <- dat %>% mutate(label = ifelse(finalDesign == "tBtw" & focalVariable == 1,
 # Show the converted ESs
 dat %>% filter(finalDesign == "tBtw") %>% select(gConv, gVarConv, researchDesign, df2, n1, n2, ni, useCellN, label)
 
-dat <- dat %>% mutate(ni = ifelse(is.na(ni) & !is.na(yi), n1 + n2, NA))
+dat <- dat %>% mutate(ni = ifelse(is.na(ni) & !is.na(yi), n1 + n2, ni))
 dat$result <- 1:nrow(dat)
 
+# # Multiply the ES by -1 if not in the predicted direction
+dat <- dat %>% mutate(gConv = gConv * predictedDirection * ifelse(side == "left", -1, 1),
+                      yi = ifelse(is.na(yi) & !is.na(gConv) & !is.na(predictedDirection), predictedDirection * gConv, yi),
+                      vi = ifelse(is.na(vi) & !is.na(gVarConv) & !is.na(predictedDirection), gVarConv, vi),
+                      sd1 = ifelse(is.na(sd1) & !is.na(se1), se1*sqrt(n1+n2), sd1),
+                      sd2 = ifelse(is.na(sd2) & !is.na(se2), se2*sqrt(n1+n2), sd2))
 
 ####
 # Correlation -------------------------------------------------------------
@@ -228,8 +236,6 @@ dat$result <- 1:nrow(dat)
 # dat$label[dat$biasTest == "t.from.B"] <- paste(dat[dat$biasTest == "t.from.B",]$paperID, "/", dat[dat$biasTest == "t.from.B",]$Study.Indicator, "/", dat[dat$biasTest == "t.from.B",]$Variable.Indicator, ": ",
 #                                                     "t(", dat[dat$biasTest == "t.from.B",]$df2, ")=", dat[dat$biasTest == "t.from.B",]$t, sep = "")
 # 
-# # Multiply the ES by -1 if not in the predicted direction
-# dat$gConv <- ifelse(test = (dat$Predicted.Direction == -1 & dat$gConv > 0), yes = (dat$gConv*-1), no = dat$gConv)
 # 
 # 
 # ####
