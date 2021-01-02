@@ -6,6 +6,13 @@ if(length(new.packages)) install.packages(new.packages)
 # load required libraries
 lapply(list.of.packages, require, quietly = TRUE, warn.conflicts = FALSE, character.only = TRUE)
 
+# Determine the alpha level / use of one-tailed vs two-tailed test for p-uniform and PET-PEESE
+if (test == "one-tailed") {
+  alpha <- .10
+} else if (test == "two-tailed") {
+  alpha <- .05
+}
+
 # Meta-analysis -----------------------------------------------------------
 
 # Meta analysis run on a filtered dataset
@@ -105,7 +112,7 @@ duplicated.random = function(x, incomparables = FALSE, ...)
 
 # Summary results ---------------------------------------------------------
 
-maResults <- function(rmaObject = NA, data = NA, alpha = .05, briefBias = F, pcurve = T){
+maResults <- function(rmaObject = NA, data = NA, briefBias = F, pcurve = T){
   list(
     "RMA results with model-based SEs" = rmaObject[[2]],
     "RVE SEs with Satterthwaite small-sample correction" = conf_int(rmaObject[[2]], vcov = "CR2", cluster = data$study),
@@ -252,14 +259,14 @@ grimmerTest <- function(n, mean, SD, items = 1, decimals_mean = 2, decimals_SD =
 #funnel(robma, level=c(90, 95, 99), shade=c("white", "gray", "darkgray"), refline=0, pch = 20, yaxis = "sei")
 
 # PET-PEESE plot
-# if(fourPSM$value[4] < .05 & ifelse(exists("side") & side == "left", -1, 1) * fourPSM$value[1] > 0)
+# if(fourPSM$value[4] < alpha & ifelse(exists("side") & side == "left", -1, 1) * fourPSM$value[1] > 0)
 # {plot(data$vi, data$yi, main="PEESE", xlab = "Variance", ylab = "Effect size", pch = 19, cex.main = 1.3, cex = .6, xlim = c(0, .27),xaxs="i")} else {plot(sqrt(data$vi), data$yi, main="PET", xlab = "Standard error", ylab = "Effect size", pch = 19, cex.main = 1.3, cex = .6, xaxs="i")}
-# abline((if(fourPSM$value[4] < .05 & ifelse(exists("side") & side == "left", -1, 1) * fourPSM$value[1] > 0) {peese} else {pet}), lwd=3, lty = 2, col = "red")
+# abline((if(fourPSM$value[4] < alpha & ifelse(exists("side") & side == "left", -1, 1) * fourPSM$value[1] > 0) {peese} else {pet}), lwd=3, lty = 2, col = "red")
 # PP.plot <- recordPlot()
 
 # Publication bias --------------------------------------------------------
 
-bias <- function(data = NA, rmaObject = NA, alpha = .05, briefBias = TRUE){
+bias <- function(data = NA, rmaObject = NA, briefBias = TRUE){
   # Correlation between the ES and precision (SE)
   esPrec <- cor(rmaObject[[1]]$yi, sqrt(rmaObject[[1]]$vi), method = "kendall")
   # Small-study effects correction
@@ -276,6 +283,9 @@ bias <- function(data = NA, rmaObject = NA, alpha = .05, briefBias = TRUE){
   # PET-PEESE
   petPeeseOut <- petPeese(data)
   
+  # WAAP-WLS
+  waapWLSout <- data %$% waapWLS(yi, vi)
+  
   # p-uniform
   resultPuniform <- matrix(ncol = 4, nrow = nsim)
   for(i in 1:nsim){
@@ -289,7 +299,7 @@ bias <- function(data = NA, rmaObject = NA, alpha = .05, briefBias = TRUE){
     return(list("4PSM ES estimate" = fourPSM[1, 1],
                 "4PSM confidence interval" = c(fourPSM[2, 1], fourPSM[3, 1]),
                 "4PSM p-value" = fourPSM[4, 1],
-                "Whether PET or PEESE was used" = ifelse(fourPSM[4, 1] < .05 & ifelse(exists("side") & side == "left", -1, 1) * fourPSM[1, 1] > 0, "PEESE", "PET"),
+                "Whether PET or PEESE was used" = ifelse(fourPSM[4, 1] < alpha & ifelse(exists("side") & side == "left", -1, 1) * fourPSM[1, 1] > 0, "PEESE", "PET"),
                 "PET-PEESE ES estimate" = as.numeric(petPeeseOut[1]),
                 "PET-PEESE confidence interval" = as.numeric(c(petPeeseOut[5], petPeeseOut[6])),
                 "PET-PEESE p-value" = petPeeseOut[4]))}
@@ -325,6 +335,7 @@ powerEst <- function(data = NA){
 
 # Code adapted from Carter, E. C., Schönbrodt, F. D., Hilgard, J., & Gervais, W. (2018). Correcting for bias in psychology: A comparison of meta-analytic methods. Retrieved from https://osf.io/rf3ys/.
 # https://github.com/nicebread/meta-showdown/blob/master/MA-methods/7-Selection%20Models.R
+
 # Return a result data frame either in wide or long format (for the 3PSM output)
 returnRes <- function(res, long = TRUE, reduce = TRUE) {
   if (is.null(res)) return(NULL)
@@ -332,7 +343,7 @@ returnRes <- function(res, long = TRUE, reduce = TRUE) {
   # convert all factor columns to characters
   res %>% mutate_if(is.factor, as.character) -> res
   
-  if (long==FALSE) {
+  if (long == FALSE) {
     # return wide format
     return(res)
   } else {
@@ -349,7 +360,7 @@ if (!require(weightr)) {
   install.packages('weightr')
 }
 
-threePSM.est <- function(yi, vi, min.pvalues=2, long=TRUE) {
+threePSM.est <- function(yi, vi, min.pvalues = 2, long = TRUE) {
   
   w1 <- tryCatch(
     weightfunct(yi, vi, steps = c(0.025, 1), mods = NULL, weights = NULL, fe = FALSE, table = TRUE),
@@ -395,7 +406,7 @@ threePSM.est <- function(yi, vi, min.pvalues=2, long=TRUE) {
   return(returnRes(res.wide))
 }
 
-fourPSM.est <- function(yi, vi, min.pvalues=2, long=TRUE, fallback = FALSE) {	
+fourPSM.est <- function(yi, vi, min.pvalues = 2, long = TRUE, fallback = FALSE) {	
   w1 <- tryCatch(
     weightfunct(yi, vi, steps = c(0.025, 0.5, 1), mods = NULL, weights = NULL, fe = FALSE, table = TRUE),
     error = function(e) NULL
@@ -418,7 +429,7 @@ fourPSM.est <- function(yi, vi, min.pvalues=2, long=TRUE, fallback = FALSE) {
   p.table <- table(cut(w1$p, breaks=c(0, .025, 0.5, 1)))
   if (any(p.table < 2)) {
     if (fallback==TRUE) {
-      return(threePSM.est(yi, vi, min.pvalues=2, long=TRUE))
+      return(threePSM.est(yi, vi, min.pvalues = 2, long = TRUE))
     } else {
       return(returnRes(res.NA))
     }	  
@@ -445,10 +456,12 @@ fourPSM.est <- function(yi, vi, min.pvalues=2, long=TRUE, fallback = FALSE) {
 
 # PET-PEESE ---------------------------------------------------------------
 
-#PET-PEESE with 3PSM as the conditional estimator instead of PET
-petPeese <- function(data, nBased = TRUE, selModAsCondEst = TRUE){
-  viMatrix <- impute_covariance_matrix(data$vi, cluster = data$study, r = rho, smooth_vi = TRUE)
+#PET-PEESE with 4/3PSM as the conditional estimator instead of PET. 
+# Also implemented the modified sample-size based estimator (see https://www.jepusto.com/pet-peese-performance/).
+petPeese <- function(data, nBased = TRUE, selModAsCondEst = TRUE){  # if nBased = TRUE, use the sample-size-based estimator, if FALSE, use the ordinary SE/var. If selModAsCondEst = TRUE, use the selection model as conditional estimator, otherwise use PET.
+  viMatrix <- impute_covariance_matrix(data$vi, cluster = data$study, r = rho, smooth_vi = TRUE)  # compute the covariance matrix for the CHE working model
   data$nTerm <- 2/data$ni
+  
   if(nBased == TRUE){
     pet <<- robust.rma.mv(rma.mv(yi = yi ~ sqrt(nTerm), V = viMatrix, random = ~ 1|study/result, method = "REML", sparse = TRUE, data = data), cluster = data$study)
   } else {
@@ -467,10 +480,10 @@ petPeese <- function(data, nBased = TRUE, selModAsCondEst = TRUE){
   
   if(selModAsCondEst == TRUE){
     fourPSM <- fourPSM.est(data$yi, data$vi, fallback = TRUE) # This is assuming independent effects
-    ifelse(fourPSM$value[4] < .05 & ifelse(exists("side") & side == "left", -1, 1) * fourPSM$value[1] > 0,
+    ifelse(fourPSM$value[4] < alpha & ifelse(exists("side") & side == "left", -1, 1) * fourPSM$value[1] > 0,
            return(peese.out),  return(pet.out))
   } else {
-    ifelse(pet$pval[1] < .05 & ifelse(exists("side") & side == "left", -1, 1) * pet$b[1] > 0,
+    ifelse(pet$pval[1] < alpha & ifelse(exists("side") & side == "left", -1, 1) * pet$b[1] > 0,
            return(peese.out),  return(pet.out))
   } 
 }
@@ -826,3 +839,62 @@ pcurve_app=function(x)
   #Note, I use hat as the estimate of power, with powerfit(.5) we could get a more precise best fitting
   #level of power than the minimum in the figure above between .051 and .99, hat, but more precision than 1% in power is not informative.
 }
+
+# ---------------------------------------------------------------------
+# WAAP-WLS estimator
+# Code by Felix Schonbrodt and Evan Carter; https://github.com/nicebread/meta-showdown/blob/master/MA-methods/6-WAAP.R
+# based on Stanley, T. D., Doucouliagos, H., & Ioannidis, J. P. A. (2017). Finding the power to reduce publication bias. Statistics in Medicine, 54(3), 30–19. http://doi.org/10.1002/sim.7228
+
+# WLS estimator
+
+# Weighted least squares estimator: Stanley, T. D., & Doucouliagos, H. (2015). Neither fixed nor random: weighted least squares meta-analysis. Statistics in Medicine, 34(13), 2116–2127. http://doi.org/10.1002/sim.6481
+WLS.est <- function(yi, vi, long = TRUE) {
+  se <- sqrt(vi)
+  yi.precision <- 1/se
+  yi.stand <- yi/se
+  l1 <- lm(yi.stand ~ 0 + yi.precision)
+  s1 <- summary(l1)
+  res <- data.frame(
+    method = "WLS",
+    term = "b0",
+    estimate = 	s1$coefficients[1, 1],
+    std.error = s1$coefficients[1, 2],
+    statistic = s1$coefficients[1, 2],
+    p.value = s1$coefficients[1, 4],
+    conf.low = confint(l1)[1],
+    conf.high = confint(l1)[2]
+  )
+  returnRes(res, long)
+}
+
+# return object: type = 1: WAAP, type = 2: WLS (must be numeric, otherwise it distorts the structure of the results object)
+waapWLS <- function(yi, vi, est = c("WAAP-WLS"), long = TRUE) {
+  
+  # 1. determine which studies are in the top-N set
+  
+  # "Here, we employ FE (or, equivalently, WLS) as the proxy for ‘true’ effect."
+  WLS.all  <- WLS.est(yi, vi, long=FALSE)
+  true.effect <- WLS.all$estimate
+  
+  # only select studies that are adequatly powered (Stanley uses a two-sided test)
+  powered <- true.effect/2.8 >= sqrt(vi)
+  
+  # 2. compute the unrestricted weighted average (WLS) rma of either all or only adequatly powered studies
+  # "Thus, the estimate we employ here is a hybrid between WAAP and WLS; thereby called, ‘WAAP-WLS’"
+  # "If there is no or only one adequately powered study in a systematic review, WAAP’s standard error and confidence interval are undefined. In this case, we compute WLS across the entire research record."
+  # "When there are two or more adequately powered studies, WAAP is calculated using WLS’s formula from this subset of adequately powered studies."
+  # Combined estimator: WAAP-WLS	
+  kAdequate <- sum(powered,na.rm=T)
+  
+  if (kAdequate >= 2) {
+    res <- WLS.est(yi[powered], vi[powered], long=FALSE)
+    res$method <- "WAAP-WLS"
+    res <- plyr::rbind.fill(res, data.frame(method="WAAP-WLS", term="estimator", type=1, kAdequate=kAdequate))
+  } else {
+    res <- WLS.all
+    res$method <- "WAAP-WLS"
+    res <- plyr::rbind.fill(res, data.frame(method="WAAP-WLS", term="estimator", type=2, kAdequate=kAdequate))
+  }
+  returnRes(res, long)
+}
+

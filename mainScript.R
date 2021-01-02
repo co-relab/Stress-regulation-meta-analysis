@@ -14,6 +14,11 @@ rho <- 0.5
 # Side argument for the p-uniform and conditional estimator of PET-PEESE. If the target effect should be in negative values, set to "left", otherwise "right".
 side <- "left"
 
+# Define whether to use one-tailed or two-tailed test for PET-PEESE, 4PSM, and p-uniform.
+# Recommended by Stanley (2016) for literature where small sample-size studies are rather the norm.
+# Assuming alpha level of .05 for the two-tailed test
+test <- "one-tailed"
+
 # No of simulations for the permutation p-curve and 4PSM model
 nsim <- 10 # Set to 5 just to make code checking/running fast. For the final paper, it needs to be set to at least 1000 and run overnight.
 
@@ -65,7 +70,7 @@ rmaObjects <- setNames(lapply(dataObjects, function(x){rmaCustom(x)}), nm = name
 briefBias <- TRUE # For a more elaborate output from the pub bias tests, set to FALSE
 results <- list(NA)
 for(i in 1:length(rmaObjects)){
-  results[[i]] <- maResults(data = dataObjects[[i]], rmaObject = rmaObjects[[i]], alpha = .05, briefBias = briefBias, pcurve = F)
+  results[[i]] <- maResults(data = dataObjects[[i]], rmaObject = rmaObjects[[i]], briefBias = briefBias, pcurve = F)
 }
 
 results <- setNames(results, nm = namesObjects)

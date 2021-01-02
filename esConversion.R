@@ -28,11 +28,6 @@ dat$pReported <- as.numeric(as.character(gsub("[^0-9.]", "", dat$pReported)))
 # Which designs are present?
 table(dat$researchDesign, useNA="ifany")
 
-# Create result and study ID
-dat$result <- 1:nrow(dat)
-dat$paperID
-dat$study <- paste(dat$paperID, "/", dat$studyID, sep = "")
-
 # Compute gender ratio (% of female)
 dat$percFemale <- ifelse(is.na(dat$percFemale), dat$nFemale/(dat$nFemale + dat$nMale), dat$percFemale)
 
@@ -52,6 +47,10 @@ dat <- dat %>% rowwise %>% mutate(p = as.numeric(round(tTestSummary(mean1, mean2
 dat$gConv <- NA
 dat$gVarConv <- NA
 dat$useCellN <- NA
+
+# Create result and study ID
+dat$paperID
+dat$study <- paste(dat$paperID, "/", dat$studyID, sep = "")
 
 ####
 # F-Test between with df1 == 1 ---------------------------------------------------------------------
@@ -77,7 +76,7 @@ dat <- dat %>% mutate(label = ifelse(finalDesign == "F1" & focalVariable == 1, p
                                                         "F(", df1, ",", df2, ")=", F, sep = ""), NA))
 
 # Show the converted ESs
-dat %>% filter(finalDesign == "F1") %>% select(result, gConv, gConv, researchDesign, df2, n1, n2, ni, useCellN, label)
+dat %>% filter(finalDesign == "F1") %>% select(gConv, gConv, researchDesign, df2, n1, n2, ni, useCellN, label)
 
 #View(dat[,c("result", "mean1", "mean2", "sd1", "sd2", "yi", "vi", "gConv", "label")])
 
@@ -108,6 +107,8 @@ dat <- dat %>% mutate(label = ifelse(finalDesign == "tBtw" & focalVariable == 1,
 dat %>% filter(finalDesign == "tBtw") %>% select(gConv, gVarConv, researchDesign, df2, n1, n2, ni, useCellN, label)
 
 dat <- dat %>% mutate(ni = ifelse(is.na(ni) & !is.na(yi), n1 + n2, NA))
+dat$result <- 1:nrow(dat)
+
 
 ####
 # Correlation -------------------------------------------------------------
