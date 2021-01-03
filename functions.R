@@ -273,7 +273,7 @@ bias <- function(data = NA, rmaObject = NA, briefBias = TRUE){
   # 3-parameter selection model
   resultSM <- matrix(ncol = 8, nrow = nsim)
   for(i in 1:nsim){
-    resultSM[i,] <- data %>% selectionModel(., minPvalues = 2)
+    resultSM[i,] <- data %>% selectionModel(., minPvalues = 4)
   }
   colnames(resultSM) <- c("est", "se", "zvalue", "pvalue", "ciLB", "ciUB", "k", "steps")
   resultSM <- resultSM %>% data.frame() %>% na.omit() %>% arrange(est) %>% slice(ceiling(n()/2)) %>% unlist()
@@ -285,14 +285,15 @@ bias <- function(data = NA, rmaObject = NA, briefBias = TRUE){
   # WAAP-WLS
   waapWLSout <- data %$% waapWLS(yi, vi)
   
-  # p-uniform
+  # p-uniform* (van Aert & van Assen, 2021)
   resultPuniform <- matrix(ncol = 4, nrow = nsim)
   for(i in 1:nsim){
-    modelPuniform <- data[!duplicated.random(data$study),] %$% puniform(yi = yi, vi = vi, alpha = alpha, side = side, method = "P")
+    modelPuniform <- dataBio[!duplicated.random(dataBio$study),] %$% puni_star(yi = yi, vi = vi, alpha = alpha, side = side, method = "ML")
     resultPuniform[i,] <- c("est" = modelPuniform[["est"]], "ciLB" = modelPuniform[["ci.lb"]], "ciUB" = modelPuniform[["ci.ub"]], "p-value" = modelPuniform[["pval.0"]])
   }
   colnames(resultPuniform) <- c("est", "ci.lb", "ci.ub", "pval.0")
-  puniform.out <- describe(resultPuniform)[,5, drop = FALSE]
+  resultPuniform <- resultPuniform %>% data.frame() %>% na.omit() %>% arrange(est) %>% slice(ceiling(n()/2)) %>% unlist()
+  resultPuniform <<- resultPuniform
 
   if(briefBias == TRUE){
     return(list("4/3PSM ES estimate" = resultSM["est"],
@@ -301,11 +302,12 @@ bias <- function(data = NA, rmaObject = NA, briefBias = TRUE){
                 "Whether PET or PEESE was used" = ifelse(resultSM["pvalue"] < alpha & ifelse(exists("side") & side == "left", -1, 1) * resultSM["est"] > 0, "PEESE", "PET"),
                 "PET-PEESE ES estimate" = as.numeric(petPeeseOut[1]),
                 "PET-PEESE confidence interval" = as.numeric(c(petPeeseOut[5], petPeeseOut[6])),
-                "PET-PEESE p-value" = petPeeseOut[4]))}
+                "PET-PEESE p-value" = petPeeseOut[4],
+                "p-uniform*" = resultPuniform))}
   else{
     return(list("4/3PSM" = resultSM, 
                 "PET-PEESE" = petPeeseOut,
-                "p-uniform" = puniform.out))
+                "p-uniform*" = resultPuniform))
   }
 }
 
@@ -323,7 +325,7 @@ powerEst <- function(data = NA){
 
 # Multiple-parameter selection models -------------------------------------
 # 4/3-parameter selection model (4PSM/3PSM)
-selectionModel <- function(data, minPvalues = 2){
+selectionModel <- function(data, minPvalues = 4){
   mydat <<- data[!duplicated.random(data$study),]
   res <- rma(yi, vi, data = mydat, )
   fourFit <- tryCatch(selmodel(res, type = "stepfun", steps = c(.025, .5, 1)),

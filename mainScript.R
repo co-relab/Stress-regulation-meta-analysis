@@ -12,10 +12,10 @@ corr <- 0.5
 # Assumed constant sampling correlation
 rho <- 0.5
 
-# Side argument for the p-uniform and conditional estimator of PET-PEESE. If the target effect should be in negative values, set to "left", otherwise "right".
+# Side argument for the p-uniform* and conditional estimator of PET-PEESE. If the target effect should be in negative values, set to "left", otherwise "right".
 side <- "left"
 
-# Define whether to use one-tailed or two-tailed test for PET-PEESE, 3PSM, and p-uniform.
+# Define whether to use one-tailed or two-tailed test for PET-PEESE, 3PSM, and p-uniform*.
 # Recommended by Stanley (2016) for literature where small sample-size studies are rather the norm.
 # Assuming alpha level of .05 for the two-tailed test
 test <- "one-tailed"
