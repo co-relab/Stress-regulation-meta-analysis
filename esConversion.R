@@ -1,4 +1,11 @@
 # Check SE -> SD calc
+# Read in the data
+# check mean age 52-54
+# deleted "ask author" for sd1 and sd2 in datBio
+# filling out missing studyID and paperID
+# published, researchDesign, comparisonGroupType, robOverall, populationType not filled out completely
+# what does NA for items mean?
+
 
 # install required R libraries if not installed already
 list.of.packages <- c("car", "tidyverse", "psych", "metafor", "esc", "lme4", "ggplot2", "knitr", "puniform", "kableExtra", "lmerTest", "pwr", "Amelia", "multcomp", "magrittr")
@@ -8,13 +15,6 @@ if(length(new.packages)) install.packages(new.packages)
 # load required libraries
 lapply(list.of.packages, require, quietly = TRUE, warn.conflicts = FALSE, character.only = TRUE)
 select <- dplyr::select
-
-# Read in the data
-# check mean age 52-54
-# deleted "ask author" for sd1 and sd2 in datBio
-# filling out missing studyID and paperID
-# published, researchDesign, comparisonGroupType, robOverall, populationType not filled out completely
-# what does NA for items mean?
 
 datMind <- read_delim("SAM1.csv", delim = ";", trim_ws = T)
 datBio <- read_delim("BF1.csv", delim = ";", trim_ws = T)

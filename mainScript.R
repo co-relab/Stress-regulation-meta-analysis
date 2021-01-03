@@ -1,5 +1,6 @@
 # Libraries and stuff -----------------------------------------------------
 
+
 knitr::opts_chunk$set(echo=FALSE, warning = FALSE)
 rm(list = ls())
 
@@ -14,12 +15,12 @@ rho <- 0.5
 # Side argument for the p-uniform and conditional estimator of PET-PEESE. If the target effect should be in negative values, set to "left", otherwise "right".
 side <- "left"
 
-# Define whether to use one-tailed or two-tailed test for PET-PEESE, 4PSM, and p-uniform.
+# Define whether to use one-tailed or two-tailed test for PET-PEESE, 3PSM, and p-uniform.
 # Recommended by Stanley (2016) for literature where small sample-size studies are rather the norm.
 # Assuming alpha level of .05 for the two-tailed test
 test <- "one-tailed"
 
-# No of simulations for the permutation p-curve and 4PSM model
+# No of simulations for the permutation p-curve and 3PSM model
 nsim <- 10 # Set to 5 just to make code checking/running fast. For the final paper, it needs to be set to at least 1000 and run overnight.
 
 #' Statistical analysis was carried out in R, version 3.4.3, using packages "metafor", "lme4", "ggplot2", "knitr", "psych", "puniform", "reshape2", "kableExtra", "lmerTest", "pwr", "Amelia".
@@ -67,7 +68,7 @@ dataObjects <- list("Mind" = dataMind, "Bio" = dataBio)
 rmaObjects <- setNames(lapply(dataObjects, function(x){rmaCustom(x)}), nm = namesObjects)
 
 # Further results
-briefBias <- TRUE # For a more elaborate output from the pub bias tests, set to FALSE
+briefBias <- FALSE # For a more elaborate output from the pub bias tests, set to FALSE
 results <- list(NA)
 for(i in 1:length(rmaObjects)){
   results[[i]] <- maResults(data = dataObjects[[i]], rmaObject = rmaObjects[[i]], briefBias = briefBias, pcurve = F)
@@ -75,6 +76,13 @@ for(i in 1:length(rmaObjects)){
 
 results <- setNames(results, nm = namesObjects)
 results
+
+# Contour enhanced funnel plot
+dataBio %$% metafor::funnel.default(yi, vi, level=c(90, 95, 99), shade=c("white", "gray", "darkgray"), refline=0, pch = 20, yaxis = "sei")
+dataMind %$% metafor::funnel.default(yi, vi, level=c(90, 95, 99), shade=c("white", "gray", "darkgray"), refline=0, pch = 20, yaxis = "sei")
+
+dataBio %$% forest(yi, vi, subset=order(vi))
+dataMind %$% forest(yi, vi, subset=order(vi))
 
 # Published vs unpublished studies ----------------------------------------
 

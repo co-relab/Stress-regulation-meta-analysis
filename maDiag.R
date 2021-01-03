@@ -12,8 +12,8 @@ baujat(ma.uni)
 #+eval = FALSE
 #fit FE model to all possible subsets
 gosh.plot <- gosh(ma.uni, progbar = TRUE, subsets = 1000, parallel = "multicore")
-plot(gosh.plot, out = 67, breaks = 50) # Testing the influence of single outliers
-plot(gosh.plot, out = 69, breaks = 50)
+plot(gosh.plot, out = 76, breaks = 50) # Testing the influence of single outliers
+plot(gosh.plot, out = 74, breaks = 50)
 
 #+eval = FALSE
 # Influence diagnostics
@@ -73,5 +73,4 @@ dat %>% filter(strategy == 2) %$% table(is.na(.$yi))
 #'### Percentage of missing data
 # dat %>% filter(strategy == 2) %$% paste(round(sum(is.na(.))/prod(dim(.))*100, 3), "%", sep = "") # insert collumn numbers
 dat %>% filter(strategy == 2) %>% missmap(rank.order = TRUE, margins = c(8, 0), legend = F)    # insert collumn numbers
-
 

@@ -1,5 +1,7 @@
+# Describe [3 or 5 mean or median]
+
 # Load libraries (and install if not installed already)
-list.of.packages <- c("car", "reshape", "tidyverse", "psych", "metafor", "esc", "lme4", "ggplot2", "knitr", "puniform", "kableExtra", "lmerTest", "pwr", "Amelia", "multcomp", "magrittr")
+list.of.packages <- c("car", "reshape", "tidyverse", "psych", "metafor", "esc", "lme4", "ggplot2", "knitr", "puniform", "kableExtra", "lmerTest", "pwr", "Amelia", "multcomp", "magrittr", "weightr", "clubSandwich")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 
@@ -24,7 +26,8 @@ rmaCustom <- function(data = NA, robust = TRUE){
   viMatrix <- impute_covariance_matrix(data$vi, cluster = data$study, r = rho, smooth_vi = TRUE)
   rmaObjectModBasedSE <- rma.mv(yi = yi, V = viMatrix, data = data, method = "REML", random = ~ 1|study/result, sparse = TRUE)
   rmaObject <- robust.rma.mv(rmaObjectModBasedSE, cluster = data$study)
-  return(list("RMA.MV object with RVE SEs with n/(n-p) small-sample correction" = rmaObject, "RMA.MV object with model-based SEs" = rmaObjectModBasedSE))
+  return(list("RMA.MV object with RVE SEs with n/(n-p) small-sample correction" = rmaObject, 
+              "RMA.MV object with model-based SEs" = rmaObjectModBasedSE))
 }
 
 # 95% prediction interval -------------------------------------------------
@@ -255,9 +258,6 @@ grimmerTest <- function(n, mean, SD, items = 1, decimals_mean = 2, decimals_SD =
 # addpoly(robma, row = 0, mlab = "", cex = 1, annotate = F)
 # forest <- recordPlot()
 
-# Contour enhanced funnel plot
-#funnel(robma, level=c(90, 95, 99), shade=c("white", "gray", "darkgray"), refline=0, pch = 20, yaxis = "sei")
-
 # PET-PEESE plot
 # if(fourPSM$value[4] < alpha & ifelse(exists("side") & side == "left", -1, 1) * fourPSM$value[1] > 0)
 # {plot(data$vi, data$yi, main="PEESE", xlab = "Variance", ylab = "Effect size", pch = 19, cex.main = 1.3, cex = .6, xlim = c(0, .27),xaxs="i")} else {plot(sqrt(data$vi), data$yi, main="PET", xlab = "Standard error", ylab = "Effect size", pch = 19, cex.main = 1.3, cex = .6, xaxs="i")}
@@ -270,15 +270,14 @@ bias <- function(data = NA, rmaObject = NA, briefBias = TRUE){
   # Correlation between the ES and precision (SE)
   esPrec <- cor(rmaObject[[1]]$yi, sqrt(rmaObject[[1]]$vi), method = "kendall")
   # Small-study effects correction
-  # 4-parameter selection model
-  result4PSM <- matrix(ncol = 4, nrow = nsim)
-  model4PSM <- matrix(ncol = 4, nrow = 24)
+  # 3-parameter selection model
+  resultSM <- matrix(ncol = 8, nrow = nsim)
   for(i in 1:nsim){
-    model4PSM <- data[!duplicated.random(data$study),] %$% fourPSM.est(yi, vi, fallback = T, min.pvalues = 2)
-    result4PSM[i,] <- c(model4PSM$value[1], "ciLB" = model4PSM$value[5], "ciUB" = model4PSM$value[6], "p-value" = model4PSM$value[4])
+    resultSM[i,] <- data %>% selectionModel(., minPvalues = 2)
   }
-  colnames(result4PSM) <- c("estimate", "ciLB", "ciUB", "p-value")
-  fourPSM <- describe(result4PSM)[,3, drop = FALSE]
+  colnames(resultSM) <- c("est", "se", "zvalue", "pvalue", "ciLB", "ciUB", "k", "steps")
+  resultSM <- resultSM %>% data.frame() %>% na.omit() %>% arrange(est) %>% slice(ceiling(n()/2)) %>% unlist()
+  resultSM <<- resultSM
 
   # PET-PEESE
   petPeeseOut <- petPeese(data)
@@ -293,165 +292,60 @@ bias <- function(data = NA, rmaObject = NA, briefBias = TRUE){
     resultPuniform[i,] <- c("est" = modelPuniform[["est"]], "ciLB" = modelPuniform[["ci.lb"]], "ciUB" = modelPuniform[["ci.ub"]], "p-value" = modelPuniform[["pval.0"]])
   }
   colnames(resultPuniform) <- c("est", "ci.lb", "ci.ub", "pval.0")
-  puniform.out <- describe(resultPuniform)[,3, drop = FALSE]
+  puniform.out <- describe(resultPuniform)[,5, drop = FALSE]
 
   if(briefBias == TRUE){
-    return(list("4PSM ES estimate" = fourPSM[1, 1],
-                "4PSM confidence interval" = c(fourPSM[2, 1], fourPSM[3, 1]),
-                "4PSM p-value" = fourPSM[4, 1],
-                "Whether PET or PEESE was used" = ifelse(fourPSM[4, 1] < alpha & ifelse(exists("side") & side == "left", -1, 1) * fourPSM[1, 1] > 0, "PEESE", "PET"),
+    return(list("4/3PSM ES estimate" = resultSM["est"],
+                "4/3PSM confidence interval" = c(resultSM["ciLB"], resultSM["ciUB"]),
+                "4/3PSM p-value" = resultSM[4],
+                "Whether PET or PEESE was used" = ifelse(resultSM["pvalue"] < alpha & ifelse(exists("side") & side == "left", -1, 1) * resultSM["est"] > 0, "PEESE", "PET"),
                 "PET-PEESE ES estimate" = as.numeric(petPeeseOut[1]),
                 "PET-PEESE confidence interval" = as.numeric(c(petPeeseOut[5], petPeeseOut[6])),
                 "PET-PEESE p-value" = petPeeseOut[4]))}
   else{
-    return(list("4PSM" = fourPSM, 
+    return(list("4/3PSM" = resultSM, 
                 "PET-PEESE" = petPeeseOut,
                 "p-uniform" = puniform.out))
   }
 }
 
-# Power based on PEESE and 4PSM parameter estimates -----------------------
+# Power based on PEESE and 4/3PSM parameter estimates -----------------------
 
 powerEst <- function(data = NA){
   powerPEESE <- NA
-  power4PSM <- NA
+  powerSM <- NA
   peeseEst <- petPeese(data)[1]
-  result <- matrix(ncol = 4, nrow = nsim)
-  model <- matrix(ncol = 4, nrow = 24)
-  for(i in 1:nsim){
-    model <- data[!duplicated.random(data$study),] %$% fourPSM.est(yi, vi, min.pvalues = 2, fallback = T)
-    result[i,] <- c(model$value[1], "ciLB" = model$value[5], "ciUB" = model$value[6], "p-value" = model$value[4])
-  }
-  colnames(result) <- c("estimate", "ciLB", "ciUB", "p-value")
-  fourPSM <- describe(result)[,3, drop = FALSE][1, 1]
-  
   powerPEESEresult <- median(pwr::pwr.t.test(n = data[!is.na(data$ni),]$ni, d = peeseEst)$power)
-  power4PSMresult <- median(pwr::pwr.t.test(n = data[!is.na(data$ni),]$ni, d = fourPSM)$power)
+  powerSMresult <- median(pwr::pwr.t.test(n = data[!is.na(data$ni),]$ni, d = resultSM["est"])$power)
   c("Median power for detecting PET-PEESE estimate" = powerPEESEresult, 
-    "Median power for detecting 4PSM estimate" = power4PSMresult)
+    "Median power for detecting 4/3PSM estimate" = powerSMresult)
 }
 
 # Multiple-parameter selection models -------------------------------------
-
-# Code adapted from Carter, E. C., Schönbrodt, F. D., Hilgard, J., & Gervais, W. (2018). Correcting for bias in psychology: A comparison of meta-analytic methods. Retrieved from https://osf.io/rf3ys/.
-# https://github.com/nicebread/meta-showdown/blob/master/MA-methods/7-Selection%20Models.R
-
-# Return a result data frame either in wide or long format (for the 3PSM output)
-returnRes <- function(res, long = TRUE, reduce = TRUE) {
-  if (is.null(res)) return(NULL)
+# 4/3-parameter selection model (4PSM/3PSM)
+selectionModel <- function(data, minPvalues = 2){
+  mydat <<- data[!duplicated.random(data$study),]
+  res <- rma(yi, vi, data = mydat, )
+  fourFit <- tryCatch(selmodel(res, type = "stepfun", steps = c(.025, .5, 1)),
+                      error = function(e) NULL)
+  fourOut <- c("est" = fourFit$beta, "se" = fourFit$se, "zvalue" = fourFit$zval, "pvalue" = fourFit$pval, "ciLB" = fourFit$ci.lb, "ciUB" = fourFit$ci.ub, "k" = fourFit$k, "steps" = length(fourFit$steps))
   
-  # convert all factor columns to characters
-  res %>% mutate_if(is.factor, as.character) -> res
+  # if <= min.pvalues p-values in an interval: return NULL
+  pTable <- table(cut(mydat$p, breaks = c(0, .025, 0.5, 1)))
   
-  if (long == FALSE) {
-    # return wide format
-    return(res)
-  } else {
-    # transform to long format
-    longRes <- melt(res, id.vars=c("method", "term"))
-    if (reduce==TRUE & nrow(res) > 1) {longRes <- longRes %>% filter(!is.na(value)) %>% arrange(method, term, variable)}
-    return(longRes)
-  }
-}
-
-# 3-parameter selection model (3PSM)
-# p-value intervals may be re-specified if they contain too few values
-if (!require(weightr)) {
-  install.packages('weightr')
-}
-
-threePSM.est <- function(yi, vi, min.pvalues = 2, long = TRUE) {
-  
-  w1 <- tryCatch(
-    weightfunct(yi, vi, steps = c(0.025, 1), mods = NULL, weights = NULL, fe = FALSE, table = TRUE),
-    error = function(e) NULL
-  )
-  
-  res.NA <- data.frame(
-    method = "3PSM",
-    term = c("tau2", "b0", "pr.nonsig"),
-    estimate = NA,
-    std.error = NA,
-    statistic = NA,
-    p.value = NA,
-    conf.low = NA,
-    conf.high = NA
-  )
-  
-  if (is.null(w1)) return(returnRes(res.NA))
-  
-  # If <= 3 p-values in an interval: return NA
-  p.table <- table(cut(w1$p, breaks=c(0, .025, 1)))
-  if (any(p.table < 2)) {
-    return(returnRes(res.NA))
-  } else {
-    est <- w1[[2]]$par
-    
-    # Compute standard errors from hessian
-    std.err <- sqrt(abs(diag(solve(w1[[2]]$hessian))))
-    
-    
-    res.wide <- data.frame(
-      method = "3PSM",
-      term = c("tau2", "b0", "pr.nonsig"),
-      estimate = round(est, 4),
-      std.error = round(std.err, 4),
-      statistic = round(est/std.err, 4),
-      p.value = round((pnorm(abs(est/std.err), lower.tail=FALSE)*2), 4),
-      conf.low = round((est + qnorm(.025)*std.err), 4),
-      conf.high = round((est + qnorm(1-.025)*std.err), 4)
-    )
-  }
-  
-  return(returnRes(res.wide))
-}
-
-fourPSM.est <- function(yi, vi, min.pvalues = 2, long = TRUE, fallback = FALSE) {	
-  w1 <- tryCatch(
-    weightfunct(yi, vi, steps = c(0.025, 0.5, 1), mods = NULL, weights = NULL, fe = FALSE, table = TRUE),
-    error = function(e) NULL
-  )
-  
-  res.NA <- data.frame(
-    method = "4PSM",
-    term = c("tau2", "b0", "pr.nonsig", "pr.opposite"),
-    estimate = NA,
-    std.error = NA,
-    statistic = NA,
-    p.value = NA,
-    conf.low = NA,
-    conf.high = NA
-  )
-  
-  if (is.null(w1)) return(returnRes(res.NA))
-  
-  # if <= min.pvalues p-values in an interval: return NA
-  p.table <- table(cut(w1$p, breaks=c(0, .025, 0.5, 1)))
-  if (any(p.table < 2)) {
-    if (fallback==TRUE) {
-      return(threePSM.est(yi, vi, min.pvalues = 2, long = TRUE))
+  if (any(pTable < minPvalues) | is.null(fourFit)) {
+    threeFit <- tryCatch(selmodel(res, type = "stepfun", steps = c(.025, 1)),
+                         error = function(e) NULL)
+    threeOut <- if(is.null(threeFit)){
+      rep(NA, 8)
     } else {
-      return(returnRes(res.NA))
-    }	  
+      round(c("est" = threeFit$beta, "se" = threeFit$se, "zvalue" = threeFit$zval, "pvalue" = threeFit$pval, "ciLB" = threeFit$ci.lb, "ciUB" = threeFit$ci.ub, "k" = threeFit$k, "steps" = length(threeFit$steps)), 3)
+    }
+    out <- threeOut
   } else {
-    est <- w1[[2]]$par
-    
-    # compute standard errors from hessian
-    std.err <- sqrt(abs(diag(solve(w1[[2]]$hessian))))
-    
-    res.wide <- data.frame(
-      method = "4PSM",
-      term = c("tau2", "b0", "pr.nonsig", "pr.opposite"),
-      estimate = round(est, 4),
-      std.error = round(std.err, 4),
-      statistic = round(est/std.err, 4),
-      p.value = round(pnorm(est/std.err, lower.tail=FALSE)*2, 4),
-      conf.low = round(est + qnorm(.025)*std.err, 4),
-      conf.high = round(est + qnorm(1-.025)*std.err, 4)
-    )
+    out <- fourOut %>% round(., 3)
   }
-  
-  return(returnRes(res.wide))
+  out
 }
 
 # PET-PEESE ---------------------------------------------------------------
@@ -479,8 +373,7 @@ petPeese <- function(data, nBased = TRUE, selModAsCondEst = TRUE){  # if nBased 
   names(peese.out) <- c("PEESE estimate", "se", "zval", "pval", "ci.lb", "ci.ub")
   
   if(selModAsCondEst == TRUE){
-    fourPSM <- fourPSM.est(data$yi, data$vi, fallback = TRUE) # This is assuming independent effects
-    ifelse(fourPSM$value[4] < alpha & ifelse(exists("side") & side == "left", -1, 1) * fourPSM$value[1] > 0,
+    ifelse(resultSM["pvalue"] < alpha & ifelse(exists("side") & side == "left", -1, 1) * resultSM["est"] > 0,
            return(peese.out),  return(pet.out))
   } else {
     ifelse(pet$pval[1] < alpha & ifelse(exists("side") & side == "left", -1, 1) * pet$b[1] > 0,
@@ -898,3 +791,23 @@ waapWLS <- function(yi, vi, est = c("WAAP-WLS"), long = TRUE) {
   returnRes(res, long)
 }
 
+# Code adapted from Carter, E. C., Schönbrodt, F. D., Hilgard, J., & Gervais, W. (2018). Correcting for bias in psychology: A comparison of meta-analytic methods. Retrieved from https://osf.io/rf3ys/.
+# https://github.com/nicebread/meta-showdown/blob/master/MA-methods/7-Selection%20Models.R
+
+# Return a result data frame either in wide or long format
+returnRes <- function(res, long = TRUE, reduce = TRUE) {
+  if (is.null(res)) return(NULL)
+  
+  # convert all factor columns to characters
+  res %>% mutate_if(is.factor, as.character) -> res
+  
+  if (long == FALSE) {
+    # return wide format
+    return(res)
+  } else {
+    # transform to long format
+    longRes <- melt(res, id.vars=c("method", "term"))
+    if (reduce==TRUE & nrow(res) > 1) {longRes <- longRes %>% filter(!is.na(value)) %>% arrange(method, term, variable)}
+    return(longRes)
+  }
+}
