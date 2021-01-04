@@ -1,12 +1,6 @@
 # Check SE -> SD calc
+
 # Read in the data
-# check mean age 52-54
-# deleted "ask author" for sd1 and sd2 in datBio
-# filling out missing studyID and paperID
-# published, researchDesign, comparisonGroupType, robOverall, populationType not filled out completely
-# what does NA for items mean?
-
-
 # install required R libraries if not installed already
 list.of.packages <- c("car", "tidyverse", "psych", "metafor", "esc", "lme4", "ggplot2", "knitr", "puniform", "kableExtra", "lmerTest", "pwr", "Amelia", "multcomp", "magrittr")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]

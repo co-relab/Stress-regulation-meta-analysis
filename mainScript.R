@@ -1,6 +1,5 @@
 # Libraries and stuff -----------------------------------------------------
 
-
 knitr::opts_chunk$set(echo=FALSE, warning = FALSE)
 rm(list = ls())
 
@@ -31,24 +30,7 @@ source("functions.R")
 source("esConversion.R")
 
 # GRIM & GRIMMER Test -----------------------------------------------------
-# dat <- dat %>% mutate(items = ifelse(is.na(items), 0, items)) # Q for Alessandro: what does NA for items mean?
-# 
-# outGrimM1 <- NA
-# outGrimM2 <- NA
-# outGrimmerSD1 <- NA
-# outGrimmerSD2 <- NA
-# for(i in 1:nrow(dat)){
-#   outGrimM1[i] <- grimTest(n = dat[i,]$n1, mean = dat[i,]$mean1, items = dat[i,]$items, decimals = 2)
-#   outGrimM2[i] <- grimTest(n = dat[i,]$n2, mean = dat[i,]$mean2, items = dat[i,]$items, decimals = 2)
-#   outGrimmerSD1[i] <- grimmerTest(n = dat[i,]$n1, mean = dat[i,]$mean1, SD = dat[i,]$sd1, items = dat[i,]$items, decimals_mean = 2, decimals_SD = 2)
-#   outGrimmerSD2[i] <- grimmerTest(n = dat[i,]$n2, mean = dat[i,]$mean2, SD = dat[i,]$sd2, items = dat[i,]$items, decimals_mean = 2, decimals_SD = 2)
-# }
-# 
-# dat$outGrimM1 <- outGrimM1
-# dat$outGrimM2 <- outGrimM2
-# dat$outGrimmerSD1 <- outGrimmerSD1
-# dat$outGrimmerSD2 <- outGrimmerSD2
-# dat$inconsistenciesCount <- rowSums(dat[,c("outGrimM1", "outGrimM2")], na.rm = TRUE)
+grimAndGrimmer(dat)
 
 # Meta-analysis -----------------------------------------------------------
 
@@ -71,7 +53,7 @@ rmaObjects <- setNames(lapply(dataObjects, function(x){rmaCustom(x)}), nm = name
 briefBias <- FALSE # For a more elaborate output from the pub bias tests, set to FALSE
 results <- list(NA)
 for(i in 1:length(rmaObjects)){
-  results[[i]] <- maResults(data = dataObjects[[i]], rmaObject = rmaObjects[[i]], briefBias = briefBias, pcurve = F)
+  results[[i]] <- maResults(data = dataObjects[[i]], rmaObject = rmaObjects[[i]], briefBias = briefBias, pcurveOut = T)
 }
 
 results <- setNames(results, nm = namesObjects)
