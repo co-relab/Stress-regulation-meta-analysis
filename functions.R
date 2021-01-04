@@ -1,5 +1,5 @@
 # Load libraries (and install if not installed already)
-list.of.packages <- c("car", "reshape", "tidyverse", "psych", "metafor", "meta", "dmetar", "esc", "lme4", "ggplot2", "knitr", "puniform", "kableExtra", "lmerTest", "pwr", "Amelia", "multcomp", "magrittr", "weightr", "clubSandwich")
+list.of.packages <- c("car", "reshape", "tidyverse", "psych", "metafor", "meta", "dmetar", "esc", "lme4", "ggplot2", "knitr", "puniform", "kableExtra", "lmerTest", "pwr", "Amelia", "multcomp", "magrittr", "weightr", "clubSandwich", "R.devices", "ddpcr")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 
@@ -75,66 +75,6 @@ propSig <- function(p.values = NA){
   as.integer(table(p.values < .05)[2])/length(p.values < .05)
 }
 
-# t-test for summary statistics -------------------------------------------
-
-tTestSummary <- function(mean1, mean2, sd1, sd2, n1, n2)
-{
-  # pooled standard deviation, scaled by the sample sizes
-  se <- sqrt((1/n1 + 1/n2) * ((n1 - 1) * sd1^2 + (n2 - 1) * sd2^2)/(n1 + n2 - 2)) 
-  df <- n1 + n2 - 2
-  t <- (mean1 - mean2)/se 
-  out <- c(mean1 - mean2, se, t, 2*pt(-abs(t),df))    
-  names(out) <- c("Difference in means", "SE", "t-statistic", "p-value")
-  return(out) 
-}
-
-# Random selection of effects ---------------------------------------------
-
-# Choose effects from a single study by random (for the purpose of permutation p-curve)
-duplicated.random = function(x, incomparables = FALSE, ...)
-{
-  if (is.vector(x))
-  {
-    permutation = sample(length(x))
-    x.perm      = x[permutation]
-    result.perm = duplicated(x.perm, incomparables, ...)
-    result      = result.perm[order(permutation)]
-    return(result)
-  }
-  else (is.matrix(x))
-  {
-    permutation = sample(nrow(x))
-    x.perm      = x[permutation,]
-    result.perm = duplicated(x.perm, incomparables, ...)
-    result      = result.perm[order(permutation)]
-    return(result)
-  }
-}
-
-
-# Plots -------------------------------------------------------------------
-
-# Forest plot
-# forest(x = data$yi, vi = data$vi,
-#        xlim=c(-2.5,3.5),        ### adjust horizontal plot region limits
-#        subset=order(data$vi),        ### order by size of yi
-#        slab=NA, annotate=FALSE, ### remove study labels and annotations
-#        efac=0,                  ### remove vertical bars at end of CIs
-#        pch=19,                  ### changing point symbol to filled circle
-#        col="gray40",            ### change color of points/CIs
-#        psize=3,                 ### increase point size
-#        cex.lab=.7, cex.axis=.7,   ### increase size of x-axis title/labels
-#        lty=c("solid","blank"))  ### remove horizontal line at top of plot
-# title("Overall effect")
-# addpoly(robma, row = 0, mlab = "", cex = 1, annotate = F)
-# forest <- recordPlot()
-
-# PET-PEESE plot
-# if(fourPSM$value[4] < alpha & ifelse(exists("side") & side == "left", -1, 1) * fourPSM$value[1] > 0)
-# {plot(data$vi, data$yi, main="PEESE", xlab = "Variance", ylab = "Effect size", pch = 19, cex.main = 1.3, cex = .6, xlim = c(0, .27),xaxs="i")} else {plot(sqrt(data$vi), data$yi, main="PET", xlab = "Standard error", ylab = "Effect size", pch = 19, cex.main = 1.3, cex = .6, xaxs="i")}
-# abline((if(fourPSM$value[4] < alpha & ifelse(exists("side") & side == "left", -1, 1) * fourPSM$value[1] > 0) {peese} else {pet}), lwd=3, lty = 2, col = "red")
-# PP.plot <- recordPlot()
-
 # Publication bias --------------------------------------------------------
 
 bias <- function(data = NA, rmaObject = NA, briefBias = TRUE){
@@ -162,6 +102,7 @@ bias <- function(data = NA, rmaObject = NA, briefBias = TRUE){
   # p-uniform* (van Aert & van Assen, 2021)
   resultPuniform <- matrix(ncol = 4, nrow = nsim)
   for(i in 1:nsim){
+    set.seed(1)
     modelPuniform <- data[!duplicated.random(data$study) & data$focalVariable == 1,] %$% puni_star(yi = yi, vi = vi, alpha = alpha, side = side, method = "ML")
     resultPuniform[i,] <- c("est" = modelPuniform[["est"]], "ciLB" = modelPuniform[["ci.lb"]], "ciUB" = modelPuniform[["ci.ub"]], "p-value" = modelPuniform[["pval.0"]])
   }
@@ -179,7 +120,7 @@ bias <- function(data = NA, rmaObject = NA, briefBias = TRUE){
                 "PET-PEESE confidence interval" = as.numeric(c(petPeeseOut[5], petPeeseOut[6])),
                 "PET-PEESE p-value" = petPeeseOut[4],
                 "p-uniform*" = puniformOut,
-                "p-curve" = ifelse(pcurveOut == TRUE, pcurvePermOut, paste("p-curve analysis not carried out")),))}
+                "p-curve" = ifelse(pcurveOut == TRUE, pcurvePermOut$pcurveResults, paste("p-curve analysis not carried out")),))}
   else{
     return(list("4/3PSM" = resultSM, 
                 "PET-PEESE" = petPeeseOut,
@@ -188,25 +129,13 @@ bias <- function(data = NA, rmaObject = NA, briefBias = TRUE){
   }
 }
 
-
-# Power based on PEESE and 4/3PSM parameter estimates -----------------------
-
-powerEst <- function(data = NA){
-  powerPEESE <- NA
-  powerSM <- NA
-  peeseEst <- petPeese(data)[1]
-  powerPEESEresult <- median(pwr::pwr.t.test(n = data[!is.na(data$ni),]$ni, d = peeseEst)$power)
-  powerSMresult <- median(pwr::pwr.t.test(n = data[!is.na(data$ni),]$ni, d = resultSM["est"])$power)
-  c("Median power for detecting PET-PEESE estimate" = powerPEESEresult, 
-    "Median power for detecting 4/3PSM estimate" = powerSMresult)
-}
-
 # Permutation p-curve
 # Subseting only the effects that are focal for the published study
 pcurvePerm <- function(data, esEstimate = FALSE){
   resultIDpcurve <- list(NA)
   resultPcurve <- matrix(ncol = 11, nrow = nsim)
   for(i in 1:nsim){
+    set.seed(1)
     datPcurve <- data[!duplicated.random(data$study) & data$focalVariable == 1,]
     metaPcurve <- metagen(TE = yi, seTE = sqrt(vi), n.e = ni, data = datPcurve)
     modelPcurve <- suppressGraphics(pcurve(metaPcurve, effect.estimation = esEstimate, N = datPcurve$n.e))
@@ -214,17 +143,16 @@ pcurvePerm <- function(data, esEstimate = FALSE){
     resultIDpcurve[[i]] <- datPcurve$result
   }
   colnames(resultPcurve) <- c("iterationNo", "rightskew.pBinomial", "rightskew.zFull", "rightskew.pFull", "rightskew.zHalf", "rightskew.pHalf", "flatness.pBinomial", "flatness.zFull", "flatness.pFull", "flatness.zHalf", "flatness.pHalf")
-  resultPcurve <- resultPcurve %>% data.frame() %>% na.omit() %>% arrange(rightskew.zFull) %>% slice(ceiling(n()/2)) %>% unlist()
-  resultPcurve <<- resultPcurve
-  medianResultPcurve <- metagen(TE = yi, seTE = sqrt(vi), data = data[data$result %in% unlist(resultIDpcurve[resultPcurve["iterationNo"]]),])
-  bin <- pcurve(medianResultPcurve, effect.estimation = esEstimate)
-  pcurvePlot <<- recordPlot()
-  resultPcurve
+  medianResultPcurve <- resultPcurve %>% data.frame() %>% na.omit() %>% arrange(rightskew.zFull) %>% slice(ceiling(n()/2)) %>% unlist()
+  metaResultPcurve <- metagen(TE = yi, seTE = sqrt(vi), data = data[data$result %in% unlist(resultIDpcurve[medianResultPcurve["iterationNo"]]),])
+  pcurveOut <- pcurve(metaResultPcurve, effect.estimation = esEstimate)
+  pcurveOut
 }
 
 # Multiple-parameter selection models -------------------------------------
 # 4/3-parameter selection model (4PSM/3PSM)
 selectionModel <- function(data, minPvalues = 4){
+  set.seed(1)
   mydat <<- data[!duplicated.random(data$study) & data$focalVariable == 1,]
   res <- rma(yi, vi, data = mydat, )
   fourFit <- tryCatch(selmodel(res, type = "stepfun", steps = c(.025, .5, 1)),
@@ -283,8 +211,9 @@ petPeese <- function(data, nBased = TRUE, selModAsCondEst = TRUE){  # if nBased 
 }
 
 
-# ---------------------------------------------------------------------
-# WAAP-WLS estimator
+
+# WAAP-WLS estimator ------------------------------------------------------
+
 # Code by Felix Schonbrodt and Evan Carter; https://github.com/nicebread/meta-showdown/blob/master/MA-methods/6-WAAP.R
 # based on Stanley, T. D., Doucouliagos, H., & Ioannidis, J. P. A. (2017). Finding the power to reduce publication bias. Statistics in Medicine, 54(3), 30–19. http://doi.org/10.1002/sim.7228
 
@@ -341,6 +270,18 @@ waapWLS <- function(yi, vi, est = c("WAAP-WLS"), long = TRUE) {
   returnRes(res, long)
 }
 
+# Power based on PEESE and 4/3PSM parameter estimates -----------------------
+
+powerEst <- function(data = NA){
+  powerPEESE <- NA
+  powerSM <- NA
+  peeseEst <- petPeese(data)[1]
+  powerPEESEresult <- median(pwr::pwr.t.test(n = data[!is.na(data$ni),]$ni, d = peeseEst)$power)
+  powerSMresult <- median(pwr::pwr.t.test(n = data[!is.na(data$ni),]$ni, d = resultSM["est"])$power)
+  c("Median power for detecting PET-PEESE estimate" = powerPEESEresult, 
+    "Median power for detecting 4/3PSM estimate" = powerSMresult)
+}
+
 # Summary results ---------------------------------------------------------
 
 maResults <- function(rmaObject = NA, data = NA, briefBias = F, pcurveOut = TRUE){
@@ -354,6 +295,7 @@ maResults <- function(rmaObject = NA, data = NA, briefBias = F, pcurveOut = TRUE
     "Power based on PEESE and 4PSM parameter estimates" = powerEst(data))
 }
 
+# Return format
 # Code adapted from Carter, E. C., Schönbrodt, F. D., Hilgard, J., & Gervais, W. (2018). Correcting for bias in psychology: A comparison of meta-analytic methods. Retrieved from https://osf.io/rf3ys/.
 # https://github.com/nicebread/meta-showdown/blob/master/MA-methods/7-Selection%20Models.R
 
@@ -372,6 +314,42 @@ returnRes <- function(res, long = TRUE, reduce = TRUE) {
     longRes <- melt(res, id.vars=c("method", "term"))
     if (reduce==TRUE & nrow(res) > 1) {longRes <- longRes %>% filter(!is.na(value)) %>% arrange(method, term, variable)}
     return(longRes)
+  }
+}
+
+# t-test for summary statistics -------------------------------------------
+
+tTestSummary <- function(mean1, mean2, sd1, sd2, n1, n2)
+{
+  # pooled standard deviation, scaled by the sample sizes
+  se <- sqrt((1/n1 + 1/n2) * ((n1 - 1) * sd1^2 + (n2 - 1) * sd2^2)/(n1 + n2 - 2)) 
+  df <- n1 + n2 - 2
+  t <- (mean1 - mean2)/se 
+  out <- c(mean1 - mean2, se, t, 2*pt(-abs(t),df))    
+  names(out) <- c("Difference in means", "SE", "t-statistic", "p-value")
+  return(out) 
+}
+
+# Random selection of effects ---------------------------------------------
+
+# Choose effects from a single study by random (for the purpose of permutation p-curve)
+duplicated.random = function(x, incomparables = FALSE, ...)
+{
+  if (is.vector(x))
+  {
+    permutation = sample(length(x))
+    x.perm      = x[permutation]
+    result.perm = duplicated(x.perm, incomparables, ...)
+    result      = result.perm[order(permutation)]
+    return(result)
+  }
+  else (is.matrix(x))
+  {
+    permutation = sample(nrow(x))
+    x.perm      = x[permutation,]
+    result.perm = duplicated(x.perm, incomparables, ...)
+    result      = result.perm[order(permutation)]
+    return(result)
   }
 }
 
