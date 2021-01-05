@@ -36,8 +36,8 @@ side <- "left"
 test <- "one-tailed"
 
 # No of simulations for the permutation-based bias correction models and p-curve specifically
-nIterations <- 5 # Set to 5 just to make code checking/running fast. For the final paper, it needs to be set to at least 1000 and run overnight.
-nIterationsPcurve <- 5
+nIterations <- 200 # Set to 5 just to make code checking/running fast. For the final paper, it needs to be set to at least 1000 and run overnight.
+nIterationsPcurve <- 200
 
 # Exclude studies having an overall Risk of Bias score of at least x.
 acceptableRiskOfBias <- 2
@@ -59,8 +59,64 @@ dataMind <- dataMind %>% filter_all(any_vars(!is.na(.)))
 dataBio <- dataBio %>% filter_all(any_vars(!is.na(.)))
 
 #'# Meta-analysis results
-#'
+
+#' **RMA results with model-based SEs**
 #'k = number of studies; sqrt in "Variance components" = tau, the standard deviation of true effects; estimate in "Model results" = naive MA estimate
+#'
+#' **RVE SEs with Satterthwaite small-sample correction**
+#' Estimate based on a multilevel RE model with constant sampling correlation model (CHE - correlated hierarchical effects - working model) (Pustejovsky & Tipton, 2020; https://osf.io/preprints/metaarxiv/vyfcj/). 
+#' Interpretation of naive-meta-analysis should be based on these estimates.
+#'
+#' **Prediction interval**
+#' Shows the expected range of true effects in similar studies.
+#' As an approximation, in 95% of cases the true effect in a new *published* study can be expected to fall between PI LB and PI UB.
+#' Note that these are non-adjusted estimates. An unbiased newly conducted study will more likely fall in an interval centered around bias-adjusted estimate with a wider CI width.
+#'
+#' **Heterogeneity**
+#' Tau can be interpreted as the total amount of heterogeneity in the true effects. 
+#' I^2$ represents the ratio of true heterogeneity to total variance across the observed effect estimates. Estimates calculated by 2 approaches are reported.
+#' This is followed by separate estimates of between- and within-cluster heterogeneity and estimated intra-class correlation of underlying true effects.
+#' 
+#' **Proportion of significant results**
+#' What proportion of effects were statistically at the alpha level of .05.
+#' 
+#' **ES-precision correlation**
+#' Kendalls's correlation between the ES and precision
+#' 
+#' **4/3PSM**
+#' Applies a permutation-based, step-function 4-parameter selection model (one-tailed p-value steps = c(.025, .5, 1)). 
+#' Falls back to 3-parameter selection model if at least one of the three p-value intervals contains less than 4 p-values.
+#' 
+#' pvalue = p-value testing H0 that the effect is zero. ciLB and ciUB are lower and upper bound of the CI. k = number of studies. steps = 3 means that the 4PSM was applied, 2 means that the 3PSM was applied.
+#' 
+#' **PET-PEESE**
+#' Estimated effect size of an infinitely precise study. Using 4/3PSM as the conditional estimator instead of PET (can be changed to PET). If the PET-PEESE estimate is in the opposite direction, the effect can be regarded nil. 
+#' By default (can be changed to PET), the function employs a modified sample-size based estimator (see https://www.jepusto.com/pet-peese-performance/). 
+#' It also uses the same RVE sandwich-type based estimator in a CHE (correlated hierarchical effects) working model with the identical random effects structure as the primary (naive) meta-analytic model.
+#' 
+#' Name of the estimate parameter denotes whether PET or PEESE was applied.
+#' 
+#' **WAAP-WLS**
+#' Combined WAAP-WLS estimator (weighted average of the adequately powered - weighted least squares). The method tries to identify studies that are adequately powered to detect the meta-analytic effect.
+#' If there's none or only one such study, the methods falls back to WLS estimator (Stanley & Doucouliagos, 2015).
+#' If there are at least two, WAAP returns a WLS estimate based on only effects from those studies
+#' 
+#' type = 1: WAAP estimate, 2: WLS estimate. kAdequate = number of adequately powered studies
+#' 
+#' **p-uniform**
+#' Permutation-based new version of p-uniform method, the so-called p-uniform* (van Aert, van Assen, 2021).
+#' 
+#' **p-curve**
+#' Permutation-based p-curve method. Output should be pretty self-explanatory.
+#' 
+#' **Power based on PEESE and 4PSM parameter estimates**
+#' A sort of a thought experiment. Estimates of the statistical power, assuming that population true values equal the bias-corrected estimates (4/3PSM or PET-PEESE).
+#' 
+#' **Handling of dependencies in bias-correction methods**
+#' To handle dependencies among the effects, the 4PSM, p-curve, p-uniform are implemented using a permutation-based procedure, randomly selecting only one focal effect (i.e., excluding those which were not coded as being focal) from a single study and iterating nIterations times.
+#' Lastly, the procedure selects the result with the median value of the ES estimate (4PSM, p-uniform) or median z-score of the full p-curve (p-curve).
+#' 
+
 namesObjects <- c("Self-administered mindfulness", "Biofeedback")
 levels(dat$strategy) <- namesObjects
 dataObjects <- list("Mind" = dataMind, "Bio" = dataBio)
@@ -84,7 +140,6 @@ results$`Self-administered mindfulness`
 
 #'## Biofeedback
 results$Biofeedback
-
 
 # Plots -------------------------------------------------------------------
 
@@ -145,6 +200,10 @@ abline((if(results[[2]]$`Publication bias`$`4/3PSM`["pvalue"] < alpha & ifelse(e
 # Moderator/sensitivity analyses ------------------------------------------
 
 #'# Moderator/sensitivity analyses
+#' The below reported meta-regressions are all implemented as a multivariate RVE-based models using the CHE working model (Pustejovsky & Tipton, 2020; https://osf.io/preprints/metaarxiv/vyfcj/).
+#' Testing of contrasts is carried out using a robust Wald-type test testing the equality of estimates across levels of the moderator.
+#' 
+
 #'## Published status
 
 pubUnpub <- list(NA)

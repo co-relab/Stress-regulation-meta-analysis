@@ -1,6 +1,8 @@
 # Pocket 
 # print(deparse(substitute(df)))
 
+# check btw/within heterogeneity code
+
 # Load libraries (and install if not installed already)
 list.of.packages <- c("car", "reshape", "tidyverse", "tidyr", "psych", "metafor", "meta", "dmetar", "esc", "lme4", "ggplot2", "knitr", "puniform", "kableExtra", "lmerTest", "pwr", "Amelia", "multcomp", "magrittr", "weightr", "clubSandwich", "ddpcr", "poibin")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
@@ -107,7 +109,6 @@ bias <- function(data = NA, rmaObject = NA){
   # p-uniform* (van Aert & van Assen, 2021)
   resultPuniform <- matrix(ncol = 4, nrow = nIterations)
   for(i in 1:nIterations){
-    set.seed(1)
     modelPuniform <- data[!duplicated.random(data$study) & data$focalVariable == 1,] %$% puni_star(yi = yi, vi = vi, alpha = alpha, side = side, method = "ML")
     resultPuniform[i,] <- c("est" = modelPuniform[["est"]], "ciLB" = modelPuniform[["ci.lb"]], "ciUB" = modelPuniform[["ci.ub"]], "p-value" = modelPuniform[["pval.0"]])
   }
@@ -116,7 +117,8 @@ bias <- function(data = NA, rmaObject = NA){
   puniformOut <<- resultPuniform
 
   # Publication bias results
-    return(list("4/3PSM" = resultSM, 
+    return(list("ES-precision correlation" = esPrec,
+                "4/3PSM" = resultSM, 
                 "PET-PEESE" = petPeeseOut,
                 "WAAP-WLS" = waapWLSout,
                 "p-uniform*" = puniformOut,
@@ -129,7 +131,6 @@ pcurvePerm <- function(data, esEstimate = FALSE, plot = FALSE, nIterations = nIt
   resultIDpcurve <- list(NA)
   resultPcurve <- matrix(ncol = 11, nrow = nIterationsPcurve)
   for(i in 1:nIterationsPcurve){
-    set.seed(1)
     datPcurve <- data[!duplicated.random(data$study) & data$focalVariable == 1,]
     metaPcurve <- metagen(TE = yi, seTE = sqrt(vi), n.e = ni, data = datPcurve)
     modelPcurve <- pcurveMod(metaPcurve, effect.estimation = esEstimate, N = datPcurve$n.e, plot = FALSE)
@@ -146,7 +147,6 @@ pcurvePerm <- function(data, esEstimate = FALSE, plot = FALSE, nIterations = nIt
 # Multiple-parameter selection models -------------------------------------
 # 4/3-parameter selection model (4PSM/3PSM)
 selectionModel <- function(data, minPvalues = 4){
-  set.seed(1)
   mydat <<- data[!duplicated.random(data$study) & data$focalVariable == 1,]
   res <- rma(yi, vi, data = mydat, )
   fourFit <- tryCatch(selmodel(res, type = "stepfun", steps = c(.025, .5, 1)),
@@ -255,11 +255,11 @@ waapWLS <- function(yi, vi, est = c("WAAP-WLS"), long = FALSE) {
   if (kAdequate >= 2) {
     res <- WLS.est(yi[powered], vi[powered], long=FALSE)
     res$method <- "WAAP-WLS"
-    res <- plyr::rbind.fill(res, data.frame(method="WAAP-WLS", term="b0", type=1, kAdequate=kAdequate))
+    res <- plyr::rbind.fill(res, data.frame(method="WAAP-WLS", term="estimator", type=1, kAdequate=kAdequate))
   } else {
     res <- WLS.all
     res$method <- "WAAP-WLS"
-    res <- plyr::rbind.fill(res, data.frame(method="WAAP-WLS", term="b0", type=2, kAdequate=kAdequate))
+    res <- plyr::rbind.fill(res, data.frame(method="WAAP-WLS", term="estimator", type=2, kAdequate=kAdequate))
   }
   returnRes(res, long = FALSE)
 }
