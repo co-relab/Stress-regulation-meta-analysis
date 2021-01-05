@@ -13,7 +13,7 @@
 
 #+ setup, include = FALSE
 knitr::opts_chunk$set(echo=FALSE, warning = FALSE)
-
+# check with Alessandro if overall RoB was scored correctly
 
 rm(list = ls())
 
@@ -35,11 +35,16 @@ side <- "left"
 # Assuming alpha level of .05 for the two-tailed test
 test <- "one-tailed"
 
-# No of simulations for the permutation p-curve and 3PSM model
-nsim <- 10 # Set to 5 just to make code checking/running fast. For the final paper, it needs to be set to at least 1000 and run overnight.
+# No of simulations for the permutation-based bias correction models and p-curve specifically
+nIterations <- 5 # Set to 5 just to make code checking/running fast. For the final paper, it needs to be set to at least 1000 and run overnight.
+nIterationsPcurve <- 5
+
+# Exclude studies having an overall Risk of Bias score of at least x.
+acceptableRiskOfBias <- 2
 
 # Sourcing and data -----------------------------------------------------------------
 source("functions.R")
+source("pcurvePlotOption.R")
 source("esConversion.R")
 
 # GRIM & GRIMMER Test -----------------------------------------------------
@@ -63,16 +68,25 @@ dataObjects <- list("Mind" = dataMind, "Bio" = dataBio)
 rmaObjects <- setNames(lapply(dataObjects, function(x){rmaCustom(x)}), nm = namesObjects)
 
 # Further results
-briefBias <- FALSE # For a more elaborate output from the pub bias tests, set to FALSE
 results <- list(NA)
+metaResultsPcurve <- list(NA)
 for(i in 1:length(rmaObjects)){
-  results[[i]] <- maResults(data = dataObjects[[i]], rmaObject = rmaObjects[[i]], briefBias = briefBias, pcurveOut = T)
+  results[[i]] <- maResults(data = dataObjects[[i]], rmaObject = rmaObjects[[i]])
+  metaResultsPcurve[[i]] <- metaResultPcurve
 }
 
 results <- setNames(results, nm = namesObjects)
+metaResultsPcurve <- setNames(metaResultsPcurve, nm = namesObjects)
 
 #+ include = TRUE
-results
+#'## Self-administered mindfulness
+results$`Self-administered mindfulness`
+
+#'## Biofeedback
+results$Biofeedback
+
+
+# Plots -------------------------------------------------------------------
 
 #+ include = TRUE
 #'# Plots
@@ -103,6 +117,13 @@ title("Mindfulness")
 #'### Biofeedback
 dataBio %$% forest(yi, vi, subset=order(vi))
 
+#'## p-curve plots
+#'### Mindfulness
+quiet(pcurveMod(metaResultsPcurve$`Self-administered mindfulness`, effect.estimation = FALSE, plot = TRUE))
+
+#'### Biofeedback
+quiet(pcurveMod(metaResultsPcurve$Biofeedback, effect.estimation = FALSE, plot = TRUE))
+
 #'## PET-PEESE plots
 #'### Mindfulness
 quiet(petPeese(dataMind))
@@ -121,88 +142,71 @@ if(results[[2]]$`Publication bias`$`4/3PSM`["pvalue"] < alpha & ifelse(exists("s
 abline((if(results[[2]]$`Publication bias`$`4/3PSM`["pvalue"] < alpha & ifelse(exists("side") & side == "left", -1, 1) * results[[2]]$`Publication bias`$`4/3PSM`["est"] > 0) {peese} else {pet}), lwd=3, lty = 2, col = "red")
 
 
-# Published vs unpublished studies ----------------------------------------
-# 
-# publishedRMA <- rmaCustom(dat[!is.na(dat$yi) & !is.na(dat$published) & dat$published == 1,])
-# unpublishedRMA <- rmaCustom(dat[!is.na(dat$yi) & !is.na(dat$published) & dat$published == 0,])
-# pubResults <- maResults(rmaObject = publishedRMA, data = dat[!is.na(dat$yi) & !is.na(dat$published) & dat$published == 1,], briefBias = T, pcurve = F)
-# unpubResults <- maResults(rmaObject = unpublishedRMA, data = dat[!is.na(dat$yi) & !is.na(dat$published) & dat$published == 0,], briefBias = T, pcurve = F)
-# pubResults
-# unpubResults
-# 
-# # Sensitivity analysis excluding effects from non-randomized designs -------
-# rmaRnd <- setNames(lapply(dataObjects, function(x){rmaCustom(x[x$researchDesign == 1,])}), nm = namesObjects)
-# rndResults <- list(NA)
-# for(i in 1:length(rmaRnd)){
-#   rndResults[[i]] <- maResults(rmaObject = rmaRnd[[i]], data = dataObjects[[i]][dataObjects[[i]]$researchDesign == 1,], briefBias = T, pcurve = F)
-# }
-# rndResults <- setNames(rndResults, nm = namesObjects)
-# rndResults
-# 
-# # Sensitivity analysis excluding effects based on inconsistent means or SDs -------
-# 
-# rmaRnd <- setNames(lapply(dataObjects, function(x){rmaCustom(x[x$inconsistenciesCount == 0,])}), nm = namesObjects)
-# rndResults <- list(NA)
-# for(i in 1:length(rmaRnd)){
-#   rndResults[[i]] <- maResults(rmaObject = rmaRnd[[i]], data = dataObjects[[i]][dataObjects[[i]]$inconsistenciesCount == 0,], briefBias = T, pcurve = F)
-# }
-# rndResults <- setNames(rndResults, nm = namesObjects)
-# rndResults
-# 
-# # Sensitivity analysis excluding effects based on a high risk of bias -------------
-# 
+# Moderator/sensitivity analyses ------------------------------------------
+
+#'# Moderator/sensitivity analyses
+#'## Published status
+
+pubUnpub <- list(NA)
+for(i in 1:length(dataObjects)){
+  viMatrix <- impute_covariance_matrix(dataObjects[[i]]$vi, cluster = dataObjects[[i]]$study, r = rho, smooth_vi = TRUE)
+  rmaObject <- rma.mv(yi ~ 0 + factor(published), V = viMatrix, data = dataObjects[[i]], method = "REML", random = ~ 1|study/result, sparse = TRUE)
+  RVEmodel <- conf_int(rmaObject, vcov = "CR2", test = "z", cluster = dataObjects[[i]]$study)
+  pubUnpub[[i]] <- list("Model results" = RVEmodel, "RVE Wald test" = Wald_test(rmaObject, constraints = constrain_equal(1:2), vcov = "CR2"))
+}
+pubUnpub <- setNames(pubUnpub, nm = namesObjects)
+pubUnpub
+
+#'## Excluding effects from non-randomized designs
+rndNonrnd <- list(NA)
+for(i in 1:length(dataObjects)){
+  viMatrix <- impute_covariance_matrix(dataObjects[[i]]$vi, cluster = dataObjects[[i]]$study, r = rho, smooth_vi = TRUE)
+  rmaObject <- rma.mv(yi ~ 0 + factor(researchDesign == 1), V = viMatrix, data = dataObjects[[i]], method = "REML", random = ~ 1|study/result, sparse = TRUE)
+  RVEmodel <- conf_int(rmaObject, vcov = "CR2", test = "z", cluster = dataObjects[[i]]$study)
+  rndNonrnd[[i]] <- list("Model results" = RVEmodel, "RVE Wald test" = Wald_test(rmaObject, constraints = constrain_equal(1:2), vcov = "CR2"))
+}
+rndNonrnd <- setNames(rndNonrnd, nm = namesObjects)
+rndNonrnd
+
+#'## Excluding effects due to inconsistent means or SDs
+consIncons <- list(NA)
+for(i in 1:length(dataObjects)){
+  viMatrix <- impute_covariance_matrix(dataObjects[[i]]$vi, cluster = dataObjects[[i]]$study, r = rho, smooth_vi = TRUE)
+  rmaObject <- rma.mv(yi ~ 0 + factor(as.logical(inconsistenciesCountGRIMMER)), V = viMatrix, data = dataObjects[[i]], method = "REML", random = ~ 1|study/result, sparse = TRUE)
+  RVEmodel <- conf_int(rmaObject, vcov = "CR2", test = "z", cluster = dataObjects[[i]]$study)
+  consIncons[[i]] <- list("Count of GRIM/GRIMMER inconsistencies" = table(as.logical(dataObjects[[i]]$inconsistenciesCountGRIMMER)), "Model results" = RVEmodel, "RVE Wald test" = Wald_test(rmaObject, constraints = constrain_equal(1:2), vcov = "CR2"))
+}
+consIncons <- setNames(consIncons, nm = namesObjects)
+consIncons
+
+#'## Excluding effects due to a high risk of bias
+
 # # Probably need to edit to comply with that is given in the ms: "Following RoB 2 recommendations a study was categorized overall as a high risk of bias if one of two conditions are met: 
 # # A) The study scores a  high risk of bias in at least one domain or B) the study is evaluated as having some concerns for more than one domain. 
 # # A study was judged as having “some concern” whether it raised some concerns in at least one domain. 
 # # Finally a study was assessed as having a low risk of bias if it was judged as having a low risk of bias in all of the five domains. 
-# 
-# excludeRisk <- 3 # Exclude studies having a risk of bias of at least x
-# rmaRoB <- setNames(lapply(dataObjects, function(x){rmaCustom(x[!is.na(x$robOverall) & x$robOverall < excludeRisk,])}), nm = namesObjects)
-# RoBResults <- list(NA)
-# for(i in 1:length(rmaRnd)){
-#   RoBResults[[i]] <- maResults(rmaObject = rmaRnd[[i]], data = dataObjects[[i]][!is.na(dataObjects[[i]]$robOverall) & dataObjects[[i]]$robOverall < excludeRisk,], briefBias = T, pcurve = F)
-# }
-# RoBResults <- setNames(RoBResults, nm = namesObjects)
-# RoBResults
-# 
-# # Moderator analysis for strategies ---------------------------------------
-# # The other moderator analyses will follow the same analytic pipeline
-# 
-# # Comparison of categories after controlling for prognostic factors w.r.t. the effect sizes
-# rmaCompare <- robust.rma.mv(rma.mv(yi = yi, V = vi, mods = ~factor(strategy), data = dat[!is.na(dat$yi),], method = "REML", random = ~ 1|study/result), cluster = dat[!is.na(dat$yi),]$study)
-# rmaCompare
-# 
-# # Defining the null model for moderator analyses
-# rmaNull <- robust.rma.mv(rma.mv(yi = yi, V = vi, mods = researchDesign + populationType + comparisonGroupType + published + robOverall - 1, struct="DIAG", data = dat[!is.na(dat$yi),], method = "ML", random = ~ factor(strategy) | result), cluster = dat[!is.na(dat$yi),]$study)
-# 
-# # Strategies
-# # Comparison of categories of strategies after controlling for prognostic factors w.r.t. the effect sizes
-# # What moderator/meta-regression analyses shall we conduct is a substantial question to discuss.
-# rmaCat <- robust.rma.mv(rma.mv(yi = yi, V = vi, mods = ~factor(strategy) + researchDesign + populationType + comparisonGroupType + published + robOverall - 1,struct="DIAG", data = dat[!is.na(dat$yi),], method = "ML", random = ~ factor(strategy) | result), cluster = dat[!is.na(dat$yi),]$study)
-# rmaCat
-# 
-# # Likelihood ratio test for the differences between categories
-# # Omnibus test
-# anova(rmaNull, rmaCat)
-# 
-# # Contrasts 
-# # p-values adjusted using Holm's method
-# summary(glht(rmaCat, linfct=cbind(contrMat(c("Self-administered mindfulness" = 1, "Biofeedback" = 1), type="Tukey"), 0, 0, 0, 0, 0)), test=adjusted("holm"))
-# 
-# # Components
-# # Comparison of components after controlling for prognostic factors w.r.t. the effect sizes
-# rmaComp <- robust.rma.mv(rma.mv(yi = yi, V = vi, mods = ~factor(stressComponentType) + researchDesign + populationType + comparisonGroupType + published + robOverall - 1, struct="DIAG", data = dat[!is.na(dat$yi),], method = "ML", random = ~ factor(strategy) | result), cluster = dat[!is.na(dat$yi),]$study)
-# rmaComp
-# 
-# # Likelihood ratio test for the differences between categories
-# # Omnibus test
-# anova(rmaNull, rmaComp)
-# 
-# # Wald's robust F test
-# # Wald_dv_multilevel <- Wald_test(rmaComp,
-# #                                 constraints = constrain_equal(1:2), 
-# #                                 vcov = "CR2")
-# 
-# # Contrasts 
-# # p-values adjusted using Holm's method
-# summary(glht(rmaComp, linfct=cbind(contrMat(c("AFloAneV" = 1, "AFhiAneV" = 1, "AFloApoV" = 1, "AFhiApoV" = 1, "cognitiveComp" = 1, "physiologicalComp" = 1), type="Tukey"), 0, 0, 0, 0, 0)), test=adjusted("holm"))
+
+highRoB <- list(NA)
+for(i in 1:length(dataObjects)){
+  viMatrix <- impute_covariance_matrix(dataObjects[[i]]$vi, cluster = dataObjects[[i]]$study, r = rho, smooth_vi = TRUE)
+  rmaObject <- rma.mv(yi ~ 0 + factor(robOverall > acceptableRiskOfBias), V = viMatrix, data = dataObjects[[i]], method = "REML", random = ~ 1|study/result, sparse = TRUE)
+  RVEmodel <- conf_int(rmaObject, vcov = "CR2", test = "z", cluster = dataObjects[[i]]$study)
+  highRoB[[i]] <- list("Model results" = RVEmodel, "RVE Wald test" = Wald_test(rmaObject, constraints = constrain_equal(1:2), vcov = "CR2"))
+}
+highRoB <- setNames(highRoB, nm = namesObjects)
+highRoB
+
+#'## Comparison of strategies
+
+#'### Model without covariates
+viMatrixStratComp <- impute_covariance_matrix(dat$vi, cluster = dat$study, r = rho, smooth_vi = TRUE)
+rmaObjectStratComp <- rma.mv(yi ~ 0 + factor(strategy), V = viMatrixStratComp, data = dat, method = "REML", random = ~ 1|study/result, sparse = TRUE)
+RVEmodelStratComp <- conf_int(rmaObjectStratComp, vcov = "CR2", test = "z", cluster = dat$study)
+list("Model results" = RVEmodelStratComp, "RVE Wald test" = Wald_test(rmaObjectStratComp, constraints = constrain_equal(1:2), vcov = "CR2"))
+
+#'### Model with covariates
+#' Controlling for design-related factors that are prognostic w.r.t. the effect sizes (i.e., might vary across moderator categories)
+viMatrixStratComp <- impute_covariance_matrix(dat$vi, cluster = dat$study, r = rho, smooth_vi = TRUE)
+rmaObjectStratComp <- rma.mv(yi ~ 0 + factor(strategy) + researchDesign + populationType + comparisonGroupType + published + robOverall, V = viMatrixStratComp, data = dat, method = "REML", random = ~ 1|study/result, sparse = TRUE)
+RVEmodelStratComp <- conf_int(rmaObjectStratComp, vcov = "CR2", test = "z", cluster = dat$study)
+list("Model results" = RVEmodelStratComp, "RVE Wald test" = Wald_test(rmaObjectStratComp, constraints = constrain_equal(1:2), vcov = "CR2"))

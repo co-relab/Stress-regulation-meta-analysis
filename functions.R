@@ -1,5 +1,8 @@
+# Pocket 
+# print(deparse(substitute(df)))
+
 # Load libraries (and install if not installed already)
-list.of.packages <- c("car", "reshape", "tidyverse", "psych", "metafor", "meta", "dmetar", "esc", "lme4", "ggplot2", "knitr", "puniform", "kableExtra", "lmerTest", "pwr", "Amelia", "multcomp", "magrittr", "weightr", "clubSandwich", "R.devices", "ddpcr")
+list.of.packages <- c("car", "reshape", "tidyverse", "tidyr", "psych", "metafor", "meta", "dmetar", "esc", "lme4", "ggplot2", "knitr", "puniform", "kableExtra", "lmerTest", "pwr", "Amelia", "multcomp", "magrittr", "weightr", "clubSandwich", "ddpcr", "poibin")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 
@@ -25,7 +28,7 @@ rmaCustom <- function(data = NA, robust = TRUE){
   rmaObjectModBasedSE <- rma.mv(yi = yi, V = viMatrix, data = data, method = "REML", random = ~ 1|study/result, sparse = TRUE)
   rmaObject <- robust.rma.mv(rmaObjectModBasedSE, cluster = data$study)
   return(list("RMA.MV object with RVE SEs with n/(n-p) small-sample correction" = rmaObject, 
-              "RMA.MV object with model-based SEs" = rmaObjectModBasedSE))
+              "RMA.MV object without cluster robust SEs" = rmaObjectModBasedSE))
 }
 
 # 95% prediction interval -------------------------------------------------
@@ -77,13 +80,13 @@ propSig <- function(p.values = NA){
 
 # Publication bias --------------------------------------------------------
 
-bias <- function(data = NA, rmaObject = NA, briefBias = TRUE){
+bias <- function(data = NA, rmaObject = NA){
   # Correlation between the ES and precision (SE)
   esPrec <- cor(rmaObject[[1]]$yi, sqrt(rmaObject[[1]]$vi), method = "kendall")
   # Small-study effects correction
   # 3-parameter selection model
-  resultSM <- matrix(ncol = 8, nrow = nsim)
-  for(i in 1:nsim){
+  resultSM <- matrix(ncol = 8, nrow = nIterations)
+  for(i in 1:nIterations){
     resultSM[i,] <- data %>% selectionModel(., minPvalues = 4)
   }
   colnames(resultSM) <- c("est", "se", "zvalue", "pvalue", "ciLB", "ciUB", "k", "steps")
@@ -95,13 +98,15 @@ bias <- function(data = NA, rmaObject = NA, briefBias = TRUE){
   
   # WAAP-WLS
   waapWLSout <- data %$% waapWLS(yi, vi)
+  waapWLSout[1, 9:10] <- waapWLSout[2, 9:10]
+  waapWLSout <- waapWLSout[1,]
   
   # Permutation p-curve
-  pcurvePermOut <- pcurvePerm(data, esEstimate = FALSE)
+  pcurvePermOut <- pcurvePerm(data, esEstimate = FALSE, plot = FALSE)
   
   # p-uniform* (van Aert & van Assen, 2021)
-  resultPuniform <- matrix(ncol = 4, nrow = nsim)
-  for(i in 1:nsim){
+  resultPuniform <- matrix(ncol = 4, nrow = nIterations)
+  for(i in 1:nIterations){
     set.seed(1)
     modelPuniform <- data[!duplicated.random(data$study) & data$focalVariable == 1,] %$% puni_star(yi = yi, vi = vi, alpha = alpha, side = side, method = "ML")
     resultPuniform[i,] <- c("est" = modelPuniform[["est"]], "ciLB" = modelPuniform[["ci.lb"]], "ciUB" = modelPuniform[["ci.ub"]], "p-value" = modelPuniform[["pval.0"]])
@@ -111,42 +116,31 @@ bias <- function(data = NA, rmaObject = NA, briefBias = TRUE){
   puniformOut <<- resultPuniform
 
   # Publication bias results
-  if(briefBias == TRUE){
-    return(list("4/3PSM ES estimate" = resultSM["est"],
-                "4/3PSM confidence interval" = c(resultSM["ciLB"], resultSM["ciUB"]),
-                "4/3PSM p-value" = resultSM[4],
-                "Whether PET or PEESE was used" = ifelse(resultSM["pvalue"] < alpha & ifelse(exists("side") & side == "left", -1, 1) * resultSM["est"] > 0, "PEESE", "PET"),
-                "PET-PEESE ES estimate" = as.numeric(petPeeseOut[1]),
-                "PET-PEESE confidence interval" = as.numeric(c(petPeeseOut[5], petPeeseOut[6])),
-                "PET-PEESE p-value" = petPeeseOut[4],
-                "p-uniform*" = puniformOut,
-                "p-curve" = ifelse(pcurveOut == TRUE, pcurvePermOut$pcurveResults, paste("p-curve analysis not carried out")),))}
-  else{
     return(list("4/3PSM" = resultSM, 
                 "PET-PEESE" = petPeeseOut,
+                "WAAP-WLS" = waapWLSout,
                 "p-uniform*" = puniformOut,
                 "p-curve" = pcurvePermOut))
-  }
 }
 
 # Permutation p-curve
 # Subseting only the effects that are focal for the published study
-pcurvePerm <- function(data, esEstimate = FALSE){
+pcurvePerm <- function(data, esEstimate = FALSE, plot = FALSE, nIterations = nIterationsPcurve){
   resultIDpcurve <- list(NA)
-  resultPcurve <- matrix(ncol = 11, nrow = nsim)
-  for(i in 1:nsim){
+  resultPcurve <- matrix(ncol = 11, nrow = nIterationsPcurve)
+  for(i in 1:nIterationsPcurve){
     set.seed(1)
     datPcurve <- data[!duplicated.random(data$study) & data$focalVariable == 1,]
     metaPcurve <- metagen(TE = yi, seTE = sqrt(vi), n.e = ni, data = datPcurve)
-    modelPcurve <- suppressGraphics(pcurve(metaPcurve, effect.estimation = esEstimate, N = datPcurve$n.e))
+    modelPcurve <- pcurveMod(metaPcurve, effect.estimation = esEstimate, N = datPcurve$n.e, plot = FALSE)
     resultPcurve[i,] <- c(i, "rightskew" = modelPcurve$pcurveResults[1,], "flatness" = modelPcurve$pcurveResults[2,])
     resultIDpcurve[[i]] <- datPcurve$result
   }
   colnames(resultPcurve) <- c("iterationNo", "rightskew.pBinomial", "rightskew.zFull", "rightskew.pFull", "rightskew.zHalf", "rightskew.pHalf", "flatness.pBinomial", "flatness.zFull", "flatness.pFull", "flatness.zHalf", "flatness.pHalf")
   medianResultPcurve <- resultPcurve %>% data.frame() %>% na.omit() %>% arrange(rightskew.zFull) %>% slice(ceiling(n()/2)) %>% unlist()
   metaResultPcurve <- metagen(TE = yi, seTE = sqrt(vi), data = data[data$result %in% unlist(resultIDpcurve[medianResultPcurve["iterationNo"]]),])
-  pcurveOut <- pcurve(metaResultPcurve, effect.estimation = esEstimate)
-  pcurveOut
+  metaResultPcurve <<- metaResultPcurve
+  pcurveMod(metaResultPcurve, effect.estimation = esEstimate, plot = plot)
 }
 
 # Multiple-parameter selection models -------------------------------------
@@ -220,7 +214,7 @@ petPeese <- function(data, nBased = TRUE, selModAsCondEst = TRUE){  # if nBased 
 # WLS estimator
 
 # Weighted least squares estimator: Stanley, T. D., & Doucouliagos, H. (2015). Neither fixed nor random: weighted least squares meta-analysis. Statistics in Medicine, 34(13), 2116–2127. http://doi.org/10.1002/sim.6481
-WLS.est <- function(yi, vi, long = TRUE) {
+WLS.est <- function(yi, vi, long = FALSE) {
   se <- sqrt(vi)
   yi.precision <- 1/se
   yi.stand <- yi/se
@@ -236,11 +230,11 @@ WLS.est <- function(yi, vi, long = TRUE) {
     conf.low = confint(l1)[1],
     conf.high = confint(l1)[2]
   )
-  returnRes(res, long)
+  returnRes(res, long = FALSE)
 }
 
 # return object: type = 1: WAAP, type = 2: WLS (must be numeric, otherwise it distorts the structure of the results object)
-waapWLS <- function(yi, vi, est = c("WAAP-WLS"), long = TRUE) {
+waapWLS <- function(yi, vi, est = c("WAAP-WLS"), long = FALSE) {
   
   # 1. determine which studies are in the top-N set
   
@@ -261,13 +255,13 @@ waapWLS <- function(yi, vi, est = c("WAAP-WLS"), long = TRUE) {
   if (kAdequate >= 2) {
     res <- WLS.est(yi[powered], vi[powered], long=FALSE)
     res$method <- "WAAP-WLS"
-    res <- plyr::rbind.fill(res, data.frame(method="WAAP-WLS", term="estimator", type=1, kAdequate=kAdequate))
+    res <- plyr::rbind.fill(res, data.frame(method="WAAP-WLS", term="b0", type=1, kAdequate=kAdequate))
   } else {
     res <- WLS.all
     res$method <- "WAAP-WLS"
-    res <- plyr::rbind.fill(res, data.frame(method="WAAP-WLS", term="estimator", type=2, kAdequate=kAdequate))
+    res <- plyr::rbind.fill(res, data.frame(method="WAAP-WLS", term="b0", type=2, kAdequate=kAdequate))
   }
-  returnRes(res, long)
+  returnRes(res, long = FALSE)
 }
 
 # Power based on PEESE and 4/3PSM parameter estimates -----------------------
@@ -284,14 +278,14 @@ powerEst <- function(data = NA){
 
 # Summary results ---------------------------------------------------------
 
-maResults <- function(rmaObject = NA, data = NA, briefBias = F, pcurveOut = TRUE){
+maResults <- function(rmaObject = NA, data = NA, bias = T){
   list(
     "RMA results with model-based SEs" = rmaObject[[2]],
     "RVE SEs with Satterthwaite small-sample correction" = conf_int(rmaObject[[2]], vcov = "CR2", cluster = data$study),
     "Prediction interval" = pi95(rmaObject),
     "Heterogeneity" = heterogeneity(rmaObject),
     "Proportion of significant results" = propSig(data$p),
-    "Publication bias" = bias(data, rmaObject, briefBias = briefBias),
+    "Publication bias" = if(bias ==T) {bias(data, rmaObject)} else {paste("Publication bias correction not carried out")},
     "Power based on PEESE and 4PSM parameter estimates" = powerEst(data))
 }
 

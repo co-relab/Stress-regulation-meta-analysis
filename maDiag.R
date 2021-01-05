@@ -15,7 +15,6 @@ baujat(ma.uni)
 #fit FE model to all possible subsets
 gosh.plot <- gosh(ma.uni, progbar = TRUE, subsets = 1000, parallel = "multicore")
 plot(gosh.plot, out = 76, breaks = 50) # Testing the influence of single outliers
-plot(gosh.plot, out = 74, breaks = 50)
 
 #+eval = FALSE
 # Influence diagnostics
