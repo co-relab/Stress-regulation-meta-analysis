@@ -24,7 +24,7 @@ dual-screen display of real-time HRV patterns and relaxing
 nature scenes as participants practiced focusing of atten
 tion,
 resonant frequency breathing, and positive imagery";usual care treatment;HRV;;6;;1;1;5;29;;;;;;;;;;;;;;;;0.18;0.17;17;17;;0.84;0.33;1;1;1;1;1;1;1;;
-2;Symptom Management Among Cancer Survivors: Randomized Pilot Intervention Trial of Heart Rate Variability Biofeedback.;"Burch, James B.; Ginsberg, J. P.; McLain, Alexander C.; Franco, Regina; Stokes, Sherry; Susko, Kerri; Hendry, William; Crowley, Elizabeth; Christ, Alex; Hanna, John; Anderson, Annie; Hébert, James R.; O'Rourke, Mark A.";burch@mailbox.sc.edu;1;2;Applied psychophysiology and biofeedback;21;2020;1;1;1;;1;0;-1;1;1;2;5;5;1;at the end of the 4-6 weeks;200;4-6 weeks;1;1;0;4;;3;Cancer survivors;HRV coherence ratio;1;"HRVB training consisted of 25 min of individual
+2;Symptom Management Among Cancer Survivors: Randomized Pilot Intervention Trial of Heart Rate Variability Biofeedback.;"Burch, James B.; Ginsberg, J. P.; McLain, Alexander C.; Franco, Regina; Stokes, Sherry; Susko, Kerri; Hendry, William; Crowley, Elizabeth; Christ, Alex; Hanna, John; Anderson, Annie; Hébert, James R.; O'Rourke, Mark A.";burch@mailbox.sc.edu;1;2;Applied psychophysiology and biofeedback;21;2020;1;1;1;;1;10;-1;1;1;2;5;5;1;at the end of the 4-6 weeks;200;4-6 weeks;1;1;0;4;;3;Cancer survivors;PSS - perceived stress scale;1;"HRVB training consisted of 25 min of individual
 biofeedback training/coaching using an emWave Pro sys
 tem
 (HeartMath, Boulder Creek, CA) and earlobe or fin
@@ -34,8 +34,8 @@ personal practice period. Feedback was provided using a
 dual-screen display of real-time HRV patterns and relaxing
 nature scenes as participants practiced focusing of atten
 tion,
-resonant frequency breathing, and positive imagery";usual care treatment;HRV;;2;;1;1;5;29;;;;;;;;;;;;;;;;0.87;0.59;17;17;;20.9;20.8;1;1;1;1;1;1;1;;
-2;Symptom Management Among Cancer Survivors: Randomized Pilot Intervention Trial of Heart Rate Variability Biofeedback.;"Burch, James B.; Ginsberg, J. P.; McLain, Alexander C.; Franco, Regina; Stokes, Sherry; Susko, Kerri; Hendry, William; Crowley, Elizabeth; Christ, Alex; Hanna, John; Anderson, Annie; Hébert, James R.; O'Rourke, Mark A.";burch@mailbox.sc.edu;1;3;Applied psychophysiology and biofeedback;21;2020;1;1;1;;1;0;1;1;1;2;5;5;1;at the end of the 4-6 weeks;200;4-6 weeks;1;1;0;4;;3;Cancer survivors;HRV coherence ratio;1;"HRVB training consisted of 25 min of individual
+resonant frequency breathing, and positive imagery";usual care treatment;stress;;2;;1;1;5;29;;;;;;;;;;;;;;;;0.87;0.59;17;17;;20.9;20.8;1;1;1;1;1;1;1;;
+2;Symptom Management Among Cancer Survivors: Randomized Pilot Intervention Trial of Heart Rate Variability Biofeedback.;"Burch, James B.; Ginsberg, J. P.; McLain, Alexander C.; Franco, Regina; Stokes, Sherry; Susko, Kerri; Hendry, William; Crowley, Elizabeth; Christ, Alex; Hanna, John; Anderson, Annie; Hébert, James R.; O'Rourke, Mark A.";burch@mailbox.sc.edu;1;3;Applied psychophysiology and biofeedback;21;2020;1;1;1;;1;0;1;1;1;2;5;5;1;at the end of the 4-6 weeks;200;4-6 weeks;1;1;0;4;;3;Cancer survivors;Back depression inventory;1;"HRVB training consisted of 25 min of individual
 biofeedback training/coaching using an emWave Pro sys
 tem
 (HeartMath, Boulder Creek, CA) and earlobe or fin
@@ -45,7 +45,7 @@ personal practice period. Feedback was provided using a
 dual-screen display of real-time HRV patterns and relaxing
 nature scenes as participants practiced focusing of atten
 tion,
-resonant frequency breathing, and positive imagery";usual care treatment;HRV;;;1;1;1;5;29;;;;;;;;;;;;;;;;2.5;2.3;17;17;;8.3;11.7;1;1;1;1;1;1;1;;
+resonant frequency breathing, and positive imagery";usual care treatment;depression;;;1;1;1;5;29;;;;;;;;;;;;;;;;2.5;2.3;17;17;;8.3;11.7;1;1;1;1;1;1;1;;
 3;A randomized-controlled trial of heart rate variability biofeedback for psychotic symptoms.;"Clamor, Annika; Koenig, Julian; Thayer, Julian F.; Lincoln, Tania M.";"annika.clamor@uni-hamburg.de, Julian.Koenig@
 med.uni-heidelberg.de, thayer.39@osu.edu, tania.lincoln@
 uni-hamburg.de";1;2;Behaviour research and therapy;57;2016;1;1;1;;17;0;;1;1;2;1;1;1;;20;;0;1;1;2;;2;;RMSSD;1;"In the intervention phase, the procedure varied for the groups.
@@ -237,28 +237,6 @@ resonant frequency and relax. The BFB sessions were
 given for 10 consecutive days for 20 min each.";"Placebo Group was shown motivational basketball
 visual
 clips";State anxiety;;2;;1;1;17;13;;21.13;;;;;;;;;;;;1.43;7.38;;;10;10;10;21.40;36.40;1;1;1;1;2;1;1;;
-11;The effect of heart rate variability biofeedback on performance psychology of  basketball players.;"Paul, Maman; Garg, Kanupriya";kannugr855@yahoo.co.in, maman_paul20@yahoo.co.uk;1;2;Applied psychophysiology and biofeedback;21;2012;1;1;2;;138;20;1;1;1;2;7;10;2;1 month follow-up;200;10 consecutive days;0;1;0;4;;2;;STAY- S state anxiety;2;"Fol
-lowing
-the pre-test measurements, the subject sat with
-closed eyes in a chair for 5 min with hands resting on arm
-rest in a peaceful room before commencement of HRV
-biofeedback training. In the first session, the subject was
-asked to breathe at variable respiratory rates for about
-2 min each (6.5, 6, 5.5, 5, 4.5 breaths/minute) for deter
-mination
-of resonant frequency. A ‘‘pacing stimulus’’: a
-light display that moved up and down on the computer
-screen at the target respiratory rate was provided. The
-subject was instructed to breathe at that particular rate of
-stimulus. The resonant frequency was determined as the
-maximum point in the peak amplitude signal of the reso
-nant
-frequency detection monitor on the biofeedback
-equipment. The subject was then asked to breathe at his
-resonant frequency and relax. The BFB sessions were
-given for 10 consecutive days for 20 min each.";"Placebo Group was shown motivational basketball
-visual
-clips";State anxiety;;2;;1;1;17;13;;21.13;;;;;;;;;;;;1.28;7.34;;;10;10;10;20.10;36.30;1;1;1;1;2;1;1;;
 11;The effect of heart rate variability biofeedback on performance psychology of  basketball players.;"Paul, Maman; Garg, Kanupriya";kannugr855@yahoo.co.in, maman_paul20@yahoo.co.uk;1;3;Applied psychophysiology and biofeedback;21;2012;1;1;2;;138;20;1;1;1;2;7;10;1;after intervention ;200;10 consecutive days;0;1;0;4;;2;;STAY- T trait anxiety;2;"Fol
 lowing
 the pre-test measurements, the subject sat with
@@ -281,28 +259,6 @@ resonant frequency and relax. The BFB sessions were
 given for 10 consecutive days for 20 min each.";"Placebo Group was shown motivational basketball
 visual
 clips";Trait anxiety;;;2;1;1;17;13;;21.13;;;;;;;;;;;;2.89;8.84;;;10;10;10;26.20;42.50;1;1;1;1;2;1;1;;
-11;The effect of heart rate variability biofeedback on performance psychology of  basketball players.;"Paul, Maman; Garg, Kanupriya";kannugr855@yahoo.co.in, maman_paul20@yahoo.co.uk;1;4;Applied psychophysiology and biofeedback;21;2012;1;1;2;;138;20;1;1;1;2;7;10;2;1 month follow-up;200;10 consecutive days;0;1;0;4;;2;;STAY- T trait anxiety;2;"Fol
-lowing
-the pre-test measurements, the subject sat with
-closed eyes in a chair for 5 min with hands resting on arm
-rest in a peaceful room before commencement of HRV
-biofeedback training. In the first session, the subject was
-asked to breathe at variable respiratory rates for about
-2 min each (6.5, 6, 5.5, 5, 4.5 breaths/minute) for deter
-mination
-of resonant frequency. A ‘‘pacing stimulus’’: a
-light display that moved up and down on the computer
-screen at the target respiratory rate was provided. The
-subject was instructed to breathe at that particular rate of
-stimulus. The resonant frequency was determined as the
-maximum point in the peak amplitude signal of the reso
-nant
-frequency detection monitor on the biofeedback
-equipment. The subject was then asked to breathe at his
-resonant frequency and relax. The BFB sessions were
-given for 10 consecutive days for 20 min each.";"Placebo Group was shown motivational basketball
-visual
-clips";Trait anxiety;;;2;1;1;17;13;;21.13;;;;;;;;;;;;2.67;8.66;;;10;10;10;25.40;42.40;1;1;1;1;2;1;1;;
 11;The effect of heart rate variability biofeedback on performance psychology of  basketball players.;"Paul, Maman; Garg, Kanupriya";kannugr855@yahoo.co.in, maman_paul20@yahoo.co.uk;1;5;Applied psychophysiology and biofeedback;21;2012;1;1;2;;138;0;1;1;1;2;7;10;1;after intervention ;200;10 consecutive days;0;1;0;4;;2;;;2;"Fol
 lowing
 the pre-test measurements, the subject sat with
@@ -325,28 +281,6 @@ resonant frequency and relax. The BFB sessions were
 given for 10 consecutive days for 20 min each.";"Placebo Group was shown motivational basketball
 visual
 clips";total HRV;;5;;1;1;17;13;;21.13;;;;;;;;;;;;1,624.81;386.68;;;10;10;10;2,224.11;455.75;1;1;1;1;2;1;1;;
-11;The effect of heart rate variability biofeedback on performance psychology of  basketball players.;"Paul, Maman; Garg, Kanupriya";kannugr855@yahoo.co.in, maman_paul20@yahoo.co.uk;1;6;Applied psychophysiology and biofeedback;21;2012;1;1;2;;138;0;1;1;1;2;7;10;2;1 month follow-up;200;10 consecutive days;0;1;0;4;;2;;;2;"Fol
-lowing
-the pre-test measurements, the subject sat with
-closed eyes in a chair for 5 min with hands resting on arm
-rest in a peaceful room before commencement of HRV
-biofeedback training. In the first session, the subject was
-asked to breathe at variable respiratory rates for about
-2 min each (6.5, 6, 5.5, 5, 4.5 breaths/minute) for deter
-mination
-of resonant frequency. A ‘‘pacing stimulus’’: a
-light display that moved up and down on the computer
-screen at the target respiratory rate was provided. The
-subject was instructed to breathe at that particular rate of
-stimulus. The resonant frequency was determined as the
-maximum point in the peak amplitude signal of the reso
-nant
-frequency detection monitor on the biofeedback
-equipment. The subject was then asked to breathe at his
-resonant frequency and relax. The BFB sessions were
-given for 10 consecutive days for 20 min each.";"Placebo Group was shown motivational basketball
-visual
-clips";total HRV;;5;;1;1;17;13;;21.13;;;;;;;;;;;;1,641.80;386.47;;;10;10;10;2,287.2;455.88;1;1;1;1;2;1;1;;
 12;The effect of a single episode of short duration heart rate variability biofeedback on measures of anxiety and relaxation states;"Prinsloo, G.E.; Derman, W.E.; Lambert, M.I.; Laurie Rauch, H.G.";gabriellprinsloo@gmail.com;1;1;International Journal of Stress Management;29;2013;1;1;2;;42;20;1;1;1;2;1;1;2;after the 10 minutes biofeedback session;10;single administration - 10 minute;0;1;1;2;Modified Stroop task;2;;STAY- S state anxiety;1;10 minutes hrv biofeedback intervention;;state anxiety;;2;;1;1;18;0;;34;;;;;;;;;;;;7;9;;;9;9;;30;32;1;2;1;1;1;2;1;;https://www.scopus.com/inward/record.uri?eid=2-s2.0-68949215036&doi=10.1037%2fa0016047&partnerID=40&md5=4fc9851262f5c7a5b04fbb7d7c804d4e
 12;The effect of a single episode of short duration heart rate variability biofeedback on measures of anxiety and relaxation states;"Prinsloo, G.E.; Derman, W.E.; Lambert, M.I.; Laurie Rauch, H.G.";gabriellprinsloo@gmail.com;1;2;International Journal of Stress Management;29;2013;1;1;2;;42;20;1;1;1;2;1;1;2;after the 10 minutes biofeedback session;10;single administration - 10 minute;0;1;1;2;Modified Stroop task;2;;Smith relaxation states inventory (SRSI3) mindfulness subscale;1;10 minutes hrv biofeedback intervention;;mindful quiet;;3;;1;1;18;0;;34;;;;;;;;;;;;0.87;1.10;;;9;9;;4.28;3.56;1;2;1;1;1;2;1;;
 13;Effects of Respiratory Sinus Arrhythmia Biofeedback Versus Passive Biofeedback Control;"Sherlin, L.; Gevirtz, R.; Wyckoff, S.; Muench, F.";lesliesherlin@mac.com;1;1;International Journal of Stress Management;27;2009;1;1;3;;64;20;1;1;1;2;1;1;1;Immediatly after the intervention;15;only 15 minutes;0;0;1;2;;1;;STAY- S state anxiety;2;"The HRV biofeedback device (the StressEraser; Helicor, Inc., New York,
@@ -357,7 +291,7 @@ their breathing to a rate that is unique to them by inhaling until their HR
 peaks as marked on the device by a triangle and exhaling as the wave falls,
 until it begins to rise again";"The passive biofeedback control alternate intervention device was a
 StressEraser with an altered wave that still responded to their physiology, but
-participants had no indication of how to manipulate the wave";;;2;;1;1;;;48.8;;;;;;;;;;;;;11.54;11.05;;;21;22;;33.54       ; 37.68;1;1;1;1;2;2;1;;https://search.proquest.com/docview/2316839361?accountid=16562
+participants had no indication of how to manipulate the wave";state anxiety;;2;;1;1;;;48.8;;;;;;;;;;;;;11.54;11.05;;;21;22;;33.54       ; 37.68;1;1;1;1;2;2;1;;https://search.proquest.com/docview/2316839361?accountid=16562
 13;Effects of Respiratory Sinus Arrhythmia Biofeedback Versus Passive Biofeedback Control;"Sherlin, L.; Gevirtz, R.; Wyckoff, S.; Muench, F.";lesliesherlin@mac.com;1;2;International Journal of Stress Management;27;2009;1;1;3;;64;20;1;1;1;2;1;1;1;Immediatly after the intervention;15;only 15 minutes;0;0;1;2;;1;;Heart rate;2;"The HRV biofeedback device (the StressEraser; Helicor, Inc., New York,
 NY) an over-the-counter noninvasive biofeedback device that displays the
 natural rise and fall of real-time pulse-by-pulse activity as a wave (RSA) on
@@ -423,7 +357,7 @@ HeartMath, LLC, Boulder, Colorado) provided HRV biofeedback treatment. The emWav
 includes a fingertip plethysmograph that transfers heart rate data to a software program through
 which biofeedback is provided. Data from the sensor is transformed to display participants’ heart
 rhythm in real time. In addition, graphs depicting the HRV power spectrum or pulse wave were
-displayed. The third biofeedback component involves coherence.";no intervention group;depression;;;2;1;1;4;23;;22.54;;;;;;;;;;;;1.02;0.60;;;;;;0.50;0.23;1;2;1;1;1;2;1;;
+displayed. The third biofeedback component involves coherence.";no intervention group;depression;;;1;1;1;4;23;;22.54;;;;;;;;;;;;1.02;0.60;;;;;;0.50;0.23;1;2;1;1;1;2;1;;
 15;Effectiveness of Biofeedback in Improving Heart Rate Variability Recovery Following Stress;Wheat, Amanda L.;;1;4;;;2012;1;0;1;;1;0;-1;1;1;2;1;6;1;after last intervention;192;"Days
 between the initial and follow-up visits ranged from 28 to 84 days.";1;1;1;3;Arythmetic stress task;3;;MAACL-R - positive affect;1;"The emWave PC Stress Relief System (“emWave,”
 HeartMath, LLC, Boulder, Colorado) provided HRV biofeedback treatment. The emWave
@@ -448,16 +382,6 @@ abdomen to distend to allow for the full use of the diaphragm. Participants were
 taught to breathe deeply in through the nose and out through pursed lips, using
 the diaphragm and belly in a manner that the shoulders do not rise and fall. The
 use of good posture without slouching and the use of transitioning breathing";no intervention;SDNN - HRV;;6;;1;1;56;28;;54;;;;;;;;;;;;;;3.24;3.84;44;41;;31.7;37.6;1;2;1;1;1;2;1;;https://search.proquest.com/docview/2267452548?accountid=16562
-16;Role of Heart Rate Variability Biofeedback in Cognitive Performance, Chronic Pain, and Related Symptoms;Winstead, James P.;;1;2;;;2019;0;0;1;;0;0;-1;1;1;2;1;6;2;1 month after the end of intervention;150;6 weeks ;1;1;0;4;;3;"veteran patients attending the WJB Dorn
-Veterans Administration Medical Center (DVAMC)";SDNN - HRV;1;"The first was to assist the participant to
-paint a positive mental image of something that truly makes them happy and guide
-their thoughts to a peaceful, reduced-stress environment. The next portion of the
-training included instruction to adjust breathing rate and pattern. Participants were
-taught to perform “belly-breathing” using diaphragmatic breathing, allowing the
-abdomen to distend to allow for the full use of the diaphragm. Participants were
-taught to breathe deeply in through the nose and out through pursed lips, using
-the diaphragm and belly in a manner that the shoulders do not rise and fall. The
-use of good posture without slouching and the use of transitioning breathing";no intervention;SDNN - HRV;;6;;1;1;56;28;;54;;;;;;;;;;;;;;3.79;4.27;44;41;;31.1;34.8;1;2;1;1;1;2;1;;
 16;Role of Heart Rate Variability Biofeedback in Cognitive Performance, Chronic Pain, and Related Symptoms;Winstead, James P.;;1;3;;;2019;0;0;1;;0;21;1;1;1;2;1;6;1;post-intervention;150;6 weeks ;1;1;0;4;;;;Beck Depression Inventory-II (BDI);1;"The first was to assist the participant to
 paint a positive mental image of something that truly makes them happy and guide
 their thoughts to a peaceful, reduced-stress environment. The next portion of the
@@ -476,24 +400,6 @@ abdomen to distend to allow for the full use of the diaphragm. Participants were
 taught to breathe deeply in through the nose and out through pursed lips, using
 the diaphragm and belly in a manner that the shoulders do not rise and fall. The
 use of good posture without slouching and the use of transitioning breathing";no intervention;stress;;2;;1;1;56;28;;54;;;;;;;;;;;;;;0.76;0.76;44;41;;21.72;22.26;1;2;1;1;1;2;1;;
-16;Role of Heart Rate Variability Biofeedback in Cognitive Performance, Chronic Pain, and Related Symptoms;Winstead, James P.;;1;5;;;2019;0;0;1;;0;21;1;1;1;2;1;6;2;1 month after the end of intervention;150;6 weeks ;1;1;0;4;;;;Beck Depression Inventory-II (BDI);1;"The first was to assist the participant to
-paint a positive mental image of something that truly makes them happy and guide
-their thoughts to a peaceful, reduced-stress environment. The next portion of the
-training included instruction to adjust breathing rate and pattern. Participants were
-taught to perform “belly-breathing” using diaphragmatic breathing, allowing the
-abdomen to distend to allow for the full use of the diaphragm. Participants were
-taught to breathe deeply in through the nose and out through pursed lips, using
-the diaphragm and belly in a manner that the shoulders do not rise and fall. The
-use of good posture without slouching and the use of transitioning breathing";no intervention;depression;;;1;1;1;56;28;;54;;;;;;;;;;;;;;1.34;1.34;44;41;;16.30;20.32;1;2;1;1;1;2;1;;
-16;Role of Heart Rate Variability Biofeedback in Cognitive Performance, Chronic Pain, and Related Symptoms;Winstead, James P.;;1;6;;;2019;0;0;1;;0;10;1;1;1;2;1;6;2;1 month after the end of intervention;150;6 weeks ;1;1;0;4;;;;PSS - Perceived stress scale;1;"The first was to assist the participant to
-paint a positive mental image of something that truly makes them happy and guide
-their thoughts to a peaceful, reduced-stress environment. The next portion of the
-training included instruction to adjust breathing rate and pattern. Participants were
-taught to perform “belly-breathing” using diaphragmatic breathing, allowing the
-abdomen to distend to allow for the full use of the diaphragm. Participants were
-taught to breathe deeply in through the nose and out through pursed lips, using
-the diaphragm and belly in a manner that the shoulders do not rise and fall. The
-use of good posture without slouching and the use of transitioning breathing";no intervention;stress;;2;;1;1;56;28;;54;;;;;;;;;;;;;;0.82;0.83;44;41;;21.66;23.35;1;2;1;1;1;2;1;;
 17;"Effectiveness of Voluntary Heart Rate Control in
 Reducing Speech Anxiety";Gatchel et al. ;;1;1;Journal of consulting and clinical psychology;56;1976;1;1;4;;76;0;1;1;1;2;1;3;1;after interventin;60;3 weeks ;0;1;1;3;"participants had to do a speech on various topics (e.g., legalization of marijuana"")";2;;;1;"subjects per
 formed

@@ -10,8 +10,8 @@ if(length(new.packages)) install.packages(new.packages)
 lapply(list.of.packages, require, quietly = TRUE, warn.conflicts = FALSE, character.only = TRUE)
 select <- dplyr::select
 
-datMind <- read_delim("SAM1.csv", delim = ";", trim_ws = T)
-datBio <- read_delim("BF1.csv", delim = ";", trim_ws = T)
+datMind <- read_delim("SAM.csv", delim = ";", trim_ws = T)
+datBio <- read_delim("BF.csv", delim = ";", trim_ws = T)
 dat <- bind_rows(datMind, datBio)
 
 dat <- dat %>% modify_at(., .at = c("F", "beta", "t", "r", "chiSq", "df1", "df2", "sd1", "sd2", "se1", "se2", "n1", "n2", "mean1", "mean2", "published", "researchDesign", "publicationYear", "nMale", "nFemale"), .f = ~as.numeric(as.character(.)))
@@ -31,6 +31,7 @@ dat <- dat %>% mutate(sd1 = ifelse(is.na(sd1) & !is.na(se1), se1*sqrt(n1+n2), sd
                       sd2 = ifelse(is.na(sd2) & !is.na(se2), se2*sqrt(n1+n2), sd2))
 
 dat <- escalc(measure = "SMD", m1i = mean1, m2i = mean2, sd1i = sd1, sd2i = sd2, n1i = n1, n2i = n2, data = dat)
+dat <- dat %>% mutate(yi = abs(yi) * predictedDirection)
 dat <- dat %>% rowwise %>% mutate(p = as.numeric(round(tTestSummary(mean1, mean2, sd1, sd2, n1, n2)["p-value"], 5))) %>% data.frame()
 
 # Initialize new variables
@@ -72,7 +73,7 @@ dat <- dat %>% mutate(label = ifelse(finalDesign == "F1" & focalVariable == 1, p
                                                         "F(", df1, ",", df2, ")=", F, sep = ""), NA))
 
 # Show the converted ESs
-dat %>% filter(finalDesign == "F1") %>% select(gConv, gConv, researchDesign, df2, n1, n2, ni, useCellN, label)
+dat %>% filter(finalDesign == "F1") %>% select(gConv, gVarConv, researchDesign, df2, n1, n2, ni, useCellN, label)
 
 #View(dat[,c("result", "mean1", "mean2", "sd1", "sd2", "yi", "vi", "gConv", "label")])
 
@@ -102,12 +103,12 @@ dat <- dat %>% mutate(label = ifelse(finalDesign == "tBtw" & focalVariable == 1,
 # Show the converted ESs
 dat %>% filter(finalDesign == "tBtw") %>% select(gConv, gVarConv, researchDesign, df2, n1, n2, ni, useCellN, label)
 
-dat <- dat %>% mutate(ni = ifelse(is.na(ni) & !is.na(yi), n1 + n2, ni))
+dat <- dat %>% mutate(ni = ifelse(is.na(ni) & !is.na(yi), n1 + n2, ni),
+                      nTerm = 2/ni)
 dat$result <- 1:nrow(dat)
 
 # # Multiply the ES by -1 if not in the predicted direction
-dat <- dat %>% mutate(gConv = gConv * predictedDirection * ifelse(side == "left", -1, 1),
-                      yi = ifelse(is.na(yi) & !is.na(gConv) & !is.na(predictedDirection), predictedDirection * gConv, yi),
+dat <- dat %>% mutate(yi = ifelse(is.na(yi) & !is.na(gConv) & !is.na(predictedDirection), predictedDirection * gConv, yi),
                       vi = ifelse(is.na(vi) & !is.na(gVarConv) & !is.na(predictedDirection), gVarConv, vi),
                       sd1 = ifelse(is.na(sd1) & !is.na(se1), se1*sqrt(n1+n2), sd1),
                       sd2 = ifelse(is.na(sd2) & !is.na(se2), se2*sqrt(n1+n2), sd2))

@@ -14,6 +14,8 @@
 #+ setup, include = FALSE
 knitr::opts_chunk$set(echo=FALSE, warning = FALSE)
 # check with Alessandro if overall RoB was scored correctly
+# subgroup analysis A: if !is.na(affect) | !is.na(stressComponentType)) = 1; if !is.na(affectiveConsequencesStress) = 2
+# subgroup analysis B: if (stressComponentType %in% c(1:4) | !is.na(affect)) ~ 1; stressComponentType = 5 ~ 2; stressComponentType = 6 ~ 3
 
 rm(list = ls())
 
@@ -28,7 +30,7 @@ corr <- 0.5
 rho <- 0.5
 
 # Side argument for the p-uniform* and conditional estimator of PET-PEESE. If the target effect should be in negative values, set to "left", otherwise "right".
-side <- "left"
+side <- "right"
 
 # Define whether to use one-tailed or two-tailed test for PET-PEESE, 3PSM, and p-uniform*.
 # Recommended by Stanley (2016) for literature where small sample-size studies are rather the norm.
@@ -36,8 +38,8 @@ side <- "left"
 test <- "one-tailed"
 
 # No of simulations for the permutation-based bias correction models and p-curve specifically
-nIterations <- 200 # Set to 5 just to make code checking/running fast. For the final paper, it needs to be set to at least 1000 and run overnight.
-nIterationsPcurve <- 200
+nIterations <- 300 # Set to 5 just to make code checking/running fast. For the final paper, it needs to be set to at least 1000 and run overnight.
+nIterationsPcurve <- 300
 
 # Exclude studies having an overall Risk of Bias score of at least x.
 acceptableRiskOfBias <- 2
@@ -171,6 +173,7 @@ title("Mindfulness")
 
 #'### Biofeedback
 dataBio %$% forest(yi, vi, subset=order(vi))
+title("Biofeedback")
 
 #'## p-curve plots
 #'### Mindfulness
@@ -180,22 +183,24 @@ quiet(pcurveMod(metaResultsPcurve$`Self-administered mindfulness`, effect.estima
 quiet(pcurveMod(metaResultsPcurve$Biofeedback, effect.estimation = FALSE, plot = TRUE))
 
 #'## PET-PEESE plots
+#' Using the sqrt(2/n) and 2/n terms instead of SE and var for PET and PEESE, respectively since modified sample-size based estimator was implemented (see https://www.jepusto.com/pet-peese-performance/).
+#' 
+
 #'### Mindfulness
 quiet(petPeese(dataMind))
 if(results[[1]]$`Publication bias`$`4/3PSM`["pvalue"] < alpha & ifelse(exists("side") & side == "left", -1, 1) * results[[1]]$`Publication bias`$`4/3PSM`["est"] > 0){
-  dataObjects[[1]] %$% plot(vi, yi, main="PEESE", xlab = "Variance", ylab = "Effect size", pch = 19, cex.main = 2, cex = .30, xlim = c(0, .65), xaxs = "i")
+  dataObjects[[1]] %$% plot(nTerm, yi, main="PEESE", xlab = "2/N", ylab = "Effect size", pch = 19, cex.main = 2, cex = .30, xlim = c(0, .4), xaxs = "i")
 } else {
-  dataObjects[[1]] %$% plot(sqrt(vi), yi, main="PET", xlab = "Standard error", ylab = "Effect size", pch = 19, cex.main = 2, cex = .3, xlim = c(0, .65), ylim = c(-2, 1), xaxs = "i")}
-abline((if(results[[1]]$`Publication bias`$`4/3PSM`["pvalue"] < alpha & ifelse(exists("side") & side == "left", -1, 1) * results[[1]]$`Publication bias`$`4/3PSM`["est"] > 0) {peese} else {pet}), lwd=3, lty = 2, col = "red")
+  dataObjects[[1]] %$% plot(sqrt(nTerm), yi, main="PET", xlab = "sqrt(2/n)", ylab = "Effect size", pch = 19, cex.main = 2, cex = .3, xlim = c(0, .4), ylim = c(-1.5, 2), xaxs = "i")}
+abline((if(results[[1]]$`Publication bias`$`4/3PSM`["pvalue"] < alpha & ifelse(exists("side") & side == "left", -1, 1) * results[[1]]$`Publication bias`$`4/3PSM`["est"] > 0) {peese} else {pet}), lwd = 3, lty = 2, col = "red")
 
 #'### Biofeedback
 quiet(petPeese(dataBio))
 if(results[[2]]$`Publication bias`$`4/3PSM`["pvalue"] < alpha & ifelse(exists("side") & side == "left", -1, 1) * results[[2]]$`Publication bias`$`4/3PSM`["est"] > 0){
-  dataObjects[[2]] %$% plot(vi, yi, main="PEESE", xlab = "Variance", ylab = "Effect size", pch = 19, cex.main = 2, cex = .30, xlim = c(0, .65), xaxs = "i")
+  dataObjects[[2]] %$% plot(nTerm, yi, main="PEESE", xlab = "2/n", ylab = "Effect size", pch = 19, cex.main = 2, cex = .30, xlim = c(0, .2), ylim = c(-1, 3), xaxs = "i")
 } else {
-  dataObjects[[2]] %$% plot(sqrt(vi), yi, main="PET", xlab = "Standard error", ylab = "Effect size", pch = 19, cex.main = 2, cex = .3, xlim = c(0, .65), ylim = c(-2, 1), xaxs = "i")}
-abline((if(results[[2]]$`Publication bias`$`4/3PSM`["pvalue"] < alpha & ifelse(exists("side") & side == "left", -1, 1) * results[[2]]$`Publication bias`$`4/3PSM`["est"] > 0) {peese} else {pet}), lwd=3, lty = 2, col = "red")
-
+  dataObjects[[2]] %$% plot(sqrt(nTerm), yi, main="PET", xlab = "sqrt(2/n)", ylab = "Effect size", pch = 19, cex.main = 2, cex = .3, xlim = c(0, .2), ylim = c(-1.5, 3), xaxs = "i")}
+abline((if(results[[2]]$`Publication bias`$`4/3PSM`["pvalue"] < alpha & ifelse(exists("side") & side == "left", -1, 1) * results[[2]]$`Publication bias`$`4/3PSM`["est"] > 0) {peese} else {pet}), lwd = 3, lty = 2, col = "red")
 
 # Moderator/sensitivity analyses ------------------------------------------
 

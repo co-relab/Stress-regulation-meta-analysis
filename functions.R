@@ -80,7 +80,7 @@ propSig <- function(p.values = NA){
   as.integer(table(p.values < .05)[2])/length(p.values < .05)
 }
 
-# Publication bias --------------------------------------------------------
+# Publication bias summary function-------------------------------
 
 bias <- function(data = NA, rmaObject = NA){
   # Correlation between the ES and precision (SE)
@@ -125,7 +125,9 @@ bias <- function(data = NA, rmaObject = NA){
                 "p-curve" = pcurvePermOut))
 }
 
-# Permutation p-curve
+
+# Permutation p-curve -----------------------------------------------------
+
 # Subseting only the effects that are focal for the published study
 pcurvePerm <- function(data, esEstimate = FALSE, plot = FALSE, nIterations = nIterationsPcurve){
   resultIDpcurve <- list(NA)
@@ -133,8 +135,13 @@ pcurvePerm <- function(data, esEstimate = FALSE, plot = FALSE, nIterations = nIt
   for(i in 1:nIterationsPcurve){
     datPcurve <- data[!duplicated.random(data$study) & data$focalVariable == 1,]
     metaPcurve <- metagen(TE = yi, seTE = sqrt(vi), n.e = ni, data = datPcurve)
-    modelPcurve <- pcurveMod(metaPcurve, effect.estimation = esEstimate, N = datPcurve$n.e, plot = FALSE)
-    resultPcurve[i,] <- c(i, "rightskew" = modelPcurve$pcurveResults[1,], "flatness" = modelPcurve$pcurveResults[2,])
+    modelPcurve <- tryCatch(pcurveMod(metaPcurve, effect.estimation = esEstimate, N = datPcurve$n.e, plot = FALSE), 
+                            error = function(e) NULL)
+    if(is.null(modelPcurve)){
+      resultPcurve[i,] <- rep(NA, 11)
+    } else {
+      resultPcurve[i,] <- c("iterationNo" = i, "rightskew" = modelPcurve$pcurveResults[1,], "flatness" = modelPcurve$pcurveResults[2,])  
+      }
     resultIDpcurve[[i]] <- datPcurve$result
   }
   colnames(resultPcurve) <- c("iterationNo", "rightskew.pBinomial", "rightskew.zFull", "rightskew.pFull", "rightskew.zHalf", "rightskew.pHalf", "flatness.pBinomial", "flatness.zFull", "flatness.pFull", "flatness.zHalf", "flatness.pHalf")
@@ -148,7 +155,7 @@ pcurvePerm <- function(data, esEstimate = FALSE, plot = FALSE, nIterations = nIt
 # 4/3-parameter selection model (4PSM/3PSM)
 selectionModel <- function(data, minPvalues = 4){
   mydat <<- data[!duplicated.random(data$study) & data$focalVariable == 1,]
-  res <- rma(yi, vi, data = mydat, )
+  res <- rma(yi, vi, data = mydat)
   fourFit <- tryCatch(selmodel(res, type = "stepfun", steps = c(.025, .5, 1)),
                       error = function(e) NULL)
   fourOut <- c("est" = fourFit$beta, "se" = fourFit$se, "zvalue" = fourFit$zval, "pvalue" = fourFit$pval, "ciLB" = fourFit$ci.lb, "ciUB" = fourFit$ci.ub, "k" = fourFit$k, "steps" = length(fourFit$steps))
@@ -177,7 +184,6 @@ selectionModel <- function(data, minPvalues = 4){
 # Also implemented the modified sample-size based estimator (see https://www.jepusto.com/pet-peese-performance/).
 petPeese <- function(data, nBased = TRUE, selModAsCondEst = TRUE){  # if nBased = TRUE, use the sample-size-based estimator, if FALSE, use the ordinary SE/var. If selModAsCondEst = TRUE, use the selection model as conditional estimator, otherwise use PET.
   viMatrix <- impute_covariance_matrix(data$vi, cluster = data$study, r = rho, smooth_vi = TRUE)  # compute the covariance matrix for the CHE working model
-  data$nTerm <- 2/data$ni
   
   if(nBased == TRUE){
     pet <<- robust.rma.mv(rma.mv(yi = yi ~ sqrt(nTerm), V = viMatrix, random = ~ 1|study/result, method = "REML", sparse = TRUE, data = data), cluster = data$study)
