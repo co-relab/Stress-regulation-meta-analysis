@@ -1,8 +1,6 @@
 # Pocket 
 # print(deparse(substitute(df)))
 
-# check btw/within heterogeneity code
-
 # Load libraries (and install if not installed already)
 list.of.packages <- c("car", "reshape", "tidyverse", "tidyr", "psych", "metafor", "meta", "dmetar", "esc", "lme4", "ggplot2", "knitr", "puniform", "kableExtra", "lmerTest", "pwr", "Amelia", "multcomp", "magrittr", "weightr", "clubSandwich", "ddpcr", "poibin")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]

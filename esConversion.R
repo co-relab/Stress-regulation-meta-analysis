@@ -68,14 +68,10 @@ dat[dat$finalDesign == "F1" & !is.na(dat$finalDesign),]$gVarConv <- dat %>% filt
 dat[dat$finalDesign == "F1" & !is.na(dat$finalDesign) & dat$useCellN == 1,]$gConv <- dat %>% filter(dat$finalDesign == "F1" & dat$useCellN == 1) %$% esc_f(f = F, grp1n = n1, grp2n = n2, es.type = "g")$es
 dat[dat$finalDesign == "F1" & !is.na(dat$finalDesign) & dat$useCellN == 1,]$gVarConv <- dat %>% filter(dat$finalDesign == "F1" & dat$useCellN == 1) %$% esc_f(f = F, grp1n = n1, grp2n = n2, es.type = "g")$var
 
-# Create a "result label" to be used as an input for p-curve analysis
-dat <- dat %>% mutate(label = ifelse(finalDesign == "F1" & focalVariable == 1, paste(paperID, "/", studyID, "/", effectID, ": ",
-                                                        "F(", df1, ",", df2, ")=", F, sep = ""), NA))
-
 # Show the converted ESs
-dat %>% filter(finalDesign == "F1") %>% select(gConv, gVarConv, researchDesign, df2, n1, n2, ni, useCellN, label)
+dat %>% filter(finalDesign == "F1") %>% select(gConv, gVarConv, researchDesign, df2, n1, n2, ni, useCellN)
 
-#View(dat[,c("result", "mean1", "mean2", "sd1", "sd2", "yi", "vi", "gConv", "label")])
+#View(dat[,c("result", "mean1", "mean2", "sd1", "sd2", "yi", "vi", "gConv")])
 
 ####
 # t-tests between ---------------------------------------------------------
@@ -96,12 +92,8 @@ dat[dat$finalDesign == "tBtw" & !is.na(dat$finalDesign),]$gVarConv <- dat %>% fi
 dat[dat$finalDesign == "tBtw" & !is.na(dat$finalDesign) & dat$useCellN == 1,]$gConv <- dat %>% filter(dat$finalDesign == "tBtw" & dat$useCellN == 1) %$% esc_t(t = abs(t), grp1n = n1, grp2n = n2, es.type = "g")$es
 dat[dat$finalDesign == "tBtw" & !is.na(dat$finalDesign) & dat$useCellN == 1,]$gVarConv <- dat %>% filter(dat$finalDesign == "tBtw" & dat$useCellN == 1) %$% esc_t(t = abs(t), grp1n = n1, grp2n = n2, es.type = "g")$var
 
-# Create a "result label" to be used as an input for p-curve analysis
-dat <- dat %>% mutate(label = ifelse(finalDesign == "tBtw" & focalVariable == 1, paste(paperID, "/", studyID, "/", effectID, ": ",
-                                                                                     "t(", df2, ")=", t, sep = ""), label))
-
 # Show the converted ESs
-dat %>% filter(finalDesign == "tBtw") %>% select(gConv, gVarConv, researchDesign, df2, n1, n2, ni, useCellN, label)
+dat %>% filter(finalDesign == "tBtw") %>% select(gConv, gVarConv, researchDesign, df2, n1, n2, ni, useCellN)
 
 dat <- dat %>% mutate(ni = ifelse(is.na(ni) & !is.na(yi), n1 + n2, ni),
                       nTerm = 2/ni)
@@ -111,7 +103,12 @@ dat$result <- 1:nrow(dat)
 dat <- dat %>% mutate(yi = ifelse(is.na(yi) & !is.na(gConv) & !is.na(predictedDirection), predictedDirection * gConv, yi),
                       vi = ifelse(is.na(vi) & !is.na(gVarConv) & !is.na(predictedDirection), gVarConv, vi),
                       sd1 = ifelse(is.na(sd1) & !is.na(se1), se1*sqrt(n1+n2), sd1),
-                      sd2 = ifelse(is.na(sd2) & !is.na(se2), se2*sqrt(n1+n2), sd2))
+                      sd2 = ifelse(is.na(sd2) & !is.na(se2), se2*sqrt(n1+n2), sd2),
+                      label = paste(paperID, "/", studyID, "/", effectID, sep = ""),
+                      stressAffective = as.factor(ifelse(!is.na(affect) | !is.na(stressComponentType), 1, ifelse(!is.na(affectiveConsequencesStress), 2, NA))),
+                      stressCompRecoded = as.factor(case_when(stressComponentType %in% c(1:4) | !is.na(affect) ~ 1,
+                                                              stressComponentType == 5 ~ 2,
+                                                              stressComponentType == 6 ~ 3)))
 
 ####
 # Correlation -------------------------------------------------------------

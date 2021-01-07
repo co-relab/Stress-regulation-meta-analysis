@@ -172,7 +172,7 @@ dataMind %$% forest(x = yi, vi = vi,
 title("Mindfulness")
 
 #'### Biofeedback
-dataBio %$% forest(yi, vi, subset=order(vi))
+dataBio %$% forest(yi, vi, subset=order(vi), slab = label)
 title("Biofeedback")
 
 #'## p-curve plots
@@ -274,3 +274,54 @@ viMatrixStratComp <- impute_covariance_matrix(dat$vi, cluster = dat$study, r = r
 rmaObjectStratComp <- rma.mv(yi ~ 0 + factor(strategy) + researchDesign + populationType + comparisonGroupType + published + robOverall, V = viMatrixStratComp, data = dat, method = "REML", random = ~ 1|study/result, sparse = TRUE)
 RVEmodelStratComp <- conf_int(rmaObjectStratComp, vcov = "CR2", test = "z", cluster = dat$study)
 list("Model results" = RVEmodelStratComp, "RVE Wald test" = Wald_test(rmaObjectStratComp, constraints = constrain_equal(1:2), vcov = "CR2"))
+
+#'## Subgroup analysis for stress vs affective consequences
+
+stressAffectConseq <- list(NA)
+for(i in 1:length(dataObjects)){
+  viMatrix <- impute_covariance_matrix(dataObjects[[i]]$vi, cluster = dataObjects[[i]]$study, r = rho, smooth_vi = TRUE)
+  rmaObject <- rma.mv(yi ~ 0 + as.factor(stressAffective), V = viMatrix, data = dataObjects[[i]], method = "REML", random = ~ 1|study/result, sparse = TRUE)
+  RVEmodel <- conf_int(rmaObject, vcov = "CR2", test = "z", cluster = dataObjects[[i]]$study)
+  stressAffectConseq[[i]] <- list("Number of included effects per category" = table(dataObjects[[i]]$stressAffective), "Model results" = RVEmodel, "RVE Wald test" = Wald_test(rmaObject, constraints = constrain_equal(1:2), vcov = "CR2"))
+}
+stressAffectConseq <- setNames(stressAffectConseq, nm = namesObjects)
+stressAffectConseq
+
+#'### Forest plots
+#'#### Mindfulness
+dataMind %>% filter(stressAffective == 1) %$% forest(yi, vi, subset=order(vi), slab = label)
+title("Mindfulness (stressAffective = 1)")
+dataMind %>% filter(stressAffective == 2) %$% forest(yi, vi, subset=order(vi), slab = label)
+title("Mindfulness (stressAffective = 2)")
+#'#### Biofeedback
+dataBio %>% filter(stressAffective == 1) %$% forest(yi, vi, subset=order(vi), slab = label)
+title("Mindfulness (stressAffective = 1)")
+dataBio %>% filter(stressAffective == 2) %$% forest(yi, vi, subset=order(vi), slab = label)
+title("Mindfulness (stressAffective = 2)")
+
+#'## Subgroup analysis for stress vs affective consequences
+stressComponentClusters <- list(NA)
+for(i in 1:length(dataObjects)){
+  viMatrix <- impute_covariance_matrix(dataObjects[[i]]$vi, cluster = dataObjects[[i]]$study, r = rho, smooth_vi = TRUE)
+  rmaObject <- rma.mv(yi ~ 0 + as.factor(stressCompRecoded), V = viMatrix, data = dataObjects[[i]], method = "REML", random = ~ 1|study/result, sparse = TRUE)
+  RVEmodel <- conf_int(rmaObject, vcov = "CR2", test = "z", cluster = dataObjects[[i]]$study)
+  stressComponentClusters[[i]] <- list("Number of included effects per category" = table(dataObjects[[i]]$stressCompRecoded), "Model results" = RVEmodel, "RVE Wald test" = Wald_test(rmaObject, constraints = constrain_equal(1:3), vcov = "CR2"))
+}
+stressComponentClusters <- setNames(stressComponentClusters, nm = namesObjects)
+stressComponentClusters
+
+#'### Forest plots
+#'#### Mindfulness
+dataMind %>% filter(stressCompRecoded == 1) %$% forest(yi, vi, subset=order(vi), slab = label)
+title("Mindfulness (stressCompRecoded = 1)")
+dataMind %>% filter(stressCompRecoded == 2) %$% forest(yi, vi, subset=order(vi), slab = label)
+title("Mindfulness (stressCompRecoded = 2)")
+dataMind %>% filter(stressCompRecoded == 3) %$% forest(yi, vi, subset=order(vi), slab = label)
+title("Mindfulness (stressCompRecoded = 3)")
+#'#### Biofeedback
+dataBio %>% filter(stressCompRecoded == 1) %$% forest(yi, vi, subset=order(vi), slab = label)
+title("Mindfulness (stressCompRecoded = 1)")
+dataBio %>% filter(stressCompRecoded == 2) %$% forest(yi, vi, subset=order(vi), slab = label)
+title("Mindfulness (stressCompRecoded = 2)")
+dataBio %>% filter(stressCompRecoded == 3) %$% forest(yi, vi, subset=order(vi), slab = label)
+title("Mindfulness (stressCompRecoded = 3)")
