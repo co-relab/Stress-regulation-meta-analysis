@@ -1,5 +1,3 @@
-# Check SE -> SD calc
-
 # Read in the data
 # install required R libraries if not installed already
 list.of.packages <- c("car", "tidyverse", "psych", "metafor", "esc", "lme4", "ggplot2", "knitr", "puniform", "kableExtra", "lmerTest", "pwr", "Amelia", "multcomp", "magrittr")
@@ -30,17 +28,14 @@ dat$percFemale <- ifelse(is.na(dat$percFemale), dat$nFemale/(dat$nFemale + dat$n
 dat <- dat %>% mutate(sd1 = ifelse(is.na(sd1) & !is.na(se1), se1*sqrt(n1+n2), sd1),
                       sd2 = ifelse(is.na(sd2) & !is.na(se2), se2*sqrt(n1+n2), sd2))
 
-dat <- escalc(measure = "SMD", m1i = mean1, m2i = mean2, sd1i = sd1, sd2i = sd2, n1i = n1, n2i = n2, data = dat)
+dat <- escalc(measure = "SMD", m1i = mean1, m2i = mean2, sd1i = sd1, sd2i = sd2, n1i = n1, n2i = n2, data = dat, include = researchDesign %in% c(1, 2))
+dat[dat$researchDesign == 3,]$yi <- dat %>% filter(researchDesign == 3) %$% escalc(measure = "SMCC", m1i = mean1, m2i = mean2, sd1i = sd1, sd2i = sd2, ni = n1, ri = c(rep(rmCor, nrow(.))))$yi
+dat[dat$researchDesign == 3,]$vi <- dat %>% filter(researchDesign == 3) %$% escalc(measure = "SMCC", m1i = mean1, m2i = mean2, sd1i = sd1, sd2i = sd2, ni = n1, ri = c(rep(rmCor, nrow(.))))$vi
 dat <- dat %>% mutate(yi = abs(yi) * predictedDirection)
-dat <- dat %>% rowwise %>% mutate(p = as.numeric(round(tTestSummary(mean1, mean2, sd1, sd2, n1, n2)["p-value"], 5))) %>% data.frame()
+dat <- dat %>% rowwise %>% mutate(p = case_when(researchDesign %in% c(1, 2) ~  as.numeric(round(tTestSummary(mean1, mean2, sd1, sd2, n1, n2, withinSS = FALSE)["p-value"], 5)),
+                                                researchDesign == 3 ~ as.numeric(round(tTestSummary(mean1, mean2, sd1, sd2, n1, n2, withinSS = TRUE)["p-value"], 5)))) %>% data.frame()
 
 # Initialize new variables
-# dat$t.from.r <- NA
-# dat$t.from.beta <- NA
-# dat$rVar <- NA
-# dat$beta.var <- NA
-# dat$dCalc <- NA
-
 dat$gConv <- NA
 dat$gVarConv <- NA
 dat$useCellN <- NA
@@ -49,9 +44,7 @@ dat$useCellN <- NA
 dat$paperID
 dat$study <- paste(dat$paperID, "/", dat$studyID, sep = "")
 
-####
 # F-Test between with df1 == 1 ---------------------------------------------------------------------
-####
 # Specify the design, compute ni and p
 dat <- dat %>% mutate(finalDesign = case_when(!is.na(F) & !is.na(df1) & !is.na(df2) & df1 == 1 ~ "F1"))
 dat <- dat %>% mutate(ni = ifelse(finalDesign == "F1", df2 + 2, NA))
@@ -73,9 +66,7 @@ dat %>% filter(finalDesign == "F1") %>% select(gConv, gVarConv, researchDesign, 
 
 #View(dat[,c("result", "mean1", "mean2", "sd1", "sd2", "yi", "vi", "gConv")])
 
-####
 # t-tests between ---------------------------------------------------------
-####
 # Specify the design, compute ni and p
 dat <- dat %>% mutate(finalDesign = ifelse(!is.na(t) & !is.na(df2), "tBtw", finalDesign))
 dat <- dat %>% mutate(ni = ifelse(finalDesign == "tBtw", df2 + 2, ni))
@@ -110,9 +101,8 @@ dat <- dat %>% mutate(yi = ifelse(is.na(yi) & !is.na(gConv) & !is.na(predictedDi
                                                               stressComponentType == 5 ~ 2,
                                                               stressComponentType == 6 ~ 3)))
 
-####
+
 # Correlation -------------------------------------------------------------
-####
 
 # # Specify the design, compute ni and p
 # dat <- dat %>% mutate(finalDesign = ifelse(!is.na(r) & !is.na(df2), "cor", finalDesign))
@@ -134,9 +124,7 @@ dat <- dat %>% mutate(yi = ifelse(is.na(yi) & !is.na(gConv) & !is.na(predictedDi
 # dat %>% filter(finalDesign == "cor") %>% select(gConv, gVarConv, r, researchDesign, df2, ni, label)
 
 
-# ####
 # # Within-subjects design, ES based on t-distribution ----------------------
-# ####
 # 
 # # Identify within-subjects design reporting F and compute t
 # dat[dat$Use.for.Meta == "Yes" & dat$Design == "Within" & !is.na(dat$F) & !is.na(dat$n.rep), "finalDesign"] <- "within.t"
@@ -145,9 +133,9 @@ dat <- dat %>% mutate(yi = ifelse(is.na(yi) & !is.na(gConv) & !is.na(predictedDi
 # # Compute ES using t
 # dat[dat$Use.for.Meta == "Yes" & dat$Design == "Within" & !is.na(dat$t) & !is.na(dat$n.rep), "finalDesign"] <- "within.t"
 # dat[dat$finalDesign == "within.t", ] %<>% mutate(
-#   dCalc = abs(t)*sqrt((2 * (1 - corr)) / n.rep),
+#   dCalc = abs(t)*sqrt((2 * (1 - rmCor)) / n.rep),
 #   gConv = (1 - (3/(4*n.rep - 3))) * dCalc,
-#   gVarConv = (1 - (3/(4*n.rep - 3)))^2 * ((1 / n.rep) + ((dCalc^2) / (2 * n.rep))) * 2 * (1 - corr),
+#   gVarConv = (1 - (3/(4*n.rep - 3)))^2 * ((1 / n.rep) + ((dCalc^2) / (2 * n.rep))) * 2 * (1 - rmCor),
 #   ni = n.rep,
 #   p = 2*pt(abs(t), n.rep - 1, lower.tail = FALSE)
 # )
@@ -164,9 +152,7 @@ dat <- dat %>% mutate(yi = ifelse(is.na(yi) & !is.na(gConv) & !is.na(predictedDi
 # dat$gConv[266:270] <- (1 - (3/(4*dat$n.rep[266:270] - 3))) * dat$d.reported[266:270]
 # dat$gVarConv[266:270] = (1 - (3/(4*dat$n.rep[266:270] - 3))) * ((dat$n.rep[266:270])/(dat$n.rep[266:270]/2 * dat$n.rep[266:270]/2) + (dat$d.reported[266:270]^2)/(2 * (dat$n.rep[266:270])))
 # 
-# ####
 # # Betas in between-subjects designs ---------------------------------------
-# ####
 # 
 # #Betas in between-subjects designs (in ML, beta considered as covariate/confounding adjusted r, then using r to d conversion)
 # dat[dat$Use.for.Meta == "Yes" & (dat$Design == "Between" | dat$Design == "Continuous") & !is.na(dat$beta) & !is.na(dat$df2), "finalDesign"] <- "Beta.between"
@@ -188,9 +174,7 @@ dat <- dat %>% mutate(yi = ifelse(is.na(yi) & !is.na(gConv) & !is.na(predictedDi
 # dat$label[dat$biasTest == "Beta.between"] <- paste(dat[dat$biasTest == "Beta.between",]$paperID, "/", dat[dat$biasTest == "Beta.between",]$Study.Indicator, "/", dat[dat$biasTest == "Beta.between",]$Variable.Indicator, ": ",
 #                                                       "Z=", qnorm(1-dat[dat$biasTest == "Beta.between",]$p.reported/2), sep = "")
 # 
-# ####
 # # chi^2 -------------------------------------------------------------------
-# ####
 # 
 # # Specify the design, compute ES, var, ni, and p
 # dat[dat$Use.for.Meta == "Yes" & dat$Design == "Between" & !is.na(dat$Chisq) & !is.na(dat$n.rep), "finalDesign"] <- "between.chisq"
@@ -208,9 +192,7 @@ dat <- dat %>% mutate(yi = ifelse(is.na(yi) & !is.na(gConv) & !is.na(predictedDi
 # dat$label[dat$biasTest == "between.chisq"] <- paste(dat[dat$biasTest == "between.chisq",]$paperID, "/", dat[dat$biasTest == "between.chisq",]$Study.Indicator, "/", dat[dat$biasTest == "between.chisq",]$Variable.Indicator, ": ",
 #                                                         "chi2(", dat[dat$biasTest == "between.chisq",]$df1, ")=", dat[dat$biasTest == "between.chisq",]$Chisq, sep = "")
 # 
-# ####
 # # t for B in continuous designs -------------------------------------------
-# ####
 # 
 # # Specify the design, compute ES, var, ni, and p
 # dat[dat$Use.for.Meta == "Yes" & (dat$Design == "Continuous" |  dat$Design == "Correlation") & !is.na(dat$B) & !is.na(dat$t) & !is.na(dat$df2) & is.na(dat$beta), "finalDesign"] <- "t.from.B"
@@ -228,9 +210,7 @@ dat <- dat %>% mutate(yi = ifelse(is.na(yi) & !is.na(gConv) & !is.na(predictedDi
 # dat$label[dat$biasTest == "t.from.B"] <- paste(dat[dat$biasTest == "t.from.B",]$paperID, "/", dat[dat$biasTest == "t.from.B",]$Study.Indicator, "/", dat[dat$biasTest == "t.from.B",]$Variable.Indicator, ": ",
 #                                                     "t(", dat[dat$biasTest == "t.from.B",]$df2, ")=", dat[dat$biasTest == "t.from.B",]$t, sep = "")
 # 
-# 
-# 
-# ####
+###
 # # Create a results label for the rest of bias=yes and meta=no, based on p-values, converted to z-score (p-curve app works with z but not with p).
 # dat[dat$Use.for.Bias.Test == "Yes" & is.na(dat$label) & !is.na(dat$paperID), "biasTest"] <- "z.from.p"
 # dat$p <- ifelse(is.na(dat$p), dat$p.reported, dat$p)

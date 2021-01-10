@@ -78,52 +78,6 @@ propSig <- function(p.values = NA){
   as.integer(table(p.values < .05)[2])/length(p.values < .05)
 }
 
-# Publication bias summary function-------------------------------
-
-bias <- function(data = NA, rmaObject = NA){
-  # Correlation between the ES and precision (SE)
-  esPrec <- cor(rmaObject[[1]]$yi, sqrt(rmaObject[[1]]$vi), method = "kendall")
-  # Small-study effects correction
-  # 3-parameter selection model
-  resultSM <- matrix(ncol = 8, nrow = nIterations)
-  for(i in 1:nIterations){
-    resultSM[i,] <- data %>% selectionModel(., minPvalues = 4)
-  }
-  colnames(resultSM) <- c("est", "se", "zvalue", "pvalue", "ciLB", "ciUB", "k", "steps")
-  resultSM <- resultSM %>% data.frame() %>% na.omit() %>% arrange(est) %>% slice(ceiling(n()/2)) %>% unlist()
-  resultSM <<- resultSM
-
-  # PET-PEESE
-  petPeeseOut <- petPeese(data)
-  
-  # WAAP-WLS
-  waapWLSout <- data %$% waapWLS(yi, vi)
-  waapWLSout[1, 9:10] <- waapWLSout[2, 9:10]
-  waapWLSout <- waapWLSout[1,]
-  
-  # Permutation p-curve
-  pcurvePermOut <- pcurvePerm(data, esEstimate = FALSE, plot = FALSE)
-  
-  # p-uniform* (van Aert & van Assen, 2021)
-  resultPuniform <- matrix(ncol = 4, nrow = nIterations)
-  for(i in 1:nIterations){
-    modelPuniform <- data[!duplicated.random(data$study) & data$focalVariable == 1,] %$% puni_star(yi = yi, vi = vi, alpha = alpha, side = side, method = "ML")
-    resultPuniform[i,] <- c("est" = modelPuniform[["est"]], "ciLB" = modelPuniform[["ci.lb"]], "ciUB" = modelPuniform[["ci.ub"]], "p-value" = modelPuniform[["pval.0"]])
-  }
-  colnames(resultPuniform) <- c("est", "ciLB", "ciUB", "pvalue")
-  puniformOut <- resultPuniform %>% data.frame() %>% na.omit() %>% arrange(est) %>% slice(ceiling(n()/2)) %>% unlist()
-  puniformOut <<- resultPuniform
-
-  # Publication bias results
-    return(list("ES-precision correlation" = esPrec,
-                "4/3PSM" = resultSM, 
-                "PET-PEESE" = petPeeseOut,
-                "WAAP-WLS" = waapWLSout,
-                "p-uniform*" = puniformOut,
-                "p-curve" = pcurvePermOut))
-}
-
-
 # Permutation p-curve -----------------------------------------------------
 
 # Subseting only the effects that are focal for the published study
@@ -136,7 +90,7 @@ pcurvePerm <- function(data, esEstimate = FALSE, plot = FALSE, nIterations = nIt
     modelPcurve <- tryCatch(pcurveMod(metaPcurve, effect.estimation = esEstimate, N = datPcurve$n.e, plot = FALSE), 
                             error = function(e) NULL)
     if(is.null(modelPcurve)){
-      resultPcurve[i,] <- rep(NA, 11)
+      next
     } else {
       resultPcurve[i,] <- c("iterationNo" = i, "rightskew" = modelPcurve$pcurveResults[1,], "flatness" = modelPcurve$pcurveResults[2,])  
       }
@@ -165,7 +119,7 @@ selectionModel <- function(data, minPvalues = 4){
     threeFit <- tryCatch(selmodel(res, type = "stepfun", steps = c(.025, 1)),
                          error = function(e) NULL)
     threeOut <- if(is.null(threeFit)){
-      rep(NA, 8)
+      next
     } else {
       round(c("est" = threeFit$beta, "se" = threeFit$se, "zvalue" = threeFit$zval, "pvalue" = threeFit$pval, "ciLB" = threeFit$ci.lb, "ciUB" = threeFit$ci.ub, "k" = threeFit$k, "steps" = length(threeFit$steps)), 3)
     }
@@ -207,8 +161,6 @@ petPeese <- function(data, nBased = TRUE, selModAsCondEst = TRUE){  # if nBased 
            return(peese.out),  return(pet.out))
   } 
 }
-
-
 
 # WAAP-WLS estimator ------------------------------------------------------
 
@@ -280,6 +232,51 @@ powerEst <- function(data = NA){
     "Median power for detecting 4/3PSM estimate" = powerSMresult)
 }
 
+# Publication bias summary function-------------------------------
+
+bias <- function(data = NA, rmaObject = NA){
+  # Correlation between the ES and precision (SE)
+  esPrec <- cor(rmaObject[[1]]$yi, sqrt(rmaObject[[1]]$vi), method = "kendall")
+  # Small-study effects correction
+  # 3-parameter selection model
+  resultSM <- matrix(ncol = 8, nrow = nIterations)
+  for(i in 1:nIterations){
+    resultSM[i,] <- data %>% selectionModel(., minPvalues = 4)
+  }
+  colnames(resultSM) <- c("est", "se", "zvalue", "pvalue", "ciLB", "ciUB", "k", "steps")
+  resultSM <- resultSM %>% data.frame() %>% na.omit() %>% arrange(est) %>% slice(ceiling(n()/2)) %>% unlist()
+  resultSM <<- resultSM
+  
+  # PET-PEESE
+  petPeeseOut <- petPeese(data)
+  
+  # WAAP-WLS
+  waapWLSout <- data %$% waapWLS(yi, vi)
+  waapWLSout[1, 9:10] <- waapWLSout[2, 9:10]
+  waapWLSout <- waapWLSout[1,]
+  
+  # Permutation p-curve
+  pcurvePermOut <- pcurvePerm(data, esEstimate = FALSE, plot = FALSE)
+  
+  # p-uniform* (van Aert & van Assen, 2021)
+  resultPuniform <- matrix(ncol = 4, nrow = nIterations)
+  for(i in 1:nIterations){
+    modelPuniform <- data[!duplicated.random(data$study) & data$focalVariable == 1,] %$% puni_star(yi = yi, vi = vi, alpha = alpha, side = side, method = "ML")
+    resultPuniform[i,] <- c("est" = modelPuniform[["est"]], "ciLB" = modelPuniform[["ci.lb"]], "ciUB" = modelPuniform[["ci.ub"]], "p-value" = modelPuniform[["pval.0"]])
+  }
+  colnames(resultPuniform) <- c("est", "ciLB", "ciUB", "pvalue")
+  puniformOut <- resultPuniform %>% data.frame() %>% na.omit() %>% arrange(est) %>% slice(ceiling(n()/2)) %>% unlist()
+  puniformOut <<- resultPuniform
+  
+  # Publication bias results
+  return(list("ES-precision correlation" = esPrec,
+              "4/3PSM" = resultSM, 
+              "PET-PEESE" = petPeeseOut,
+              "WAAP-WLS" = waapWLSout,
+              "p-uniform*" = puniformOut,
+              "p-curve" = pcurvePermOut))
+}
+
 # Summary results ---------------------------------------------------------
 
 maResults <- function(rmaObject = NA, data = NA, bias = T){
@@ -293,7 +290,7 @@ maResults <- function(rmaObject = NA, data = NA, bias = T){
     "Power based on PEESE and 4PSM parameter estimates" = powerEst(data))
 }
 
-# Return format
+# Return format function
 # Code adapted from Carter, E. C., Schönbrodt, F. D., Hilgard, J., & Gervais, W. (2018). Correcting for bias in psychology: A comparison of meta-analytic methods. Retrieved from https://osf.io/rf3ys/.
 # https://github.com/nicebread/meta-showdown/blob/master/MA-methods/7-Selection%20Models.R
 
@@ -317,20 +314,33 @@ returnRes <- function(res, long = TRUE, reduce = TRUE) {
 
 # t-test for summary statistics -------------------------------------------
 
-tTestSummary <- function(mean1, mean2, sd1, sd2, n1, n2)
+tTestSummary <- function(mean1, mean2, sd1, sd2, n1, n2, withinSS = FALSE)
 {
-  # pooled standard deviation, scaled by the sample sizes
-  se <- sqrt((1/n1 + 1/n2) * ((n1 - 1) * sd1^2 + (n2 - 1) * sd2^2)/(n1 + n2 - 2)) 
-  df <- n1 + n2 - 2
-  t <- (mean1 - mean2)/se 
-  out <- c(mean1 - mean2, se, t, 2*pt(-abs(t),df))    
-  names(out) <- c("Difference in means", "SE", "t-statistic", "p-value")
-  return(out) 
+  if(withinSS == FALSE){
+    # pooled standard deviation, scaled by the sample sizes
+    se <- sqrt((1/n1 + 1/n2) * ((n1 - 1) * sd1^2 + (n2 - 1) * sd2^2)/(n1 + n2 - 2)) 
+    df <- n1 + n2 - 2
+    t <- (mean1 - mean2)/se 
+    out <- c(mean1 - mean2, se, t, 2*pt(-abs(t),df))    
+    names(out) <- c("Difference in means", "SE", "t-statistic", "p-value")
+    return(out)  
+  } else if(withinSS == TRUE){
+    se <- sqrt((sd1^2 + sd2^2 - 2*sd1*sd2*rmCor)/(n1 - 1)) 
+    df <- n1 - 1
+    t <- (mean1 - mean2)/se 
+    out <- c(mean1 - mean2, se, t, 2*pt(-abs(t), df))    
+    names(out) <- c("Difference in means", "SE", "t-statistic", "p-value")
+    return(out)
+  }
+   
+  
+  
+  
 }
 
 # Random selection of effects ---------------------------------------------
 
-# Choose effects from a single study by random (for the purpose of permutation p-curve)
+# Choose effects from a single study by random (for the purpose of permutation-based methods)
 duplicated.random = function(x, incomparables = FALSE, ...)
 {
   if (is.vector(x))

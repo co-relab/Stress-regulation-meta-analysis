@@ -87,19 +87,19 @@ randomly assigned to the HRVB game condition, the Happify
 app was installed on their phone and the experimenter guided
 them through the calibration settings of the Breather function
 while carefully concealing any indication that the purpose of
-using Breather was to reduce stress";no intervention;Salivary Alpha Amylase Recovery;;6;;1;2;;;;20.28;;;;;2.48;;;;;93;0.02;;;0.2666;0.271;;;;9.132;10.078;1;1;1;1;2;2;1;;
+using Breather was to reduce stress";no intervention;Salivary Alpha Amylase Recovery;;6;;1;2;;;;20.28;;;;;2.48;;;;;93;0.02;;;0.2666;0.271;47;47;;9.132;10.078;1;1;1;1;2;2;1;;
 6;Effect of Brief Biofeedback via a Smartphone App on Stress Recovery: Randomized Experimental Study.;"Hunter, John F.; Olah, Meryl S.; Williams, Allison L.; Parks, Acacia C.; Pressman, Sarah D.";jhunter1@uci.edu;1;2;JMIR serious games;22;2019;1;1;1;;2;0;1;1;1;2;1;1;1;;5;5 minutes;0;0;1;1;;2;;;1;"For participants
 randomly assigned to the HRVB game condition, the Happify
 app was installed on their phone and the experimenter guided
 them through the calibration settings of the Breather function
 while carefully concealing any indication that the purpose of
-using Breather was to reduce stress";no intervention;Cortisol recovery;;6;;1;2;;;;20.28;1.19;;;;;;;;2;126;0.31;;;0.005;0.005;;;;0.09;0.09;1;1;1;1;2;2;1;;
+using Breather was to reduce stress";no intervention;Cortisol recovery;;6;;1;2;;;;20.28;1.19;;;;;;;;2;126;0.31;;;0.005;0.005;47;47;;0.09;0.09;1;1;1;1;2;2;1;;
 6;Effect of Brief Biofeedback via a Smartphone App on Stress Recovery: Randomized Experimental Study.;"Hunter, John F.; Olah, Meryl S.; Williams, Allison L.; Parks, Acacia C.; Pressman, Sarah D.";jhunter1@uci.edu;1;3;JMIR serious games;22;2019;1;1;1;;2;1;1;1;1;2;1;1;1;;5;5 minutes;0;0;1;1;;2;;Visual analogue scale;1;"For participants
 randomly assigned to the HRVB game condition, the Happify
 app was installed on their phone and the experimenter guided
 them through the calibration settings of the Breather function
 while carefully concealing any indication that the purpose of
-using Breather was to reduce stress";no intervention;Self report stress;;2;;1;2;;;;20.28;1.42;;;;;;;;2;133;0.24;;;3.04;3.18;;;;33.16;37.97;1;1;1;1;2;2;1;;
+using Breather was to reduce stress";no intervention;Self report stress;;2;;1;2;;;;20.28;1.42;;;;;;;;2;133;0.24;;;3.04;3.18;47;47;;33.16;37.97;1;1;1;1;2;2;1;;
 7;Heart rate variability biofeedback intervention for reduction of psychological stress during the early postpartum period.;"Kudo, Naoko; Shinohara, Hitomi; Kodama, Hideya";kodamah@hs.akita-u.ac.jp;1;1;Applied psychophysiology and biofeedback;21;2014;1;1;1;;50;0;1;3;2;2;7;28;1;end of the 4 weeks;;1 month;0;1;0;4;;1;"women in the early
 postpartum period";;1;"all mothers in
 the biofeedback group implemented at least one session of
@@ -158,14 +158,14 @@ ProBook 6550b), which displayed a pacer bar and a pacer line set to 6 breaths pe
 (bpm). Next
 244";"For the Exercise condition, participants stepped onto the
 Downloaded by treadmill (Trackmaster TMX425C, Newton, KS 231 , USA) for a 10-minute, self-paced walk.
-231";state anxiety;;2;;1;1;;;66;21.7;;;;;;;;;;;;8.8;9.6;;;;;;9.6;13.0;1;1;2;1;1;2;1;;https://search.proquest.com/docview/1868507602?accountid=16562
+231";state anxiety;;2;;1;1;;;66;21.7;;;;;;;;;;;;8.8;9.6;;;32;;;9.6;13.0;1;1;2;1;1;2;1;;https://search.proquest.com/docview/1868507602?accountid=16562
 9;Walking versus biofeedback: A comparison of acute interventions for stressed students;"Meier, Nathan F.; Welch, Amy S.";nfmeier@iastate.edu;1;2;Anxiety, Stress & Coping;28;2016;0;1;1;;23;4;1;1;3;2;1;1;1;immediatly after the biofeedback intervention;10;10 minutes;0;0;0;4;;2;;"Activation Deactivation Adjective
 Checklist or AD-ACL
 209";2;"Activation Deactivation Adjective
 Checklist or AD-ACL
-209";;calmness;;3;;1;1;;;66;21.7;;;;;;;;;;;;2.7;3.0;;;;;;16.0;12.9;1;1;2;1;1;2;1;;
+209";;calmness;;3;;1;1;;;66;21.7;;;;;;;;;;;;2.7;3.0;;;32;;;16.0;12.9;1;1;2;1;1;2;1;;
 9;Walking versus biofeedback: A comparison of acute interventions for stressed students;"Meier, Nathan F.; Welch, Amy S.";nfmeier@iastate.edu;1;3;Anxiety, Stress & Coping;28;2016;0;1;1;;23;0;1;1;3;2;1;1;1;immediatly after the biofeedback intervention;10;10 minutes;0;0;0;4;;2;;;2;;;" HRV - RMSSD=square root of the mean squared
-";;6;;1;1;;;66;21.7;;;;;;;;;;;;32.3;40.8;;;;;;50.5;45.5;1;1;2;1;1;2;1;;
+";;6;;1;1;;;66;21.7;;;;;;;;;;;;32.3;40.8;;;32;;;50.5;45.5;1;1;2;1;1;2;1;;
 10;Improving Managers' Psychophysical Well-Being: Effectiveness of Respiratory Sinus Arrhythmia Biofeedback.;"Munafò, Marianna; Patron, Elisabetta; Palomba, Daniela";elisabetta.patron@gmail.com, elisabetta.patron@studenti.unipd.it;1;1;Applied psychophysiology and biofeedback;21;2016;1;1;2;;21;20;;1;1;2;1;5;1;After last intervention;225;5 weeks;0;1;0;4;;2;managers with high-level work responsibilities;STAY- T trait anxiety;2;"During
 biofeedback, trial participants saw on the screen the HR
 beat-to-beat tachogram (i.e., beats/min) superimposed over
@@ -343,35 +343,35 @@ HeartMath, LLC, Boulder, Colorado) provided HRV biofeedback treatment. The emWav
 includes a fingertip plethysmograph that transfers heart rate data to a software program through
 which biofeedback is provided. Data from the sensor is transformed to display participants’ heart
 rhythm in real time. In addition, graphs depicting the HRV power spectrum or pulse wave were
-displayed. The third biofeedback component involves coherence.";no intervention group;SDNN - HRV;;6;;1;1;4;23;;22.54;;;;;;;;;;;;;;4.04;4.21;14;13;;72.13;63.27;1;2;1;1;1;2;1;;https://search.proquest.com/docview/905214602?accountid=16562
-15;Effectiveness of Biofeedback in Improving Heart Rate Variability Recovery Following Stress;Wheat, Amanda L.;;1;2;;;2012;1;0;1;;1;0;-1;1;1;2;1;6;1;after last intervention;192;"Days
+displayed. The third biofeedback component involves coherence.";no intervention group;SDNN - HRV;;6;;1;1;4;23;;22.54;;;;;;;;;;;;;;6.03;6.25;14;13;;68.84;53.39;1;2;1;1;1;2;1;;https://search.proquest.com/docview/905214602?accountid=16562
+15;Effectiveness of Biofeedback in Improving Heart Rate Variability Recovery Following Stress;Wheat, Amanda L.;;1;2;;;2012;1;0;1;;1;0;1;1;1;2;1;6;1;after last intervention;192;"Days
 between the initial and follow-up visits ranged from 28 to 84 days.";1;1;1;3;Arythmetic stress task;3;; MAACL-R - anxiety;1;"The emWave PC Stress Relief System (“emWave,”
 HeartMath, LLC, Boulder, Colorado) provided HRV biofeedback treatment. The emWave
 includes a fingertip plethysmograph that transfers heart rate data to a software program through
 which biofeedback is provided. Data from the sensor is transformed to display participants’ heart
 rhythm in real time. In addition, graphs depicting the HRV power spectrum or pulse wave were
-displayed. The third biofeedback component involves coherence.";no intervention group;Anxiety;;2;;1;1;4;23;;22.54;;;;;;;;;;;;1.07;0.51;;;;;;0.71;0.38;1;2;1;1;1;2;1;;
-15;Effectiveness of Biofeedback in Improving Heart Rate Variability Recovery Following Stress;Wheat, Amanda L.;;1;3;;;2012;1;0;1;;1;0;-1;1;1;2;1;6;1;after last intervention;192;"Days
+displayed. The third biofeedback component involves coherence.";no intervention group;Anxiety;;2;;1;1;4;23;;22.54;;;;;;;;;;;;1.06;1.08;;;14;13;;1.61;2.08;1;2;1;1;1;2;1;;
+15;Effectiveness of Biofeedback in Improving Heart Rate Variability Recovery Following Stress;Wheat, Amanda L.;;1;3;;;2012;1;0;1;;1;0;1;1;1;2;1;6;1;after last intervention;192;"Days
 between the initial and follow-up visits ranged from 28 to 84 days.";1;1;1;3;Arythmetic stress task;3;;MAACL-R - depression;1;"The emWave PC Stress Relief System (“emWave,”
 HeartMath, LLC, Boulder, Colorado) provided HRV biofeedback treatment. The emWave
 includes a fingertip plethysmograph that transfers heart rate data to a software program through
 which biofeedback is provided. Data from the sensor is transformed to display participants’ heart
 rhythm in real time. In addition, graphs depicting the HRV power spectrum or pulse wave were
-displayed. The third biofeedback component involves coherence.";no intervention group;depression;;;1;1;1;4;23;;22.54;;;;;;;;;;;;1.02;0.60;;;;;;0.50;0.23;1;2;1;1;1;2;1;;
+displayed. The third biofeedback component involves coherence.";no intervention group;depression;;;1;1;1;4;23;;22.54;;;;;;;;;;;;0.96;1.18;;;14;13;;0.71;1.38;1;2;1;1;1;2;1;;
 15;Effectiveness of Biofeedback in Improving Heart Rate Variability Recovery Following Stress;Wheat, Amanda L.;;1;4;;;2012;1;0;1;;1;0;-1;1;1;2;1;6;1;after last intervention;192;"Days
 between the initial and follow-up visits ranged from 28 to 84 days.";1;1;1;3;Arythmetic stress task;3;;MAACL-R - positive affect;1;"The emWave PC Stress Relief System (“emWave,”
 HeartMath, LLC, Boulder, Colorado) provided HRV biofeedback treatment. The emWave
 includes a fingertip plethysmograph that transfers heart rate data to a software program through
 which biofeedback is provided. Data from the sensor is transformed to display participants’ heart
 rhythm in real time. In addition, graphs depicting the HRV power spectrum or pulse wave were
-displayed. The third biofeedback component involves coherence.";no intervention group;positive affect;1;;;1;1;4;23;;22.54;;;;;;;;;;;;2.70;4.37;;;;;;3.71;6.46;1;2;1;1;1;2;1;;
+displayed. The third biofeedback component involves coherence.";no intervention group;positive affect;1;;;1;1;4;23;;22.54;;;;;;;;;;;;1.84;1.13;;;14;13;;1.19;1.23;1;2;1;1;1;2;1;;
 15;Effectiveness of Biofeedback in Improving Heart Rate Variability Recovery Following Stress;Wheat, Amanda L.;;1;5;;;2012;1;0;1;;1;10;1;1;1;2;1;6;1;after last intervention;192;"Days
 between the initial and follow-up visits ranged from 28 to 84 days.";1;1;1;3;Arythmetic stress task;3;;PSS;1;"The emWave PC Stress Relief System (“emWave,”
 HeartMath, LLC, Boulder, Colorado) provided HRV biofeedback treatment. The emWave
 includes a fingertip plethysmograph that transfers heart rate data to a software program through
 which biofeedback is provided. Data from the sensor is transformed to display participants’ heart
 rhythm in real time. In addition, graphs depicting the HRV power spectrum or pulse wave were
-displayed. The third biofeedback component involves coherence.";no intervention group;stress;;2;;1;1;4;23;;22.54;;;;;;;;;;;;8.99;5.82;;;;;;34.71;36.08;1;2;1;1;1;2;1;;
+displayed. The third biofeedback component involves coherence.";no intervention group;stress;;2;;1;1;4;23;;22.54;;;;;;;;;;;;8.99;5.82;;;14;13;;34.71;36.08;1;2;1;1;1;2;1;;
 16;Role of Heart Rate Variability Biofeedback in Cognitive Performance, Chronic Pain, and Related Symptoms;Winstead, James P.;;1;1;;;2019;0;0;1;;0;0;-1;1;1;2;1;6;1;post-intervention;150;6 weeks ;1;1;0;4;;3;"veteran patients attending the WJB Dorn
 Veterans Administration Medical Center (DVAMC)";SDNN - HRV;1;"The first was to assist the participant to
 paint a positive mental image of something that truly makes them happy and guide

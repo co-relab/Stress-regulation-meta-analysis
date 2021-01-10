@@ -24,7 +24,7 @@ rm(list = ls())
 # Assumed default pre-post correlation for within-subjects design, .50.
 # Here you can perform the sensitivity analysis to determine the impact of the assumed correlation on the overall effect size estimate.
 # E.g., for corr = c(.10, .30, .50, .70, 90).
-corr <- 0.5
+rmCor <- 0.5
 
 # Assumed constant sampling correlation
 rho <- 0.5
@@ -38,8 +38,8 @@ side <- "right"
 test <- "one-tailed"
 
 # No of simulations for the permutation-based bias correction models and p-curve specifically
-nIterations <- 300 # Set to 5 just to make code checking/running fast. For the final paper, it needs to be set to at least 1000 and run overnight.
-nIterationsPcurve <- 300
+nIterations <- 500 # Set to 5 just to make code checking/running fast. For the final paper, it needs to be set to at least 1000 and run overnight.
+nIterationsPcurve <- 500
 
 # Exclude studies having an overall Risk of Bias score of at least x.
 acceptableRiskOfBias <- 2
@@ -234,12 +234,13 @@ rndNonrnd
 
 #'## Excluding effects due to inconsistent means or SDs
 consIncons <- list(NA)
-for(i in 1:length(dataObjects)){
+i <- 2 # Only for biofeedback, since there were 0 inconsistent means or SDs for mindfulness studies.
+# for(i in 1:length(dataObjects)){
   viMatrix <- impute_covariance_matrix(dataObjects[[i]]$vi, cluster = dataObjects[[i]]$study, r = rho, smooth_vi = TRUE)
   rmaObject <- rma.mv(yi ~ 0 + factor(as.logical(inconsistenciesCountGRIMMER)), V = viMatrix, data = dataObjects[[i]], method = "REML", random = ~ 1|study/result, sparse = TRUE)
   RVEmodel <- conf_int(rmaObject, vcov = "CR2", test = "z", cluster = dataObjects[[i]]$study)
   consIncons[[i]] <- list("Count of GRIM/GRIMMER inconsistencies" = table(as.logical(dataObjects[[i]]$inconsistenciesCountGRIMMER)), "Model results" = RVEmodel, "RVE Wald test" = Wald_test(rmaObject, constraints = constrain_equal(1:2), vcov = "CR2"))
-}
+# }
 consIncons <- setNames(consIncons, nm = namesObjects)
 consIncons
 
@@ -325,3 +326,4 @@ dataBio %>% filter(stressCompRecoded == 2) %$% forest(yi, vi, subset=order(vi), 
 title("Mindfulness (stressCompRecoded = 2)")
 dataBio %>% filter(stressCompRecoded == 3) %$% forest(yi, vi, subset=order(vi), slab = label)
 title("Mindfulness (stressCompRecoded = 3)")
+
