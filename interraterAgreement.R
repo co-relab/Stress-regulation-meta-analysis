@@ -11,7 +11,7 @@ secondCoder <- read_delim("SECOND - SAM.csv", delim = ",")
 # 20% overall
 ratersData <- list(firstCoder[1:25,], secondCoder[1:25,])
 
-variableNames <- names(secondCoder)[c(5,6,10,15,17:21,23,25:29, 31, 34,35,39:42, 44:45, 47)]
+variableNames <- names(secondCoder)[c(5,6,10,15,17:21,23,25:29, 31, 34,37:40, 42:43, 45)]
 
 # kappas <- list()
 # for(i in variableNames){
@@ -58,3 +58,4 @@ names(agreement) <- variableNames
 #+ include=TRUE
 #'# Inter-rater agreement Biofeedback
 agreement
+
