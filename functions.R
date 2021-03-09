@@ -220,15 +220,21 @@ waapWLS <- function(yi, vi, est = c("WAAP-WLS"), long = FALSE) {
   returnRes(res, long = FALSE)
 }
 
-# Power based on PEESE and 4/3PSM parameter estimates -----------------------
+# Median power for detecting SESOI and bias-corrected parameter estimates --------------
 
 powerEst <- function(data = NA){
   powerPEESE <- NA
   powerSM <- NA
   peeseEst <- petPeese(data)[1]
-  powerPEESEresult <- median(pwr::pwr.t.test(n = data[!is.na(data$ni),]$ni, d = peeseEst)$power)
-  powerSMresult <- median(pwr::pwr.t.test(n = data[!is.na(data$ni),]$ni, d = resultSM["est"])$power)
-  c("Median power for detecting PET-PEESE estimate" = powerPEESEresult, 
+  power20sd <- round(median(pwr::pwr.t.test(n = data[!is.na(data$ni),]$ni, d = .20)$power), 3)
+  power50sd <- round(median(pwr::pwr.t.test(n = data[!is.na(data$ni),]$ni, d = .50)$power), 3)
+  power70sd <- round(median(pwr::pwr.t.test(n = data[!is.na(data$ni),]$ni, d = .70)$power), 3)
+  powerPEESEresult <- round(median(pwr::pwr.t.test(n = data[!is.na(data$ni),]$ni, d = peeseEst)$power), 3)
+  powerSMresult <- round(median(pwr::pwr.t.test(n = data[!is.na(data$ni),]$ni, d = resultSM["est"])$power), 3)
+  c("Median power for detecting a SESOI of d = .20" = power20sd,
+    "Median power for detecting a SESOI of d = .50" = power50sd,
+    "Median power for detecting a SESOI of d = .70" = power70sd,
+    "Median power for detecting PET-PEESE estimate" = powerPEESEresult, 
     "Median power for detecting 4/3PSM estimate" = powerSMresult)
 }
 
@@ -287,7 +293,7 @@ maResults <- function(rmaObject = NA, data = NA, bias = T){
     "Heterogeneity" = heterogeneity(rmaObject),
     "Proportion of significant results" = propSig(data$p),
     "Publication bias" = if(bias ==T) {bias(data, rmaObject)} else {paste("Publication bias correction not carried out")},
-    "Power based on PEESE and 4PSM parameter estimates" = powerEst(data))
+    "Power for detecting SESOI and bias-corrected parameter estimates" = powerEst(data))
 }
 
 # Return format function

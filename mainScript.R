@@ -38,8 +38,8 @@ side <- "right"
 test <- "one-tailed"
 
 # No of simulations for the permutation-based bias correction models and p-curve specifically
-nIterations <- 500 # Set to 5 just to make code checking/running fast. For the final paper, it needs to be set to at least 1000 and run overnight.
-nIterationsPcurve <- 500
+nIterations <- 5 # Set to 5 just to make code checking/running fast. For the final paper, it needs to be set to at least 1000 and run overnight.
+nIterationsPcurve <- 5
 
 # Exclude studies having an overall Risk of Bias score of at least x.
 acceptableRiskOfBias <- 2
@@ -111,8 +111,9 @@ dataBio <- dataBio %>% filter_all(any_vars(!is.na(.)))
 #' **p-curve**
 #' Permutation-based p-curve method. Output should be pretty self-explanatory.
 #' 
-#' **Power based on PEESE and 4PSM parameter estimates**
-#' A sort of a thought experiment. Estimates of the statistical power, assuming that population true values equal the bias-corrected estimates (4/3PSM or PET-PEESE).
+#' **Power for detecting SESOI and bias-corrected parameter estimates**
+#' Estimates of the statistical power for detecting a smallest effect sizes of interest equal to .20, .50, and .70 in SD units (Cohen's d). 
+#' A sort of a thought experiment, we also assumed that population true values equal the bias-corrected estimates (4/3PSM or PET-PEESE) and computed power for those.
 #' 
 #' **Handling of dependencies in bias-correction methods**
 #' To handle dependencies among the effects, the 4PSM, p-curve, p-uniform are implemented using a permutation-based procedure, randomly selecting only one focal effect (i.e., excluding those which were not coded as being focal) from a single study and iterating nIterations times.
