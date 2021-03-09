@@ -38,27 +38,53 @@ side <- "right"
 test <- "one-tailed"
 
 # No of simulations for the permutation-based bias correction models and p-curve specifically
-nIterations <- 5 # Set to 5 just to make code checking/running fast. For the final paper, it needs to be set to at least 1000 and run overnight.
+nIterations <- 10 # Set to 5 just to make code checking/running fast. For the final analysis, it should be set to 5000.
 nIterationsPcurve <- 5
+nIterationVWsensitivity <- 5 # Number of iterations for the Vevea & Woods (2005) step function model sensitivity analysis 
+
+# Controls for the multiple-parameter selection models 
+
+# Whether to apply a 4- or 3-parameter selection model. If fallback == TRUE, the procedure falls back to the 3-parameter selection model. 
+# This should be selected when too few effects in the opposite side make the estimate unstable.
+fallback <- TRUE
+# Even when fallback == FALSE, the 4-parameter selection model still falls back to 3 parameters for the given iteration if,
+# (1) it fails to converge or (2) the number of p-values in each of the step intervals gets smaller than minPvalues.
+minPvalues <- 5
 
 # Exclude studies having an overall Risk of Bias score of at least x.
 acceptableRiskOfBias <- 2
+
 
 # Sourcing and data -----------------------------------------------------------------
 source("functions.R")
 source("pcurvePlotOption.R")
 source("esConversion.R")
+funnel <- metafor::funnel
 
 # GRIM & GRIMMER Test -----------------------------------------------------
-grimAndGrimmer(dat)
+grim(dat)
+grimmer(dat)
 
 # Meta-analysis -----------------------------------------------------------
 
 # Subset
-dataMind <- dat[dat$strategy == 1 & !is.na(dat$yi),]
-dataBio <- dat[dat$strategy == 2 & !is.na(dat$yi),]
+dat$useMA <- 1
+dataMind <- dat %>% filter(strategy == 1 &
+                             !is.na(yi) &
+                             !(inconsistenciesCountGRIMMER %in% c(1, 2)) & 
+                             !(inconsistenciesCountGRIM %in% c(1, 2)) &
+                             robOverall != 3)
+dataBio <- dat %>% filter(strategy == 2 &
+                            !is.na(yi) &
+                            !(inconsistenciesCountGRIMMER %in% c(1, 2)) & 
+                            !(inconsistenciesCountGRIM %in% c(1, 2)) &
+                            robOverall != 3)
 dataMind <- dataMind %>% filter_all(any_vars(!is.na(.)))
 dataBio <- dataBio %>% filter_all(any_vars(!is.na(.)))
+
+# Remove outliers (based on the results from the maDiag script)
+dataMind <- dataMind %>% filter(!result %in% c(57, 59))
+dataBio <- dataBio %>% filter(!result %in% c(103, 104))
 
 #'# Meta-analysis results
 

@@ -5,7 +5,7 @@
 #+eval = FALSE
 # Initial outlier diagnostics
 # Univariate MA
-ma.uni <- dat %>% filter(strategy == 1 & !is.na(yi)) %$% rma(yi = yi, vi = vi, method = "REML", slab = result)
+ma.uni <- dataMind %$% rma(yi = yi, vi = vi, method = "REML", slab = result)
 
 #+eval = FALSE
 # MA diagnostics
@@ -14,7 +14,7 @@ baujat(ma.uni)
 #+eval = FALSE
 #fit FE model to all possible subsets
 gosh.plot <- gosh(ma.uni, progbar = TRUE, subsets = 1000, parallel = "multicore")
-plot(gosh.plot, out = 76, breaks = 50) # Testing the influence of single outliers
+plot(gosh.plot, out = 45, breaks = 50) # Testing the influence of single outliers
 
 #+eval = FALSE
 # Influence diagnostics
@@ -24,18 +24,12 @@ inf <- influence(ma.uni, progbar = T)
 ### Plot the influence diagnostics
 plot(inf)
 
-#+eval = TRUE
-# Outlier removal in case of a need
-# Excluding improbably big effect sizes or ES with improbably small SE, i.e. excerting a big influence on the MA model due to combination of huge ES and small variance.
-# Sensitivity analysis with the outlying ESs included will be reported as well.
-# dat[c(),] <- NA
-
 #'# For biofeedback studies
 
 #+eval = FALSE
 # Initial outlier diagnostics
 # Univariate MA
-ma.uni <- dat %>% filter(strategy == 2 & !is.na(yi)) %$% rma(yi = yi, vi = vi, method = "REML", slab = result)
+ma.uni <- dataBio %$% rma(yi = yi, vi = vi, method = "REML", slab = result)
 
 #+eval = FALSE
 # MA diagnostics
@@ -44,7 +38,7 @@ baujat(ma.uni)
 #+eval = FALSE
 #fit FE model to all possible subsets
 gosh.plot <- gosh(ma.uni, progbar = TRUE, subsets = 1000, parallel = "multicore")
-plot(gosh.plot, out = 13, breaks = 50) # Testing the influence of single outliers
+plot(gosh.plot, out = 12, breaks = 50) # Testing the influence of single outliers
 
 #+eval = FALSE
 # Influence diagnostics

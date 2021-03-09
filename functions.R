@@ -23,7 +23,8 @@ if (test == "one-tailed") {
 # Custom robust (RVE) multivariate RE meta-analytic model (using the CHE working model)
 # Needs specific naming of ES, variances and data on clustering; yi = yi, vi = vi, study, result
 # Using n/(n-p) small-sample correction for RVE SEs
-rmaCustom <- function(data = NA, robust = TRUE){
+rmaCustom <- function(data = NA){
+  data <- data %>% filter(useMA == 1)
   viMatrix <- impute_covariance_matrix(data$vi, cluster = data$study, r = rho, smooth_vi = TRUE)
   rmaObjectModBasedSE <- rma.mv(yi = yi, V = viMatrix, data = data, method = "REML", random = ~ 1|study/result, sparse = TRUE)
   rmaObject <- robust.rma.mv(rmaObjectModBasedSE, cluster = data$study)
@@ -84,16 +85,17 @@ propSig <- function(p.values = NA){
 pcurvePerm <- function(data, esEstimate = FALSE, plot = FALSE, nIterations = nIterationsPcurve){
   resultIDpcurve <- list(NA)
   resultPcurve <- matrix(ncol = 11, nrow = nIterationsPcurve)
+  set.seed(1)
   for(i in 1:nIterationsPcurve){
-    datPcurve <- data[!duplicated.random(data$study) & data$focalVariable == 1,]
+    datPcurve <- data[!duplicated.random(data$study) & data$focalVariable == 1 & !is.na(data$p),]
     metaPcurve <- metagen(TE = yi, seTE = sqrt(vi), n.e = ni, data = datPcurve)
-    modelPcurve <- tryCatch(pcurveMod(metaPcurve, effect.estimation = esEstimate, N = datPcurve$n.e, plot = FALSE), 
+    modelPcurve <- tryCatch(pcurveMod(metaPcurve, effect.estimation = esEstimate, N = datPcurve$ni, plot = plot), 
                             error = function(e) NULL)
     if(is.null(modelPcurve)){
       next
     } else {
       resultPcurve[i,] <- c("iterationNo" = i, "rightskew" = modelPcurve$pcurveResults[1,], "flatness" = modelPcurve$pcurveResults[2,])  
-      }
+    }
     resultIDpcurve[[i]] <- datPcurve$result
   }
   colnames(resultPcurve) <- c("iterationNo", "rightskew.pBinomial", "rightskew.zFull", "rightskew.pFull", "rightskew.zHalf", "rightskew.pHalf", "flatness.pBinomial", "flatness.zFull", "flatness.pFull", "flatness.zHalf", "flatness.pHalf")
@@ -105,29 +107,40 @@ pcurvePerm <- function(data, esEstimate = FALSE, plot = FALSE, nIterations = nIt
 
 # Multiple-parameter selection models -------------------------------------
 # 4/3-parameter selection model (4PSM/3PSM)
-selectionModel <- function(data, minPvalues = 4){
-  mydat <<- data[!duplicated.random(data$study) & data$focalVariable == 1,]
-  res <- rma(yi, vi, data = mydat)
-  fourFit <- tryCatch(selmodel(res, type = "stepfun", steps = c(.025, .5, 1)),
-                      error = function(e) NULL)
-  fourOut <- c("est" = fourFit$beta, "se" = fourFit$se, "zvalue" = fourFit$zval, "pvalue" = fourFit$pval, "ciLB" = fourFit$ci.lb, "ciUB" = fourFit$ci.ub, "k" = fourFit$k, "steps" = length(fourFit$steps))
-  
-  # if <= min.pvalues p-values in an interval: return NULL
-  pTable <- table(cut(mydat$p, breaks = c(0, .025, 0.5, 1)))
-  
-  if (any(pTable < minPvalues) | is.null(fourFit)) {
-    threeFit <- tryCatch(selmodel(res, type = "stepfun", steps = c(.025, 1)),
-                         error = function(e) NULL)
-    threeOut <- if(is.null(threeFit)){
-      next
-    } else {
-      round(c("est" = threeFit$beta, "se" = threeFit$se, "zvalue" = threeFit$zval, "pvalue" = threeFit$pval, "ciLB" = threeFit$ci.lb, "ciUB" = threeFit$ci.ub, "k" = threeFit$k, "steps" = length(threeFit$steps)), 3)
+selectionModel <- function(data, minNoPvals = minPvalues, nIteration = nIterations, fallback = FALSE, steps = c(.025, 1), deltas = NA){
+  data <- data %>% filter(useMA == 1)
+  resultSM <- matrix(ncol = 8, nrow = nIteration)
+  set.seed(1)
+  for(i in 1:nIteration){
+    mydat <<- data[!duplicated.random(data$study) & data$focalVariable == 1,]
+    res <- rma(yi, vi, data = mydat)
+    # if <= min.pvalues p-values in an interval: return NULL
+    pTable <- table(cut(mydat$p, breaks = c(0, .05, 0.5, 1)))
+    if(fallback == TRUE | any(pTable < minNoPvals) | !anyNA(deltas)){
+      threeFit <- tryCatch(selmodel(res, type = "stepfun", steps = steps, delta = deltas, alternative = "greater"),
+                           error = function(e) NULL)
+      threeOut <- if(is.null(threeFit)){
+        next
+      } else {
+        round(c("est" = threeFit$beta, "se" = threeFit$se, "zvalue" = threeFit$zval, "pvalue" = threeFit$pval, "ciLB" = threeFit$ci.lb, "ciUB" = threeFit$ci.ub, "k" = threeFit$k, "steps" = length(threeFit$steps)), 3)
+      }
+      out <- threeOut
+    } else { 
+      fourFit <- tryCatch(selmodel(res, type = "stepfun", steps = c(.025, .5, 1), alternative = "greater"),
+                          error = function(e) NULL)
+      fourOut <- c("est" = fourFit$beta, "se" = fourFit$se, "zvalue" = fourFit$zval, "pvalue" = fourFit$pval, "ciLB" = fourFit$ci.lb, "ciUB" = fourFit$ci.ub, "k" = fourFit$k, "steps" = length(fourFit$steps))  
+      if (is.null(fourFit)){
+        out <- threeOut
+      } else {
+        out <- fourOut %>% round(., 3)
+      }
     }
-    out <- threeOut
-  } else {
-    out <- fourOut %>% round(., 3)
+    resultSM[i,] <- out  
   }
-  out
+  colnames(resultSM) <- c("est", "se", "zvalue", "pvalue", "ciLB", "ciUB", "k", "steps")
+  resultSM <- resultSM %>% data.frame() %>% na.omit() %>% arrange(est) %>% slice(ceiling(n()/2)) %>% unlist()
+  resultSM <<- resultSM
+  resultSM
 }
 
 # PET-PEESE ---------------------------------------------------------------
@@ -135,6 +148,7 @@ selectionModel <- function(data, minPvalues = 4){
 #PET-PEESE with 4/3PSM as the conditional estimator instead of PET. 
 # Also implemented the modified sample-size based estimator (see https://www.jepusto.com/pet-peese-performance/).
 petPeese <- function(data, nBased = TRUE, selModAsCondEst = TRUE){  # if nBased = TRUE, use the sample-size-based estimator, if FALSE, use the ordinary SE/var. If selModAsCondEst = TRUE, use the selection model as conditional estimator, otherwise use PET.
+  data <- data %>% filter(useMA == 1)
   viMatrix <- impute_covariance_matrix(data$vi, cluster = data$study, r = rho, smooth_vi = TRUE)  # compute the covariance matrix for the CHE working model
   
   if(nBased == TRUE){
@@ -155,10 +169,10 @@ petPeese <- function(data, nBased = TRUE, selModAsCondEst = TRUE){  # if nBased 
   
   if(selModAsCondEst == TRUE){
     ifelse(resultSM["pvalue"] < alpha & ifelse(exists("side") & side == "left", -1, 1) * resultSM["est"] > 0,
-           return(peese.out),  return(pet.out))
+           return(c(peese.out, pet.out)),  return(c(pet.out, peese.out)))
   } else {
     ifelse(pet$pval[1] < alpha & ifelse(exists("side") & side == "left", -1, 1) * pet$b[1] > 0,
-           return(peese.out),  return(pet.out))
+           return(c(peese.out, pet.out)),  return(c(pet.out, peese.out)))
   } 
 }
 
@@ -223,6 +237,7 @@ waapWLS <- function(yi, vi, est = c("WAAP-WLS"), long = FALSE) {
 # Median power for detecting SESOI and bias-corrected parameter estimates --------------
 
 powerEst <- function(data = NA){
+  data <- data %>% filter(useMA == 1)
   powerPEESE <- NA
   powerSM <- NA
   peeseEst <- petPeese(data)[1]
@@ -234,8 +249,8 @@ powerEst <- function(data = NA){
   c("Median power for detecting a SESOI of d = .20" = power20sd,
     "Median power for detecting a SESOI of d = .50" = power50sd,
     "Median power for detecting a SESOI of d = .70" = power70sd,
-    "Median power for detecting PET-PEESE estimate" = powerPEESEresult, 
-    "Median power for detecting 4/3PSM estimate" = powerSMresult)
+    "Median power for detecting PET-PEESE estimate" = ifelse(peeseEst > 0, powerPEESEresult, paste("ES estimate in the opposite direction")), 
+    "Median power for detecting 4/3PSM estimate" = ifelse(resultSM["est"] > 0, powerSMresult, paste("ES estimate in the opposite direction")))
 }
 
 # Publication bias summary function-------------------------------
@@ -243,21 +258,16 @@ powerEst <- function(data = NA){
 bias <- function(data = NA, rmaObject = NA){
   # Correlation between the ES and precision (SE)
   esPrec <- cor(rmaObject[[1]]$yi, sqrt(rmaObject[[1]]$vi), method = "kendall")
+  
   # Small-study effects correction
   # 3-parameter selection model
-  resultSM <- matrix(ncol = 8, nrow = nIterations)
-  for(i in 1:nIterations){
-    resultSM[i,] <- data %>% selectionModel(., minPvalues = 4)
-  }
-  colnames(resultSM) <- c("est", "se", "zvalue", "pvalue", "ciLB", "ciUB", "k", "steps")
-  resultSM <- resultSM %>% data.frame() %>% na.omit() %>% arrange(est) %>% slice(ceiling(n()/2)) %>% unlist()
-  resultSM <<- resultSM
+  resultSM <- selectionModel(data, minNoPvals = minPvalues, nIteration = nIterations, fallback = fallback)
   
   # PET-PEESE
   petPeeseOut <- petPeese(data)
   
   # WAAP-WLS
-  waapWLSout <- data %$% waapWLS(yi, vi)
+  waapWLSout <- data %>% filter(useMA == 1) %$% waapWLS(yi, vi)
   waapWLSout[1, 9:10] <- waapWLSout[2, 9:10]
   waapWLSout <- waapWLSout[1,]
   
@@ -266,8 +276,10 @@ bias <- function(data = NA, rmaObject = NA){
   
   # p-uniform* (van Aert & van Assen, 2021)
   resultPuniform <- matrix(ncol = 4, nrow = nIterations)
+  set.seed(1)
   for(i in 1:nIterations){
-    modelPuniform <- data[!duplicated.random(data$study) & data$focalVariable == 1,] %$% puni_star(yi = yi, vi = vi, alpha = alpha, side = side, method = "ML")
+    data <- data %>% filter(useMA == 1)
+    modelPuniform <- data[!duplicated.random(data$study) & data$focalVariable == 1 & !is.na(data$vi),] %$% puni_star(yi = yi, vi = vi, alpha = alpha, side = side, method = "ML")
     resultPuniform[i,] <- c("est" = modelPuniform[["est"]], "ciLB" = modelPuniform[["ci.lb"]], "ciUB" = modelPuniform[["ci.ub"]], "p-value" = modelPuniform[["pval.0"]])
   }
   colnames(resultPuniform) <- c("est", "ciLB", "ciUB", "pvalue")
@@ -288,13 +300,52 @@ bias <- function(data = NA, rmaObject = NA){
 maResults <- function(rmaObject = NA, data = NA, bias = T){
   list(
     "RMA results with model-based SEs" = rmaObject[[2]],
-    "RVE SEs with Satterthwaite small-sample correction" = conf_int(rmaObject[[2]], vcov = "CR2", cluster = data$study),
+    "RVE SEs with Satterthwaite small-sample correction" = list("test" = coef_test(rmaObject[[2]], vcov = "CR2", cluster = data[data$useMA == 1,]$study), "CIs" = conf_int(rmaObject[[2]], vcov = "CR2", cluster = data[data$useMA == 1,]$study)),
     "Prediction interval" = pi95(rmaObject),
     "Heterogeneity" = heterogeneity(rmaObject),
-    "Proportion of significant results" = propSig(data$p),
-    "Publication bias" = if(bias ==T) {bias(data, rmaObject)} else {paste("Publication bias correction not carried out")},
+    "Proportion of significant results" = propSig(data[data$useMA == 1,]$p),
+    "Publication bias" = if(bias ==T) {bias(data, rmaObject)} else {paste("Publication bias corrections not carried out")},
+    "Power for detecting SESOI and bias-corrected parameter estimates" = if(bias ==T) {powerEst(data)} else {paste("Power for detecting bias-corrected parameter estimates not computed")})
+}
+
+biasResults <- function(rmaObject = NA, data = NA){
+  list(
+    "Publication bias" = bias(data, rmaObject),
     "Power for detecting SESOI and bias-corrected parameter estimates" = powerEst(data))
 }
+
+maResultsTable <- function(maResultsObject, metaAnalysis = TRUE, bias = TRUE){
+  if(bias == TRUE & metaAnalysis == TRUE){
+    noquote(c(
+      "k" = as.numeric(maResultsObject[[1]]$k.all),
+      "g [95% CI]" = paste(round(as.numeric(maResultsObject[[2]]$test$beta), 2), " [", round(maResultsObject[[2]]$CIs$CI_L, 2), ", ", round(maResultsObject[[2]]$CIs$CI_U, 2), "]", sep = ""),
+      "SE" = round(maResultsObject[[2]]$test$SE, 2),
+      round(maResultsObject[[4]]["Tau"], 2),
+      "I^2" = paste(round(maResultsObject[[4]]["I^2"], 0), "%", sep = ""),
+      "3PSM est [95% CI]" = paste(round(maResultsObject[[6]][["4/3PSM"]]["est"], 2), " [", round(maResultsObject[[6]][["4/3PSM"]]["ciLB"], 2), ", ", round(maResultsObject[[6]][["4/3PSM"]]["ciUB"], 2), "]", sep = ""),
+      "3PSM" = round(maResultsObject[[6]][["4/3PSM"]]["pvalue"], 3),
+      "PET-PEESE est [95% CI]" = paste(round(maResultsObject[[6]][["PET-PEESE"]][1], 2), " [", round(maResultsObject[[6]][["PET-PEESE"]][5], 2), ", ", round(maResultsObject[[6]][["PET-PEESE"]][6], 2), "]", sep = ""),
+      "PET-PEESE" = round(maResultsObject[[6]][["PET-PEESE"]][4], 3)
+    ))
+  } else if (metaAnalysis == FALSE & bias == TRUE) {
+    noquote(c(
+      "3PSM est [95% CI]" = paste(round(maResultsObject[[1]][["4/3PSM"]]["est"], 2), " [", round(maResultsObject[[1]][["4/3PSM"]]["ciLB"], 2), ", ", round(maResultsObject[[1]][["4/3PSM"]]["ciUB"], 2), "]", sep = ""),
+      "3PSM" = round(maResultsObject[[1]][["4/3PSM"]]["pvalue"], 3),
+      "PET-PEESE est [95% CI]" = paste(round(maResultsObject[[1]][["PET-PEESE"]][1], 2), " [", round(maResultsObject[[1]][["PET-PEESE"]][5], 2), ", ", round(maResultsObject[[1]][["PET-PEESE"]][6], 2), "]", sep = ""),
+      "PET-PEESE" = round(maResultsObject[[1]][["PET-PEESE"]][4], 3)
+    ))
+  } else {
+    noquote(c(
+      "k" = as.numeric(maResultsObject[[1]]$k.all),
+      "g [95% CI]" = paste(round(as.numeric(maResultsObject[[2]]$test$beta), 2), " [", round(maResultsObject[[2]]$CIs$CI_L, 2), ", ", round(maResultsObject[[2]]$CIs$CI_U, 2), "]", sep = ""),
+      "SE" = round(maResultsObject[[2]]$test$SE, 2),
+      round(maResultsObject[[4]]["Tau"], 2),
+      "I^2" = paste(round(maResultsObject[[4]]["I^2"], 0), "%", sep = "")
+    ))
+  }
+}
+
+
 
 # Return format function
 # Code adapted from Carter, E. C., Schönbrodt, F. D., Hilgard, J., & Gervais, W. (2018). Correcting for bias in psychology: A comparison of meta-analytic methods. Retrieved from https://osf.io/rf3ys/.
@@ -338,10 +389,6 @@ tTestSummary <- function(mean1, mean2, sd1, sd2, n1, n2, withinSS = FALSE)
     names(out) <- c("Difference in means", "SE", "t-statistic", "p-value")
     return(out)
   }
-   
-  
-  
-  
 }
 
 # Random selection of effects ---------------------------------------------
@@ -368,33 +415,42 @@ duplicated.random = function(x, incomparables = FALSE, ...)
 }
 
 # GRIM & GRIMMER Output -----------------------------------------------------
-grimAndGrimmer <- function(dat){
+grim <- function(dat){
   dat <- dat %>% mutate(items = ifelse(is.na(items), 0, items))
-  
   outGrimM1 <- NA
   outGrimM2 <- NA
+  datGRIM <- dat %>% filter(complete.cases(n1, n2, mean1, mean2, items))
+  for(i in 1:nrow(datGRIM)){
+    outGrimM1[i] <- grimTest(n = datGRIM[i,]$n1, mean = datGRIM[i,]$mean1, items = datGRIM[i,]$items, decimals = 2)
+    outGrimM2[i] <- grimTest(n = datGRIM[i,]$n2, mean = datGRIM[i,]$mean2, items = datGRIM[i,]$items, decimals = 2)
+    }
+  
+  datGRIM$outGrimM1 <- outGrimM1
+  datGRIM$outGrimM2 <- outGrimM2
+  datGRIM$inconsistenciesCountGRIM <- datGRIM %$% abs(outGrimM1 + outGrimM2 - 2)
+
+  dat <<- datGRIM %>% 
+    select(result, outGrimM1, outGrimM2, inconsistenciesCountGRIM) %>%
+    left_join(dat, ., by = "result", keep = FALSE)
+}
+
+grimmer <- function(dat){
+  dat <- dat %>% mutate(items = ifelse(is.na(items), 0, items))
   outGrimmerSD1 <- NA
   outGrimmerSD2 <- NA
   datGRIM <- dat %>% filter(complete.cases(n1, n2, mean1, mean2, sd1, sd2, items))
   for(i in 1:nrow(datGRIM)){
-    outGrimM1[i] <- grimTest(n = datGRIM[i,]$n1, mean = datGRIM[i,]$mean1, items = datGRIM[i,]$items, decimals = 2)
-    outGrimM2[i] <- grimTest(n = datGRIM[i,]$n2, mean = datGRIM[i,]$mean2, items = datGRIM[i,]$items, decimals = 2)
     outGrimmerSD1[i] <- grimmerTest(n = datGRIM[i,]$n1, mean = datGRIM[i,]$mean1, SD = datGRIM[i,]$sd1, items = datGRIM[i,]$items, decimals_mean = 2, decimals_SD = 2)
     outGrimmerSD2[i] <- grimmerTest(n = datGRIM[i,]$n2, mean = datGRIM[i,]$mean2, SD = datGRIM[i,]$sd2, items = datGRIM[i,]$items, decimals_mean = 2, decimals_SD = 2)
   }
-  
-  datGRIM$outGrimM1 <- outGrimM1
-  datGRIM$outGrimM2 <- outGrimM2
   datGRIM$outGrimmerSD1 <- outGrimmerSD1
   datGRIM$outGrimmerSD2 <- outGrimmerSD2
-  datGRIM$inconsistenciesCountGRIM <- datGRIM %$% abs(outGrimM1 + outGrimM2 - 2)
   datGRIM$inconsistenciesCountGRIMMER <- datGRIM %$% abs(outGrimmerSD1 + outGrimmerSD2 - 2)
   
   dat <<- datGRIM %>% 
-    select(result, outGrimM1, outGrimM2, outGrimmerSD1, outGrimmerSD2, inconsistenciesCountGRIM, inconsistenciesCountGRIMMER) %>%
+    select(result, outGrimmerSD1, outGrimmerSD2, inconsistenciesCountGRIMMER) %>%
     left_join(dat, ., by = "result", keep = FALSE)
 }
-
 # General Grim Test -------------------------------------------------------
 
 # Code adapted from https://osf.io/scpbz/ , by Nick Brown and 
