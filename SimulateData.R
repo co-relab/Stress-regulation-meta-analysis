@@ -152,6 +152,7 @@ StressData$Domain.5.risk.of.bias<- ifelse(StressData$Domain.5.risk.of.bias == "L
 StressData$overallRiskOfBias<- ifelse(StressData$Overall.risk.of.bias == "Low", 1, ifelse(StressData$Overall.risk.of.bias == "High", 3, 2))
 
 data <- StressData
+write.csv("StressData")
 
-StressData <- StressData %>% mutate (Domain.1.risk.of.bias = ifelse(Domain.1.risk.of.bias == "Low", 1,
-                                    ifelse(Domain.1.risk.of.bias == "High",3,2))) #altro modo di fare ifelse
+#StressData <- StressData %>% mutate (Domain.1.risk.of.bias = ifelse(Domain.1.risk.of.bias == "Low", 1,
+                                    #ifelse(Domain.1.risk.of.bias == "High",3,2))) #altro modo di fare ifelse

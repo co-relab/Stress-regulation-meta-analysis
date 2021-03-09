@@ -1,6 +1,6 @@
 #' ---
 #' title: "Mindfulness & Biofeedback meta-analysis"
-#' author: "Ivan Ropovik"
+#' author: "Ivan Ropovik & Alessandro Sparacio"
 #' date: "`r Sys.Date()`"
 #' output:
 #'    html_document:
@@ -292,14 +292,14 @@ stressAffectConseq
 #'### Forest plots
 #'#### Mindfulness
 dataMind %>% filter(stressAffective == 1) %$% forest(yi, vi, subset=order(vi), slab = label)
-title("Mindfulness (stressAffective = 1)")
+title("Mindfulness (StressResponse = 1)")
 dataMind %>% filter(stressAffective == 2) %$% forest(yi, vi, subset=order(vi), slab = label)
-title("Mindfulness (stressAffective = 2)")
+title("Mindfulness (AffectiveConsequences = 2)")
 #'#### Biofeedback
 dataBio %>% filter(stressAffective == 1) %$% forest(yi, vi, subset=order(vi), slab = label)
-title("Mindfulness (stressAffective = 1)")
+title("Biofeedback (StressResponse = 1)")
 dataBio %>% filter(stressAffective == 2) %$% forest(yi, vi, subset=order(vi), slab = label)
-title("Mindfulness (stressAffective = 2)")
+title("Biofeedback (AffectiveConsequences = 2)")
 
 #'## Subgroup analysis for stress vs affective consequences
 stressComponentClusters <- list(NA)
@@ -315,16 +315,16 @@ stressComponentClusters
 #'### Forest plots
 #'#### Mindfulness
 dataMind %>% filter(stressCompRecoded == 1) %$% forest(yi, vi, subset=order(vi), slab = label)
-title("Mindfulness (stressCompRecoded = 1)")
+title("Mindfulness (AffectiveComponent)")
 dataMind %>% filter(stressCompRecoded == 2) %$% forest(yi, vi, subset=order(vi), slab = label)
-title("Mindfulness (stressCompRecoded = 2)")
+title("Mindfulness (CognititveComponent)")
 dataMind %>% filter(stressCompRecoded == 3) %$% forest(yi, vi, subset=order(vi), slab = label)
-title("Mindfulness (stressCompRecoded = 3)")
+title("Mindfulness (PhysiologicalComponent)")
 #'#### Biofeedback
 dataBio %>% filter(stressCompRecoded == 1) %$% forest(yi, vi, subset=order(vi), slab = label)
-title("Mindfulness (stressCompRecoded = 1)")
+title("Biofeedback (AffectiveComponent)")
 dataBio %>% filter(stressCompRecoded == 2) %$% forest(yi, vi, subset=order(vi), slab = label)
-title("Mindfulness (stressCompRecoded = 2)")
+title("Biofeedback (CognititveComponent)")
 dataBio %>% filter(stressCompRecoded == 3) %$% forest(yi, vi, subset=order(vi), slab = label)
-title("Mindfulness (stressCompRecoded = 3)")
+title("Biofeedback (PhysiologicalComponent)")
 

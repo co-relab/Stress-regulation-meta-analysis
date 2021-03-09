@@ -3,12 +3,15 @@
 library(tidyverse)
 library(irr)
 
-firstCoder <- read_delim("data/SAM1.csv", delim = ",")
-secondCoder <- read_delim("data/SAM2.csv", delim = ",")
+firstCoder <- read_delim("FIRST - SAM.csv", delim = ",")
+secondCoder <- read_delim("SECOND - SAM.csv", delim = ",")
 
-ratersData <- list(firstCoder[1:11,], secondCoder[1:11,])
+# Check of the first 10% (remove it from the comment to calculate the interrater agreement of the first 10%)
+# ratersData <- list(firstCoder[1:11,], secondCoder[1:11,])
+# 20% overall
+ratersData <- list(firstCoder[1:25,], secondCoder[1:25,])
 
-variableNames <- names(secondCoder)[c(5,6,10,15,17:21,23,25:29, 31, 34,35,39:42, 44:45, 47)]
+variableNames <- names(secondCoder)[c(5,6,10,15,17:21,23,25:29, 31, 34,37:40, 42:43, 45)]
 
 # kappas <- list()
 # for(i in variableNames){
@@ -29,10 +32,13 @@ agreement
 
 rm(list = ls())
 #+ include=FALSE
-firstCoder <- read_delim("data/BF1.csv", delim = ",")
-secondCoder <- read_delim("data/BF2.csv", delim = ",")
+firstCoder <- read_delim("FIRST - BIO.csv", delim = ",")
+secondCoder <- read_delim("SECOND - BIO.csv", delim = ",")
 
-ratersData <- list(firstCoder[1:12,], secondCoder[1:12,])
+# Check of the first 10% (remove it from the comment to calculate the interrater agreement of the first 10%)
+#ratersData <- list(firstCoder[1:12,], secondCoder[1:12,])
+# Overall 20% 
+ratersData <- list(firstCoder[1:27,], secondCoder[1:27,])
 
 variableNames <- names(secondCoder)[c(5,6,10,15,17:22,24,26:29, 31, 34,38:41, 43:44, 46)]
 
@@ -52,3 +58,4 @@ names(agreement) <- variableNames
 #+ include=TRUE
 #'# Inter-rater agreement Biofeedback
 agreement
+
