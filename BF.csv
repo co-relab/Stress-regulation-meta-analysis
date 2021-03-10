@@ -12,7 +12,7 @@ is known to increase HRV coherence coupled with
 computer-based HRVCB (emWave Desktop, Institute
 of HeartMath, Boulder Creek, California) plus standard
 of care for chronic pain; the control group (n=6)
-received standard care without additional training.";usual care treatment;stress;;6;;1;1;13;1;;44.8;;;;;1.6;;;;;12;0.14;6.1;6.9;;;8;6;;20.4;26.0;1;2;1;1;2;2;1;;
+received standard care without additional training.";usual care treatment;stress;;6;;1;1;13;1;;44.8;;;;;1.6;;;;;12;0.14;6.1;6.9;;;8;6;;20.4;26;1;2;1;1;2;2;1;;
 2;Symptom Management Among Cancer Survivors: Randomized Pilot Intervention Trial of Heart Rate Variability Biofeedback.;"Burch, James B.; Ginsberg, J. P.; McLain, Alexander C.; Franco, Regina; Stokes, Sherry; Susko, Kerri; Hendry, William; Crowley, Elizabeth; Christ, Alex; Hanna, John; Anderson, Annie; Hébert, James R.; O'Rourke, Mark A.";burch@mailbox.sc.edu;1;1;Applied psychophysiology and biofeedback;21;2020;1;1;1;;1;0;1;1;1;2;5;5;1;at the end of the 4-6 weeks;200;4-6 weeks;1;1;0;4;;3;Cancer survivors;HRV coherence ratio;1;"HRVB training consisted of 25 min of individual
 biofeedback training/coaching using an emWave Pro sys
 tem
@@ -61,7 +61,7 @@ respiration and heart rate curves. The task was to continue deep
 breathing and to synchronize both curves. The participants were
 briefly trained in diaphragmatic breathing (e.g., exhale through
 pursed lips) and received a short trial period to test the procedure
-and clarify possible questions or difficulties";active control group;HRV;;6;;1;1;;;;;0.560;;;;;;;;2;81;0.573;;;;;29;27;28;;;1;2;1;1;2;2;1;;
+and clarify possible questions or difficulties";active control group;HRV;;6;;1;1;;;;;0.56;;;;;;;;2;81;0.573;;;;;29;27;28;;;1;2;1;1;2;2;1;;
 3;A randomized-controlled trial of heart rate variability biofeedback for psychotic symptoms.;"Clamor, Annika; Koenig, Julian; Thayer, Julian F.; Lincoln, Tania M.";"annika.clamor@uni-hamburg.de, Julian.Koenig@
 med.uni-heidelberg.de, thayer.39@osu.edu, tania.lincoln@
 uni-hamburg.de";1;2;Behaviour research and therapy;57;2016;1;1;1;;17;0;;1;1;2;1;1;1;;20;;0;1;1;2;;2;;VAS - analogue scale stress;1;"In the intervention phase, the procedure varied for the groups.
@@ -78,7 +78,7 @@ breathing and to synchronize both curves. The participants were
 briefly trained in diaphragmatic breathing (e.g., exhale through
 pursed lips) and received a short trial period to test the procedure
 and clarify possible questions or difficulties";active control group;Stress;;2;;1;1;;;;;1.847;;;;;;;;2;81;0.164;;;;;29;27;28;;;1;2;1;1;2;2;1;;
-4;Pilot study of the effects of heart rate variability biofeedback on perceived stress, perceived coping ability, and resilience in accelerated baccalaureate nursing students;Harmelink, Andrea J.;;1;1;;;2016;0;0;1;;3;10;1;1;2;2;7;28;1;;;4 weeks;1;1;0;4;;1;Accelerated baccalaureate nursing;PSS;1;;wait list control group;Stress;;2;;1;1;7;25;78;;;;;;;;;;;;;1.802;3.113;;;17;15;;20.000;22.533;2;2;1;1;2;3;1;;https://search.proquest.com/docview/1723993228?accountid=16562
+4;Pilot study of the effects of heart rate variability biofeedback on perceived stress, perceived coping ability, and resilience in accelerated baccalaureate nursing students;Harmelink, Andrea J.;;1;1;;;2016;0;0;1;;3;10;1;1;2;2;7;28;1;;;4 weeks;1;1;0;4;;1;Accelerated baccalaureate nursing;PSS;1;;wait list control group;Stress;;2;;1;1;7;25;78;;;;;;;;;;;;;1.802;3.113;;;17;15;;20;22.533;2;2;1;1;2;3;1;;https://search.proquest.com/docview/1723993228?accountid=16562
 5;Exploring the effectiveness of a computer-based heart rate variability biofeedback program in reducing anxiety in college students.;"Henriques, Gregg; Keffer, Steven; Abrahamson, Craig; Horst, S. Jeanne";henriqgx@jmu.edu;2;1;Applied psychophysiology and biofeedback;21;2011;0;1;1;;160;15;-1;1;1;2;5;20;1;end of the 4 weeks;240;4 weeks;0;1;0;4;;1;;MASQ - GDA subscale;1;;;state anxiety;;2;;1;1;8;27;;;;;;;;;;;;;;;;;;16;14;;26.5;20.9;1;2;2;1;2;3;1;asked author for missing info about sd1 & sd2;
 5;Exploring the effectiveness of a computer-based heart rate variability biofeedback program in reducing anxiety in college students.;"Henriques, Gregg; Keffer, Steven; Abrahamson, Craig; Horst, S. Jeanne";henriqgx@jmu.edu;2;2;Applied psychophysiology and biofeedback;21;2011;0;1;1;;160;15;-1;1;1;2;5;20;1;end of the 4 weeks;240;4 weeks;0;1;0;4;;1;;MASQ - GDD subscale;1;;;depression;;;1;1;1;8;27;;;;;;;;;;;;;;;;;;16;14;;30.9;26.3;1;2;2;1;2;3;1;asked author for missing info about sd1 & sd2;
 5;Exploring the effectiveness of a computer-based heart rate variability biofeedback program in reducing anxiety in college students.;"Henriques, Gregg; Keffer, Steven; Abrahamson, Craig; Horst, S. Jeanne";henriqgx@jmu.edu;2;3;Applied psychophysiology and biofeedback;21;2011;0;1;1;;160;15;1;1;1;2;5;20;1;end of the 4 weeks;240;4 weeks;0;1;0;4;;1;;MASQ - HPA subscale;1;;;positive affect;1;;;0;1;8;27;;;;;;;;;;;;;;;;;;16;14;;67.5;60.6;1;2;2;1;2;3;1;asked author for missing info about sd1 & sd2;
@@ -141,7 +141,7 @@ two weeks. Each individual training session was led by the primary investigator 
 The participants received psychoeducation regarding links among heart rate variability,
 physical health, and psychological health. During each session, participants were instructed
 to find ways(e.g., diaphragmatic breathing technique) to regulate their breathing while
-receiving feedback from heart rate variability biofeedback device (emWave PC, HeartMath).";trait anxiety;;;2;1;1;12;3;20;;;;;;;;;;;;;4.39;6.50;;;5;5;;39.40;49.80;1;2;1;1;2;2;1;;
+receiving feedback from heart rate variability biofeedback device (emWave PC, HeartMath).";trait anxiety;;;2;1;1;12;3;20;;;;;;;;;;;;;4.39;6.5;;;5;5;;39.4;49.8;1;2;1;1;2;2;1;;
 9;Walking versus biofeedback: A comparison of acute interventions for stressed students;"Meier, Nathan F.; Welch, Amy S.";nfmeier@iastate.edu;1;1;Anxiety, Stress & Coping;28;2016;0;1;1;;23;20;1;1;3;2;1;1;1;immediatly after the biofeedback intervention;10;10 minutes;0;0;0;4;;2;;STAY- S ;2;"Paced-breathing with biofeedback intervention For the Biofeedback condition, participants
 were introduced to diaphragmatic breathing using a brief script that was consistent for all
 238
@@ -158,12 +158,12 @@ ProBook 6550b), which displayed a pacer bar and a pacer line set to 6 breaths pe
 (bpm). Next
 244";"For the Exercise condition, participants stepped onto the
 Downloaded by treadmill (Trackmaster TMX425C, Newton, KS 231 , USA) for a 10-minute, self-paced walk.
-231";state anxiety;;2;;1;1;;;66;21.7;;;;;;;;;;;;8.8;9.6;;;32;;;9.6;13.0;1;1;2;1;1;2;1;;https://search.proquest.com/docview/1868507602?accountid=16562
+231";state anxiety;;2;;1;1;;;66;21.7;;;;;;;;;;;;8.8;9.6;;;32;;;9.6;13;1;1;2;1;1;2;1;;https://search.proquest.com/docview/1868507602?accountid=16562
 9;Walking versus biofeedback: A comparison of acute interventions for stressed students;"Meier, Nathan F.; Welch, Amy S.";nfmeier@iastate.edu;1;2;Anxiety, Stress & Coping;28;2016;0;1;1;;23;4;1;1;3;2;1;1;1;immediatly after the biofeedback intervention;10;10 minutes;0;0;0;4;;2;;"Activation Deactivation Adjective
 Checklist or AD-ACL
 209";2;"Activation Deactivation Adjective
 Checklist or AD-ACL
-209";;calmness;;3;;1;1;;;66;21.7;;;;;;;;;;;;2.7;3.0;;;32;;;16.0;12.9;1;1;2;1;1;2;1;;
+209";;calmness;;3;;1;1;;;66;21.7;;;;;;;;;;;;2.7;3;;;32;;;16;12.9;1;1;2;1;1;2;1;;
 9;Walking versus biofeedback: A comparison of acute interventions for stressed students;"Meier, Nathan F.; Welch, Amy S.";nfmeier@iastate.edu;1;3;Anxiety, Stress & Coping;28;2016;0;1;1;;23;0;1;1;3;2;1;1;1;immediatly after the biofeedback intervention;10;10 minutes;0;0;0;4;;2;;;2;;;" HRV - RMSSD=square root of the mean squared
 ";;6;;1;1;;;66;21.7;;;;;;;;;;;;32.3;40.8;;;32;;;50.5;45.5;1;1;2;1;1;2;1;;
 10;Improving Managers' Psychophysical Well-Being: Effectiveness of Respiratory Sinus Arrhythmia Biofeedback.;"Munafò, Marianna; Patron, Elisabetta; Palomba, Daniela";elisabetta.patron@gmail.com, elisabetta.patron@studenti.unipd.it;1;1;Applied psychophysiology and biofeedback;21;2016;1;1;2;;21;20;;1;1;2;1;5;1;After last intervention;225;5 weeks;0;1;0;4;;2;managers with high-level work responsibilities;STAY- T trait anxiety;2;"During
@@ -205,7 +205,7 @@ Fig. 1). Participants were required to synchronise HR and
 abdominal respiration variations, until the two signals (i.e.,
 HR and abdominal respiration) covaried in phase, thus
 leading to the maximal amplitude of RSA. Participants
-were also suggested to breathe slowly";daily stress diary for the duration of 5 weeks ;DPB;;6;;1;2;31;;;47.89;0.10;;;;;;;;1;29;0.75;;;;;16;15;;;;1;1;1;1;1;1;1;;
+were also suggested to breathe slowly";daily stress diary for the duration of 5 weeks ;DPB;;6;;1;2;31;;;47.89;0.1;;;;;;;;1;29;0.75;;;;;16;15;;;;1;1;1;1;1;1;1;;
 10;Improving Managers' Psychophysical Well-Being: Effectiveness of Respiratory Sinus Arrhythmia Biofeedback.;"Munafò, Marianna; Patron, Elisabetta; Palomba, Daniela";elisabetta.patron@gmail.com, elisabetta.patron@studenti.unipd.it;1;5;Applied psychophysiology and biofeedback;21;2016;1;1;2;;21;0;;1;1;2;1;5;1;After last intervention;225;5 weeks;0;1;0;4;;2;managers with high-level work responsibilities;;2;"During
 biofeedback, trial participants saw on the screen the HR
 beat-to-beat tachogram (i.e., beats/min) superimposed over
@@ -236,7 +236,7 @@ equipment. The subject was then asked to breathe at his
 resonant frequency and relax. The BFB sessions were
 given for 10 consecutive days for 20 min each.";"Placebo Group was shown motivational basketball
 visual
-clips";State anxiety;;2;;1;1;17;13;;21.13;;;;;;;;;;;;1.43;7.38;;;10;10;10;21.40;36.40;1;1;1;1;2;1;1;;
+clips";State anxiety;;2;;1;1;17;13;;21.13;;;;;;;;;;;;1.43;7.38;;;10;10;10;21.4;36.4;1;1;1;1;2;1;1;;
 11;The effect of heart rate variability biofeedback on performance psychology of  basketball players.;"Paul, Maman; Garg, Kanupriya";kannugr855@yahoo.co.in, maman_paul20@yahoo.co.uk;1;3;Applied psychophysiology and biofeedback;21;2012;1;1;2;;138;20;1;1;1;2;7;10;1;after intervention ;200;10 consecutive days;0;1;0;4;;2;;STAY- T trait anxiety;2;"Fol
 lowing
 the pre-test measurements, the subject sat with
@@ -258,7 +258,7 @@ equipment. The subject was then asked to breathe at his
 resonant frequency and relax. The BFB sessions were
 given for 10 consecutive days for 20 min each.";"Placebo Group was shown motivational basketball
 visual
-clips";Trait anxiety;;;2;1;1;17;13;;21.13;;;;;;;;;;;;2.89;8.84;;;10;10;10;26.20;42.50;1;1;1;1;2;1;1;;
+clips";Trait anxiety;;;2;1;1;17;13;;21.13;;;;;;;;;;;;2.89;8.84;;;10;10;10;26.2;42.5;1;1;1;1;2;1;1;;
 11;The effect of heart rate variability biofeedback on performance psychology of  basketball players.;"Paul, Maman; Garg, Kanupriya";kannugr855@yahoo.co.in, maman_paul20@yahoo.co.uk;1;5;Applied psychophysiology and biofeedback;21;2012;1;1;2;;138;0;1;1;1;2;7;10;1;after intervention ;200;10 consecutive days;0;1;0;4;;2;;;2;"Fol
 lowing
 the pre-test measurements, the subject sat with
@@ -282,7 +282,7 @@ given for 10 consecutive days for 20 min each.";"Placebo Group was shown motivat
 visual
 clips";total HRV;;5;;1;1;17;13;;21.13;;;;;;;;;;;;1,624.81;386.68;;;10;10;10;2,224.11;455.75;1;1;1;1;2;1;1;;
 12;The effect of a single episode of short duration heart rate variability biofeedback on measures of anxiety and relaxation states;"Prinsloo, G.E.; Derman, W.E.; Lambert, M.I.; Laurie Rauch, H.G.";gabriellprinsloo@gmail.com;1;1;International Journal of Stress Management;29;2013;1;1;2;;42;20;1;1;1;2;1;1;2;after the 10 minutes biofeedback session;10;single administration - 10 minute;0;1;1;2;Modified Stroop task;2;;STAY- S state anxiety;1;10 minutes hrv biofeedback intervention;;state anxiety;;2;;1;1;18;0;;34;;;;;;;;;;;;7;9;;;9;9;;30;32;1;2;1;1;1;2;1;;https://www.scopus.com/inward/record.uri?eid=2-s2.0-68949215036&doi=10.1037%2fa0016047&partnerID=40&md5=4fc9851262f5c7a5b04fbb7d7c804d4e
-12;The effect of a single episode of short duration heart rate variability biofeedback on measures of anxiety and relaxation states;"Prinsloo, G.E.; Derman, W.E.; Lambert, M.I.; Laurie Rauch, H.G.";gabriellprinsloo@gmail.com;1;2;International Journal of Stress Management;29;2013;1;1;2;;42;20;1;1;1;2;1;1;2;after the 10 minutes biofeedback session;10;single administration - 10 minute;0;1;1;2;Modified Stroop task;2;;Smith relaxation states inventory (SRSI3) mindfulness subscale;1;10 minutes hrv biofeedback intervention;;mindful quiet;;3;;1;1;18;0;;34;;;;;;;;;;;;0.87;1.10;;;9;9;;4.28;3.56;1;2;1;1;1;2;1;;
+12;The effect of a single episode of short duration heart rate variability biofeedback on measures of anxiety and relaxation states;"Prinsloo, G.E.; Derman, W.E.; Lambert, M.I.; Laurie Rauch, H.G.";gabriellprinsloo@gmail.com;1;2;International Journal of Stress Management;29;2013;1;1;2;;42;20;1;1;1;2;1;1;2;after the 10 minutes biofeedback session;10;single administration - 10 minute;0;1;1;2;Modified Stroop task;2;;Smith relaxation states inventory (SRSI3) mindfulness subscale;1;10 minutes hrv biofeedback intervention;;mindful quiet;;3;;1;1;18;0;;34;;;;;;;;;;;;0.87;1.1;;;9;9;;4.28;3.56;1;2;1;1;1;2;1;;
 13;Effects of Respiratory Sinus Arrhythmia Biofeedback Versus Passive Biofeedback Control;"Sherlin, L.; Gevirtz, R.; Wyckoff, S.; Muench, F.";lesliesherlin@mac.com;1;1;International Journal of Stress Management;27;2009;1;1;3;;64;20;1;1;1;2;1;1;1;Immediatly after the intervention;15;only 15 minutes;0;0;1;2;;1;;STAY- S state anxiety;2;"The HRV biofeedback device (the StressEraser; Helicor, Inc., New York,
 NY) an over-the-counter noninvasive biofeedback device that displays the
 natural rise and fall of real-time pulse-by-pulse activity as a wave (RSA) on
@@ -291,7 +291,7 @@ their breathing to a rate that is unique to them by inhaling until their HR
 peaks as marked on the device by a triangle and exhaling as the wave falls,
 until it begins to rise again";"The passive biofeedback control alternate intervention device was a
 StressEraser with an altered wave that still responded to their physiology, but
-participants had no indication of how to manipulate the wave";state anxiety;;2;;1;1;;;48.8;;;;;;;;;;;;;11.54;11.05;;;21;22;;33.54       ; 37.68;1;1;1;1;2;2;1;;https://search.proquest.com/docview/2316839361?accountid=16562
+participants had no indication of how to manipulate the wave";state anxiety;;2;;1;1;;;48.8;;;;;;;;;;;;;11.54;11.05;;;21;22;;33.54;37.68;1;1;1;1;2;2;1;;https://search.proquest.com/docview/2316839361?accountid=16562
 13;Effects of Respiratory Sinus Arrhythmia Biofeedback Versus Passive Biofeedback Control;"Sherlin, L.; Gevirtz, R.; Wyckoff, S.; Muench, F.";lesliesherlin@mac.com;1;2;International Journal of Stress Management;27;2009;1;1;3;;64;20;1;1;1;2;1;1;1;Immediatly after the intervention;15;only 15 minutes;0;0;1;2;;1;;Heart rate;2;"The HRV biofeedback device (the StressEraser; Helicor, Inc., New York,
 NY) an over-the-counter noninvasive biofeedback device that displays the
 natural rise and fall of real-time pulse-by-pulse activity as a wave (RSA) on
@@ -312,7 +312,7 @@ exercises at home increasing in duration over time: week 1: 10 min/day, week 2: 
 15 min/day, and weeks 4 and 5: 2
 20 min/day
 
-";waitlist control group;Depression;;;1;1;1;0;50;100;31.6;;;;;;;;;;;;3.40;4.97;;;29;21;;2.8;6.40;1;2;1;1;1;2;1;;
+";waitlist control group;Depression;;;1;1;1;0;50;100;31.6;;;;;;;;;;;;3.4;4.97;;;29;21;;2.8;6.4;1;2;1;1;1;2;1;;
 14;The Effect of Heart Rate Variability Biofeedback Training on Mental Health of Pregnant and Non-Pregnant Women: A Randomized Controlled Trial.;"van der Zwan, Judith Esi; Huizink, Anja C.; Lehrer, Paul M.; Koot, Hans M.; de Vente, Wieke";a.c.huizink@vu.nl;1;2;International journal of environmental research and public health;85;2019;0;1;2;;5;7;1;1;1;2;7;40;1;Immediatly after the intervention;1320;5 weeks;0;1;0;4;;2;;DASS - Anxiety;1;"The training was given by two trainers per intervention group according to a protocol [39], which was
 based on the HRV-biofeedback protocol developed by Lehrer, Vaschillo and Vaschillo [40]. It also
 included common stress-management techniques, such as psychoeducation and weekly assignments
@@ -324,7 +324,7 @@ exercises at home increasing in duration over time: week 1: 10 min/day, week 2: 
 15 min/day, and weeks 4 and 5: 2
 20 min/day
 
-";waitlist control group;Anxiety;;;2;1;1;0;50;100;31.6;;;;;;;;;;;;4.08;4.66;;;29;21;;4.10;4.90;1;2;1;1;1;2;1;;
+";waitlist control group;Anxiety;;;2;1;1;0;50;100;31.6;;;;;;;;;;;;4.08;4.66;;;29;21;;4.1;4.9;1;2;1;1;1;2;1;;
 14;The Effect of Heart Rate Variability Biofeedback Training on Mental Health of Pregnant and Non-Pregnant Women: A Randomized Controlled Trial.;"van der Zwan, Judith Esi; Huizink, Anja C.; Lehrer, Paul M.; Koot, Hans M.; de Vente, Wieke";a.c.huizink@vu.nl;1;3;International journal of environmental research and public health;85;2019;0;1;2;;5;7;1;1;1;2;7;40;1;Immediatly after the intervention;1320;5 weeks;0;1;0;4;;2;;DASS - Stress;1;"The training was given by two trainers per intervention group according to a protocol [39], which was
 based on the HRV-biofeedback protocol developed by Lehrer, Vaschillo and Vaschillo [40]. It also
 included common stress-management techniques, such as psychoeducation and weekly assignments
@@ -336,7 +336,7 @@ exercises at home increasing in duration over time: week 1: 10 min/day, week 2: 
 15 min/day, and weeks 4 and 5: 2
 20 min/day
 
-";waitlist control group;Stress;;2;;1;1;0;50;100;31.6;;;;;;;;;;;;6.24;6.76;;;29;21;;9.60;13.00;1;2;1;1;1;2;1;;
+";waitlist control group;Stress;;2;;1;1;0;50;100;31.6;;;;;;;;;;;;6.24;6.76;;;29;21;;9.6;13;1;2;1;1;1;2;1;;
 15;Effectiveness of Biofeedback in Improving Heart Rate Variability Recovery Following Stress;Wheat, Amanda L.;;1;1;;;2012;1;0;1;;1;0;1;1;1;2;1;6;1;after last intervention;192;"Days
 between the initial and follow-up visits ranged from 28 to 84 days.";1;1;1;3;Arythmetic stress task;3;;SDNN - HRV;1;"The emWave PC Stress Relief System (“emWave,”
 HeartMath, LLC, Boulder, Colorado) provided HRV biofeedback treatment. The emWave
@@ -439,7 +439,7 @@ cording.";tracking task group;Stress;;2;;1;2;;;;;13.46;;;;;;;;1;32;<0.001;;;;;;;
 18;"Biofeedback Assisted Control of Respiratory Sinus Arrhythmia
 as a Biobehavioral Intervention for Depressive Symptoms
 in Patients After Cardiac Surgery: A Preliminary Study";Patron et al.;elisabetta.patron@studenti.unipd.it;1;1;Applied psychophysiology and biofeedback;21;2012;0;1;4;;56;0;1;1;1;2;7;14;1;after interventin;630;2 weeks;0;1;0;4;;3;"All the patients
-underwent cardiac surgery";respiratory sinus arrhythmia (RSA);0;"The RSA
+underwent cardiac surgery";respiratory sinus arrhythmia (RSA);1;"The RSA
 feedback
 was presented through a 15-inch monitor con
 nected
@@ -453,7 +453,7 @@ machine
 18;"Biofeedback Assisted Control of Respiratory Sinus Arrhythmia
 as a Biobehavioral Intervention for Depressive Symptoms
 in Patients After Cardiac Surgery: A Preliminary Study";Patron et al.;;1;2;Applied psychophysiology and biofeedback;21;2012;0;1;4;;56;20;1;1;1;2;7;14;1;after interventin;630;2 weeks;0;1;0;4;;3;"All the patients
-underwent cardiac surgery";CES-D;0;"The RSA
+underwent cardiac surgery";CES-D;1;"The RSA
 feedback
 was presented through a 15-inch monitor con
 nected
@@ -467,7 +467,7 @@ machine
 18;"Biofeedback Assisted Control of Respiratory Sinus Arrhythmia
 as a Biobehavioral Intervention for Depressive Symptoms
 in Patients After Cardiac Surgery: A Preliminary Study";Patron et al.;;1;3;Applied psychophysiology and biofeedback;21;2012;0;1;4;;56;20;1;1;1;2;7;14;1;after interventin;630;2 weeks;0;1;0;4;;3;"All the patients
-underwent cardiac surgery";STAI Y1;0;"The RSA
+underwent cardiac surgery";STAI Y1;1;"The RSA
 feedback
 was presented through a 15-inch monitor con
 nected
@@ -477,11 +477,11 @@ Biograph
 Infinit
 biofeedback
 machine
-(Thought Technology; Montreal, Canada)";TAU ;state anxiety;;2;;1;2;23;3;;;;;;;;;;;;;;6.5;8.0;;;13;13;;42.2;43.8;1;1;1;1;2;2;1;;
+(Thought Technology; Montreal, Canada)";TAU ;state anxiety;;2;;1;2;23;3;;;;;;;;;;;;;;6.5;8;;;13;13;;42.2;43.8;1;1;1;1;2;2;1;;
 18;"Biofeedback Assisted Control of Respiratory Sinus Arrhythmia
 as a Biobehavioral Intervention for Depressive Symptoms
 in Patients After Cardiac Surgery: A Preliminary Study";Patron et al.;;1;4;Applied psychophysiology and biofeedback;21;2012;0;1;4;;56;20;1;1;1;2;7;14;1;after interventin;630;2 weeks;0;1;0;4;;3;"All the patients
-underwent cardiac surgery";STAI Y2;0;"The RSA
+underwent cardiac surgery";STAI Y2;1;"The RSA
 feedback
 was presented through a 15-inch monitor con
 nected
@@ -493,14 +493,14 @@ biofeedback
 machine
 (Thought Technology; Montreal, Canada)";TAU ;trait anxiety;;;2;1;2;23;3;;;;;;;;;;;;;;4.9;5.7;;;13;13;;43.6;43.7;1;1;1;1;2;2;1;;
 19;"Biofeedback Intervention for Stress and Anxiety among
-Nursing Students: A Randomized Controlled Trial";Ratanasiripong et al. ;;1;1;International Scholarly Research Network;;2012;0;1;4;;124;10;1;1;1;2;;;2;5 weeks after pre-intervention survey;;5 weeks;0;1;0;4;;1;nursing students;PSS;0;"the 30
+Nursing Students: A Randomized Controlled Trial";Ratanasiripong et al. ;;1;1;International Scholarly Research Network;;2012;0;1;4;;124;10;1;1;1;2;;;2;5 weeks after pre-intervention survey;;5 weeks;0;1;0;4;;1;nursing students;PSS;1;"the 30
 participants in the biofeedback group received 2 training
 sessions led by the researchers on how to use the portable
 biofeedback device to assist in stress and anxiety man
 agement";no training or any device;stress;;2;;1;1;0;60;100;19.27;;;;;;;;;;;;4.64;4.37;;;30;30;;13.77;15.97;1;1;1;1;2;2;1;;
 19;"Biofeedback Intervention for Stress and Anxiety among
-Nursing Students: A Randomized Controlled Trial";Ratanasiripong et al. ;;1;2;International Scholarly Research Network;;2012;0;1;4;;124;20;1;1;1;2;;;2;5 weeks after pre-intervention survey;;5 weeks;0;1;0;4;;1;nursing students;State-trait anxiety - state;0;"the 30
+Nursing Students: A Randomized Controlled Trial";Ratanasiripong et al. ;;1;2;International Scholarly Research Network;;2012;0;1;4;;124;20;1;1;1;2;;;2;5 weeks after pre-intervention survey;;5 weeks;0;1;0;4;;1;nursing students;State-trait anxiety - state;1;"the 30
 participants in the biofeedback group received 2 training
 sessions led by the researchers on how to use the portable
 biofeedback device to assist in stress and anxiety man
-agement";no training or any device;state anxiety;;2;;1;1;0;60;100;19.27;;;;;;;;;;;;6.70;8.69;;;30;30;;13.70;19.00;1;1;1;1;2;2;1;;
+agement";no training or any device;state anxiety;;2;;1;1;0;60;100;19.27;;;;;;;;;;;;6.7;8.69;;;30;30;;13.7;19;1;1;1;1;2;2;1;;
