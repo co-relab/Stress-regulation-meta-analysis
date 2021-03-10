@@ -101,6 +101,75 @@ dat <- dat %>% mutate(yi = ifelse(is.na(yi) & !is.na(gConv) & !is.na(predictedDi
                                                               stressComponentType == 5 ~ 2,
                                                               stressComponentType == 6 ~ 3)))
 
+# GRIM & GRIMMER Test
+grim(dat)
+grimmer(dat)
+
+# Subset and create data objects
+dat$useMA <- 1
+dat <- dat %>% filter_all(any_vars(!is.na(.)))
+
+dataMind <- dat %>% filter(strategy == 1 &
+                             !is.na(yi) &
+                             !(inconsistenciesCountGRIMMER %in% c(1, 2)) & 
+                             !(inconsistenciesCountGRIM %in% c(1, 2)) &
+                             robOverall != 3 &
+                             timingEffect == 1)
+dataBio <- dat %>% filter(strategy == 2 &
+                            !is.na(yi) &
+                            !(inconsistenciesCountGRIMMER %in% c(1, 2)) & 
+                            !(inconsistenciesCountGRIM %in% c(1, 2)) &
+                            robOverall != 3 &
+                            timingEffect == 1)
+
+# Remove outliers (based on the results from the maDiag script)
+dataMind <- dataMind %>% filter(!result %in% c(57, 59))
+dataBio <- dataBio %>% filter(!result %in% c(103, 104))
+
+# Data objects including inconsistent effects
+dataMindIncon <- dat %>% filter(strategy == 1 &
+                             !is.na(yi) &
+                             robOverall != 3 &
+                             timingEffect == 1)
+dataBioIncon <- dat %>% filter(strategy == 2 &
+                            !is.na(yi) &
+                            robOverall != 3 &
+                            timingEffect == 1)
+
+dataMindIncon <- dataMindIncon %>% filter(!result %in% c(57, 59))
+dataBioIncon <- dataBioIncon %>% filter(!result %in% c(103, 104))
+
+# Data objects including studies with all levels of risk of bias
+dataMindRob <- dat %>% filter(strategy == 1 &
+                             !is.na(yi) &
+                             !(inconsistenciesCountGRIMMER %in% c(1, 2)) & 
+                             !(inconsistenciesCountGRIM %in% c(1, 2)) &
+                             timingEffect == 1)
+dataBioRob <- dat %>% filter(strategy == 2 &
+                            !is.na(yi) &
+                            !(inconsistenciesCountGRIMMER %in% c(1, 2)) & 
+                            !(inconsistenciesCountGRIM %in% c(1, 2)) &
+                            timingEffect == 1)
+
+dataMindRob <- dataMindRob %>% filter(!result %in% c(57, 59))
+dataBioRob <- dataBioRob %>% filter(!result %in% c(103, 104))
+
+# Data objects including effects based on immediate as well as delayed posttest
+dataMindPost <- dat %>% filter(strategy == 1 &
+                             !is.na(yi) &
+                             !(inconsistenciesCountGRIMMER %in% c(1, 2)) & 
+                             !(inconsistenciesCountGRIM %in% c(1, 2)) &
+                             robOverall != 3)
+dataBioPost <- dat %>% filter(strategy == 2 &
+                            !is.na(yi) &
+                            !(inconsistenciesCountGRIMMER %in% c(1, 2)) & 
+                            !(inconsistenciesCountGRIM %in% c(1, 2)) &
+                            robOverall != 3)
+
+dataMindPost <- dataMindPost %>% filter(!result %in% c(57, 59))
+dataBioPost <- dataBioPost %>% filter(!result %in% c(103, 104))
+
+
 
 # Correlation -------------------------------------------------------------
 

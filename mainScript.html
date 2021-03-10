@@ -724,6 +724,36 @@ div.tocify {
 </div>
 <div id="subgroup-analysis-for-timing-of-the-effect" class="section level2">
 <h2>Subgroup analysis for timing of the effect</h2>
+<pre><code>## $`Self-administered mindfulness`
+## $`Self-administered mindfulness`[[1]]
+## 
+##  1  2 
+## 31 28 
+## 
+## $`Self-administered mindfulness`$`Model results`
+##                   Coef. Estimate     SE t-stat p-val (z) Sig.
+## 1 factor(timingEffect)1    0.340 0.0932   3.65    &lt;0.001  ***
+## 2 factor(timingEffect)2    0.233 0.0940   2.48    0.0131    *
+## 
+## $`Self-administered mindfulness`$`RVE Wald test`
+##  test Fstat df_num df_denom p_val sig
+##   HTZ  0.66      1     4.68 0.456    
+## 
+## 
+## $Biofeedback
+## $Biofeedback[[1]]
+## 
+##  1  2 
+## 28  4 
+## 
+## $Biofeedback$`Model results`
+##                   Coef. Estimate     SE t-stat p-val (z) Sig.
+## 1 factor(timingEffect)1    0.493 0.0907   5.43    &lt;0.001  ***
+## 2 factor(timingEffect)2    0.543 0.0528  10.27    &lt;0.001  ***
+## 
+## $Biofeedback$`RVE Wald test`
+##  test Fstat df_num df_denom p_val sig
+##   HTZ 0.226      1     1.33 0.701</code></pre>
 </div>
 <div id="subgroup-analysis-for-type-of-source" class="section level2">
 <h2>Subgroup analysis for type of source</h2>
@@ -733,18 +763,33 @@ div.tocify {
 ## 12  2  9  5  3 
 ## 
 ## $`Model results`
-##                 Coef. Estimate                   SE              t-stat
-## 1 factor(sourceType)1    0.391 0.152040598680704020                2.57
-## 2 factor(sourceType)2    0.220 0.000000000000000216 1018106460342296.62
-## 3 factor(sourceType)3    0.541 0.125646361587235411                4.31
-## 4 factor(sourceType)4    0.182 0.015359439897402714               11.86
-## 5 factor(sourceType)5    0.656 0.000000000000000454 1445124295057882.25
-##   p-val (z) Sig.
-## 1    0.0102    *
-## 2    &lt;0.001  ***
-## 3    &lt;0.001  ***
-## 4    &lt;0.001  ***
-## 5    &lt;0.001  ***
+## 
+## Multivariate Meta-Analysis Model (k = 31; method: REML)
+## 
+## Variance Components:
+## 
+##             estim    sqrt  nlvls  fixed        factor 
+## sigma^2.1  0.0360  0.1897     12     no         study 
+## sigma^2.2  0.0652  0.2553     31     no  study/result 
+## 
+## Test for Residual Heterogeneity:
+## QE(df = 26) = 72.7019, p-val &lt; .0001
+## 
+## Test of Moderators (coefficients 1:5):
+## QM(df = 5) = 18.8791, p-val = 0.0020
+## 
+## Model Results:
+## 
+##                      estimate      se    zval    pval    ci.lb   ci.ub 
+## factor(sourceType)1    0.3906  0.1341  2.9129  0.0036   0.1278  0.6534  ** 
+## factor(sourceType)2    0.2204  0.3560  0.6191  0.5358  -0.4773  0.9182     
+## factor(sourceType)3    0.5414  0.2162  2.5036  0.0123   0.1175  0.9652   * 
+## factor(sourceType)4    0.1821  0.2520  0.7227  0.4699  -0.3118  0.6760     
+## factor(sourceType)5    0.6558  0.3654  1.7946  0.0727  -0.0604  1.3720   . 
+## 
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
 ## 
 ## $`RVE Wald test`
 ##  test            Fstat df_num df_denom  p_val sig
@@ -757,6 +802,11 @@ div.tocify {
 <div id="published-status" class="section level2">
 <h2>Published status</h2>
 <pre><code>## $`Self-administered mindfulness`
+## $`Self-administered mindfulness`[[1]]
+## 
+##  0  1 
+##  5 26 
+## 
 ## $`Self-administered mindfulness`$`Model results`
 ##                 Coef Estimate                    SE d.f. Lower 95% CI
 ## 1 factor(published)0    0.423 0.0000000000000000295  Inf        0.423
@@ -771,6 +821,11 @@ div.tocify {
 ## 
 ## 
 ## $Biofeedback
+## $Biofeedback[[1]]
+## 
+##  0  1 
+##  6 22 
+## 
 ## $Biofeedback$`Model results`
 ##                 Coef Estimate     SE d.f. Lower 95% CI Upper 95% CI
 ## 1 factor(published)0    0.106 0.2528  Inf       -0.389        0.602
@@ -783,6 +838,11 @@ div.tocify {
 <div id="excluding-effects-from-non-randomized-designs" class="section level2">
 <h2>Excluding effects from non-randomized designs</h2>
 <pre><code>## $`Self-administered mindfulness`
+## $`Self-administered mindfulness`[[1]]
+## 
+##  1  2 
+## 29  2 
+## 
 ## $`Self-administered mindfulness`$`Model results`
 ##                               Coef Estimate     SE d.f. Lower 95% CI
 ## 1 factor(researchDesign == 1)FALSE    0.203 0.0000  Inf        0.203
@@ -797,6 +857,11 @@ div.tocify {
 ## 
 ## 
 ## $Biofeedback
+## $Biofeedback[[1]]
+## 
+##  1  2  3 
+## 23  2  3 
+## 
 ## $Biofeedback$`Model results`
 ##                               Coef Estimate    SE d.f. Lower 95% CI
 ## 1 factor(researchDesign == 1)FALSE    0.608 0.205  Inf        0.206
@@ -811,9 +876,55 @@ div.tocify {
 </div>
 <div id="excluding-effects-due-to-inconsistent-means-or-sds" class="section level2">
 <h2>Excluding effects due to inconsistent means or SDs</h2>
+<pre><code>## $`Self-administered mindfulness`
+## [1] NA
+## 
+## $Biofeedback
+## $Biofeedback$`Count of GRIM/GRIMMER inconsistencies`
+## 
+## FALSE  TRUE 
+##    10     4 
+## 
+## $Biofeedback$`Model results`
+##                                                   Coef Estimate     SE d.f.
+## 1 factor(as.logical(inconsistenciesCountGRIMMER))FALSE    0.449 0.0939  Inf
+## 2  factor(as.logical(inconsistenciesCountGRIMMER))TRUE    0.144 0.0382  Inf
+##   Lower 95% CI Upper 95% CI
+## 1       0.2649        0.633
+## 2       0.0693        0.219
+## 
+## $Biofeedback$`RVE Wald test`
+##  test Fstat df_num df_denom  p_val sig
+##   HTZ  9.04      1     4.59 0.0333   *</code></pre>
 </div>
 <div id="excluding-effects-due-to-a-high-risk-of-bias" class="section level2">
 <h2>Excluding effects due to a high risk of bias</h2>
+<pre><code>## $`Self-administered mindfulness`
+## $`Self-administered mindfulness`$`Model results`
+##                                             Coef Estimate     SE d.f.
+## 1 factor(robOverall &gt; acceptableRiskOfBias)FALSE   0.3905 0.0877  Inf
+## 2  factor(robOverall &gt; acceptableRiskOfBias)TRUE   0.0023 0.2545  Inf
+##   Lower 95% CI Upper 95% CI
+## 1        0.219        0.562
+## 2       -0.497        0.501
+## 
+## $`Self-administered mindfulness`$`RVE Wald test`
+##  test Fstat df_num df_denom p_val sig
+##   HTZ  2.08      1     3.01 0.245    
+## 
+## 
+## $Biofeedback
+## $Biofeedback$`Model results`
+##                                             Coef Estimate                    SE
+## 1 factor(robOverall &gt; acceptableRiskOfBias)FALSE    0.492 0.0907886799501561731
+## 2  factor(robOverall &gt; acceptableRiskOfBias)TRUE    1.187 0.0000000000000000663
+##   d.f. Lower 95% CI Upper 95% CI
+## 1  Inf        0.314         0.67
+## 2  Inf        1.187         1.19
+## 
+## $Biofeedback$`RVE Wald test`
+##  test Fstat df_num df_denom  p_val sig
+##   HTZ  58.6      1     8.31 &lt;0.001 ***</code></pre>
 </div>
 <div id="comparison-of-strategies" class="section level2">
 <h2>Comparison of strategies</h2>
