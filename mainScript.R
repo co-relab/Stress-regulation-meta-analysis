@@ -38,8 +38,8 @@ side <- "right"
 test <- "one-tailed"
 
 # No of simulations for the permutation-based bias correction models and p-curve specifically
-nIterations <- 20 # Set to 5 just to make code checking/running fast. For the final analysis, it should be set to 5000.
-nIterationsPcurve <- 20
+nIterations <- 5000 # Set to 5 just to make code checking/running fast. For the final analysis, it should be set to 5000.
+nIterationsPcurve <- 200
 nIterationVWsensitivity <- 5 # Number of iterations for the Vevea & Woods (2005) step function model sensitivity analysis 
 
 # Controls for the multiple-parameter selection models 
