@@ -25,8 +25,10 @@ table(dat$researchDesign, useNA="ifany")
 # Compute gender ratio (% of female)
 dat$percFemale <- ifelse(is.na(dat$percFemale), dat$nFemale/(dat$nFemale + dat$nMale), dat$percFemale)
 
-dat <- dat %>% mutate(sd1 = ifelse(is.na(sd1) & !is.na(se1), se1*sqrt(n1+n2), sd1),
-                      sd2 = ifelse(is.na(sd2) & !is.na(se2), se2*sqrt(n1+n2), sd2))
+# Compute SDs from SEs
+dat <- dat %>% mutate(sd1 = ifelse(is.na(sd1) & !is.na(se1), se1*sqrt(n1), sd1),
+                      sd2 = ifelse(is.na(sd2) & !is.na(se2), se2*sqrt(n2), sd2))
+
 
 dat <- escalc(measure = "SMD", m1i = mean1, m2i = mean2, sd1i = sd1, sd2i = sd2, n1i = n1, n2i = n2, data = dat, include = researchDesign %in% c(1, 2))
 dat[dat$researchDesign == 3,]$yi <- dat %>% filter(researchDesign == 3) %$% escalc(measure = "SMCC", m1i = mean1, m2i = mean2, sd1i = sd1, sd2i = sd2, ni = n1, ri = c(rep(rmCor, nrow(.))))$yi
@@ -93,8 +95,6 @@ dat$result <- 1:nrow(dat)
 # # Multiply the ES by -1 if not in the predicted direction
 dat <- dat %>% mutate(yi = ifelse(is.na(yi) & !is.na(gConv) & !is.na(predictedDirection), predictedDirection * gConv, yi),
                       vi = ifelse(is.na(vi) & !is.na(gVarConv) & !is.na(predictedDirection), gVarConv, vi),
-                      sd1 = ifelse(is.na(sd1) & !is.na(se1), se1*sqrt(n1+n2), sd1),
-                      sd2 = ifelse(is.na(sd2) & !is.na(se2), se2*sqrt(n1+n2), sd2),
                       label = paste(paperID, "/", studyID, "/", effectID, sep = ""),
                       stressAffective = as.factor(ifelse(!is.na(affect) | !is.na(stressComponentType), 1, ifelse(!is.na(affectiveConsequencesStress), 2, NA))),
                       stressCompRecoded = as.factor(case_when(stressComponentType %in% c(1:4) | !is.na(affect) ~ 1,
