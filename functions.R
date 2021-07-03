@@ -1,8 +1,9 @@
 # Pocket 
 # print(deparse(substitute(df)))
+# do.call(rbind, x)
 
 # Load libraries (and install if not installed already)
-list.of.packages <- c("car", "reshape", "tidyverse", "tidyr", "psych", "metafor", "meta", "dmetar", "esc", "lme4", "ggplot2", "knitr", "puniform", "kableExtra", "lmerTest", "pwr", "Amelia", "multcomp", "magrittr", "weightr", "clubSandwich", "ddpcr", "poibin")
+list.of.packages <- c("car", "reshape", "tidyverse", "tidyr", "psych", "metafor", "meta", "dmetar", "esc", "lme4", "ggplot2", "knitr", "puniform", "kableExtra", "lmerTest", "pwr", "Amelia", "multcomp", "magrittr", "weightr", "clubSandwich", "ddpcr", "poibin", "robvis", "RoBMA")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 
@@ -25,7 +26,7 @@ if (test == "one-tailed") {
 # Using n/(n-p) small-sample correction for RVE SEs
 rmaCustom <- function(data = NA){
   data <- data %>% filter(useMA == 1)
-  viMatrix <- impute_covariance_matrix(data$vi, cluster = data$study, r = rho, smooth_vi = TRUE)
+  viMatrix <- data %$% impute_covariance_matrix(vi, cluster = study, r = rho)
   rmaObjectModBasedSE <- rma.mv(yi = yi, V = viMatrix, data = data, method = "REML", random = ~ 1|study/result, sparse = TRUE)
   rmaObject <- robust.rma.mv(rmaObjectModBasedSE, cluster = data$study)
   return(list("RMA.MV object with RVE SEs with n/(n-p) small-sample correction" = rmaObject, 
@@ -87,7 +88,7 @@ pcurvePerm <- function(data, esEstimate = FALSE, plot = FALSE, nIterations = nIt
   resultPcurve <- matrix(ncol = 11, nrow = nIterationsPcurve)
   set.seed(1)
   for(i in 1:nIterationsPcurve){
-    datPcurve <- data[!duplicated.random(data$study) & data$focalVariable == 1 & !is.na(data$p),]
+    datPcurve <- data[!duplicated.random(data$study) & data$focal == 1 & !is.na(data$p),]
     metaPcurve <- metagen(TE = yi, seTE = sqrt(vi), n.e = ni, data = datPcurve)
     modelPcurve <- tryCatch(pcurveMod(metaPcurve, effect.estimation = esEstimate, N = datPcurve$ni, plot = plot), 
                             error = function(e) NULL)
@@ -112,8 +113,8 @@ selectionModel <- function(data, minNoPvals = minPvalues, nIteration = nIteratio
   resultSM <- matrix(ncol = 8, nrow = nIteration)
   set.seed(1)
   for(i in 1:nIteration){
-    mydat <<- data[!duplicated.random(data$study) & data$focalVariable == 1,]
-    res <- rma(yi, vi, data = mydat)
+    mydat <<- data[!duplicated.random(data$study) & data$focal == 1,]
+    res <- rma(yi, vi,  data = mydat)
     # if <= min.pvalues p-values in an interval: return NULL
     pTable <- table(cut(mydat$p, breaks = c(0, .05, 0.5, 1)))
     if(fallback == TRUE | any(pTable < minNoPvals) | !anyNA(deltas)){
@@ -143,13 +144,19 @@ selectionModel <- function(data, minNoPvals = minPvalues, nIteration = nIteratio
   resultSM
 }
 
+# Vevea & Woods step function model using a priori defined selection weights
+veveaWoodsSM <- function(data, stepsDelta, nIteration = nIterationVWsensitivity){
+  set.seed(1)
+  do.call(rbind, lapply(stepsDelta[-1], function(delta) suppressWarnings(selectionModel(data[data$useMA == 1 & data$focal == 1,], steps = stepsDelta$steps, deltas = delta, nIteration = nIterationVWsensitivity))))
+}
+        
 # PET-PEESE ---------------------------------------------------------------
 
 #PET-PEESE with 4/3PSM as the conditional estimator instead of PET. 
 # Also implemented the modified sample-size based estimator (see https://www.jepusto.com/pet-peese-performance/).
-petPeese <- function(data, nBased = TRUE, selModAsCondEst = TRUE){  # if nBased = TRUE, use the sample-size-based estimator, if FALSE, use the ordinary SE/var. If selModAsCondEst = TRUE, use the selection model as conditional estimator, otherwise use PET.
+petPeese <- function(data, nBased = TRUE, selModAsCondEst = condEst){  # if nBased = TRUE, use the sample-size-based estimator, if FALSE, use the ordinary SE/var. If selModAsCondEst = TRUE, use the selection model as conditional estimator, otherwise use PET.
   data <- data %>% filter(useMA == 1)
-  viMatrix <- impute_covariance_matrix(data$vi, cluster = data$study, r = rho, smooth_vi = TRUE)  # compute the covariance matrix for the CHE working model
+  viMatrix <- data %$% impute_covariance_matrix(vi, cluster = study, r = rho)  # compute the covariance matrix for the CHE working model
   
   if(nBased == TRUE){
     pet <<- robust.rma.mv(rma.mv(yi = yi ~ sqrt(nTerm), V = viMatrix, random = ~ 1|study/result, method = "REML", sparse = TRUE, data = data), cluster = data$study)
@@ -260,8 +267,11 @@ bias <- function(data = NA, rmaObject = NA){
   esPrec <- cor(rmaObject[[1]]$yi, sqrt(rmaObject[[1]]$vi), method = "kendall")
   
   # Small-study effects correction
+  # Vevea & Woods selection model
+  resultsVeveaWoodsSM <- veveaWoodsSM(data, stepsDelta)
+  
   # 3-parameter selection model
-  resultSM <- selectionModel(data, minNoPvals = minPvalues, nIteration = nIterations, fallback = fallback)
+  resultSelModel <- selectionModel(data, minNoPvals = minPvalues, nIteration = nIterations, fallback = fallback)
   
   # PET-PEESE
   petPeeseOut <- petPeese(data)
@@ -279,7 +289,7 @@ bias <- function(data = NA, rmaObject = NA){
   set.seed(1)
   for(i in 1:nIterations){
     data <- data %>% filter(useMA == 1)
-    modelPuniform <- data[!duplicated.random(data$study) & data$focalVariable == 1 & !is.na(data$vi),] %$% puni_star(yi = yi, vi = vi, alpha = alpha, side = side, method = "ML")
+    modelPuniform <- data[!duplicated.random(data$study) & data$focal == 1 & !is.na(data$vi),] %$% puni_star(yi = yi, vi = vi, alpha = alpha, side = side, method = "ML")
     resultPuniform[i,] <- c("est" = modelPuniform[["est"]], "ciLB" = modelPuniform[["ci.lb"]], "ciUB" = modelPuniform[["ci.ub"]], "p-value" = modelPuniform[["pval.0"]])
   }
   colnames(resultPuniform) <- c("est", "ciLB", "ciUB", "pvalue")
@@ -288,7 +298,8 @@ bias <- function(data = NA, rmaObject = NA){
   
   # Publication bias results
   return(list("ES-precision correlation" = esPrec,
-              "4/3PSM" = resultSM, 
+              "4/3PSM" = resultSelModel,
+              "Vevea & Woods SM" = resultsVeveaWoodsSM,
               "PET-PEESE" = petPeeseOut,
               "WAAP-WLS" = waapWLSout,
               "p-uniform*" = puniformOut,
@@ -344,8 +355,6 @@ maResultsTable <- function(maResultsObject, metaAnalysis = TRUE, bias = TRUE){
     ))
   }
 }
-
-
 
 # Return format function
 # Code adapted from Carter, E. C., Schönbrodt, F. D., Hilgard, J., & Gervais, W. (2018). Correcting for bias in psychology: A comparison of meta-analytic methods. Retrieved from https://osf.io/rf3ys/.
@@ -423,12 +432,12 @@ grim <- function(dat){
   for(i in 1:nrow(datGRIM)){
     outGrimM1[i] <- grimTest(n = datGRIM[i,]$n1, mean = datGRIM[i,]$mean1, items = datGRIM[i,]$items, decimals = 2)
     outGrimM2[i] <- grimTest(n = datGRIM[i,]$n2, mean = datGRIM[i,]$mean2, items = datGRIM[i,]$items, decimals = 2)
-    }
+  }
   
   datGRIM$outGrimM1 <- outGrimM1
   datGRIM$outGrimM2 <- outGrimM2
   datGRIM$inconsistenciesCountGRIM <- datGRIM %$% abs(outGrimM1 + outGrimM2 - 2)
-
+  
   dat <<- datGRIM %>% 
     select(result, outGrimM1, outGrimM2, inconsistenciesCountGRIM) %>%
     left_join(dat, ., by = "result", keep = FALSE)
@@ -478,7 +487,7 @@ grimTest <- function (n, mean, items = 1, decimals = 2) {
 
 # General Grimmer Test ----------------------------------------------------
 
-# Original GRIMMER esult: -1 = GRIM inconsistent, 0 = GRIMMER inconsistent, 1 = mean & sd consistent
+# Original GRIMMER result: -1 = GRIM inconsistent, 0 = GRIMMER inconsistent, 1 = mean & sd consistent
 # For the present purposes, changed so that GRIM inconsistent returns 0 (GRIMMER inconsistent)
 grimmerTest <- function(n, mean, SD, items = 1, decimals_mean = 2, decimals_SD = 2){
   # 

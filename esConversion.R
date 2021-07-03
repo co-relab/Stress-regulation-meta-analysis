@@ -121,6 +121,12 @@ dataBio <- dat %>% filter(strategy == 2 &
                             !(inconsistenciesCountGRIM %in% c(1, 2)) &
                             robOverall != 3 &
                             timingEffect == 1)
+datIncluded <- dat %>% filter(!is.na(yi) &
+                                !(inconsistenciesCountGRIMMER %in% c(1, 2)) & 
+                                !(inconsistenciesCountGRIM %in% c(1, 2)) &
+                                robOverall != 3 &
+                                timingEffect == 1 &
+                                !result %in% c(57, 59, 103, 104))
 
 # Remove outliers (based on the results from the maDiag script)
 dataMind <- dataMind %>% filter(!result %in% c(57, 59))

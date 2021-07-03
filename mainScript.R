@@ -39,17 +39,30 @@ test <- "one-tailed"
 
 # No of simulations for the permutation-based bias correction models and p-curve specifically
 nIterations <- 5000 # Set to 5 just to make code checking/running fast. For the final analysis, it should be set to 5000.
-nIterationsPcurve <- 200
-nIterationVWsensitivity <- 5 # Number of iterations for the Vevea & Woods (2005) step function model sensitivity analysis 
+nIterationsPcurve <- 2
+nIterationVWsensitivity <- 2 # Number of iterations for the Vevea & Woods (2005) step function model sensitivity analysis 
 
 # Controls for the multiple-parameter selection models 
 
 # Whether to apply a 4- or 3-parameter selection model. If fallback == TRUE, the procedure falls back to the 3-parameter selection model. 
 # This should be selected when too few effects in the opposite side make the estimate unstable.
 fallback <- TRUE
+
 # Even when fallback == FALSE, the 4-parameter selection model still falls back to 3 parameters for the given iteration if,
 # (1) it fails to converge or (2) the number of p-values in each of the step intervals gets smaller than minPvalues.
-minPvalues <- 5
+minPvalues <- 4
+
+# Steps and delta parameters for Vevea & Woods selection models 
+# Can be adjusted if a different selection process is assumed. 
+# Please note that steps vector represents one-tailed p-values.
+stepsDelta <- data.frame(
+  steps =     c(.0025, .005, .0125, .025, .05, .10, .25, .50, 1),
+  moderateSelection = c(1, 0.99, 0.97, 0.95, 0.80, 0.60, 0.50, 0.50, 0.50),
+  severeSelection =   c(1, 0.99, 0.97, 0.95, 0.65, 0.40, 0.25, 0.25, 0.25),
+  extremeSelection =  c(1, 0.98, 0.95, 0.90, 0.50, 0.20, 0.10, 0.10, 0.10))
+
+# Controls for PET-PEESE
+condEst <- TRUE
 
 # Exclude studies having an overall Risk of Bias score of at least x.
 acceptableRiskOfBias <- 2
@@ -211,7 +224,7 @@ abline((if(results[[2]]$`Publication bias`$`4/3PSM`["pvalue"] < alpha & ifelse(e
 
 numberIntervention <- list(NA)
 for(i in 1:length(dataObjects)){
-  viMatrix <- impute_covariance_matrix(dataObjects[[i]]$vi, cluster = dataObjects[[i]]$study, r = rho, smooth_vi = TRUE)
+  viMatrix <- impute_covariance_matrix(dataObjects[[i]]$vi, cluster = dataObjects[[i]]$study, r = rho)
   rmaObject <- rma.mv(yi ~ 0 + interventionNumber, V = viMatrix, data = dataObjects[[i]], method = "REML", random = ~ 1|study/result, sparse = TRUE)
   RVEmodel <- coef_test(rmaObject, vcov = "CR2", test = "z", cluster = dataObjects[[i]]$study)
   numberIntervention[[i]] <- list("Number of intervention sessions" = table(dataObjects[[i]]$interventionNumber), "Model results" = RVEmodel)
@@ -223,7 +236,7 @@ numberIntervention
 
 freqIntervention <- list(NA)
 for(i in 1:length(dataObjects)){
-  viMatrix <- impute_covariance_matrix(dataObjects[[i]]$vi, cluster = dataObjects[[i]]$study, r = rho, smooth_vi = TRUE)
+  viMatrix <- impute_covariance_matrix(dataObjects[[i]]$vi, cluster = dataObjects[[i]]$study, r = rho)
   rmaObject <- rma.mv(yi ~ 0 + interventionFrequency, V = viMatrix, data = dataObjects[[i]], method = "REML", random = ~ 1|study/result, sparse = TRUE)
   RVEmodel <- coef_test(rmaObject, vcov = "CR2", test = "z", cluster = dataObjects[[i]]$study)
   freqIntervention[[i]] <- list("Frequency of intervention sessions" = table(dataObjects[[i]]$interventionFrequency), "Model results" = RVEmodel)
@@ -235,10 +248,10 @@ freqIntervention
 
 durationIntervention <- list(NA)
 for(i in 1:length(dataObjects)){
-  viMatrix <- impute_covariance_matrix(dataObjects[[i]]$vi, cluster = dataObjects[[i]]$study, r = rho, smooth_vi = TRUE)
-  rmaObject <- rma.mv(yi ~ 0 + interventionDuration, V = viMatrix, data = dataObjects[[i]], method = "REML", random = ~ 1|study/result, sparse = TRUE)
+  viMatrix <- impute_covariance_matrix(dataObjects[[i]]$vi, cluster = dataObjects[[i]]$study, r = rho)
+  rmaObject <- rma.mv(yi ~ 0 + I(interventionDuration/60), V = viMatrix, data = dataObjects[[i]], method = "REML", random = ~ 1|study/result, sparse = TRUE)
   RVEmodel <- coef_test(rmaObject, vcov = "CR2", test = "z", cluster = dataObjects[[i]]$study)
-  durationIntervention[[i]] <- list("Duration of intervention sessions" = table(dataObjects[[i]]$interventionDuration), "Model results" = RVEmodel)
+  durationIntervention[[i]] <- list("Duration of intervention sessions" = table(dataObjects[[i]]$interventionDuration/60), "Model results" = RVEmodel)
 }
 durationIntervention <- setNames(durationIntervention, nm = namesObjects)
 durationIntervention
@@ -247,7 +260,7 @@ durationIntervention
 
 femaleProportion <- list(NA)
 for(i in 1:length(dataObjects)){
-  viMatrix <- impute_covariance_matrix(dataObjects[[i]]$vi, cluster = dataObjects[[i]]$study, r = rho, smooth_vi = TRUE)
+  viMatrix <- impute_covariance_matrix(dataObjects[[i]]$vi, cluster = dataObjects[[i]]$study, r = rho)
   rmaObject <- rma.mv(yi ~ 0 + percFemale, V = viMatrix, data = dataObjects[[i]], method = "REML", random = ~ 1|study/result, sparse = TRUE)
   RVEmodel <- coef_test(rmaObject, vcov = "CR2", test = "z", cluster = dataObjects[[i]]$study)
   femaleProportion[[i]] <- list("Proportion of females" = median(dataObjects[[i]]$percFemale, na.rm = TRUE), "Model results" = RVEmodel)
@@ -259,7 +272,7 @@ femaleProportion
 
 compGroup <- list(NA)
 for(i in 1:length(dataObjects)){
-  viMatrix <- impute_covariance_matrix(dataObjects[[i]]$vi, cluster = dataObjects[[i]]$study, r = rho, smooth_vi = TRUE)
+  viMatrix <- impute_covariance_matrix(dataObjects[[i]]$vi, cluster = dataObjects[[i]]$study, r = rho)
   rmaObject <- rma.mv(yi ~ 0 + factor(comparisonGroupType), V = viMatrix, data = dataObjects[[i]], method = "REML", random = ~ 1|study/result, sparse = TRUE)
   RVEmodel <- coef_test(rmaObject, vcov = "CR2", test = "z", cluster = dataObjects[[i]]$study)
   compGroup[[i]] <- list(table(dataObjects[[i]]$comparisonGroupType), "Model results" = RVEmodel, "RVE Wald test" = Wald_test(rmaObject, constraints = constrain_equal(c(1:2)), vcov = "CR2"))
@@ -271,7 +284,7 @@ compGroup
 
 popType <- list(NA)
 for(i in 1:length(dataObjects)){
-  viMatrix <- impute_covariance_matrix(dataObjects[[i]]$vi, cluster = dataObjects[[i]]$study, r = rho, smooth_vi = TRUE)
+  viMatrix <- impute_covariance_matrix(dataObjects[[i]]$vi, cluster = dataObjects[[i]]$study, r = rho)
   rmaObject <- rma.mv(yi ~ 0 + factor(populationType), V = viMatrix, data = dataObjects[[i]], method = "REML", random = ~ 1|study/result, sparse = TRUE)
   RVEmodel <- coef_test(rmaObject, vcov = "CR2", test = "z", cluster = dataObjects[[i]]$study)
   popType[[i]] <- list(table(dataObjects[[i]]$populationType), "Model results" = RVEmodel, "RVE Wald test" = Wald_test(rmaObject, constraints = constrain_equal(c(1:3)), vcov = "CR2"))
@@ -284,7 +297,7 @@ dataObjectsPost <- list("Mind" = dataMindPost, "Bio" = dataBioPost)
 
 effTiming <- list(NA)
 for(i in 1:length(dataObjectsPost)){
-  viMatrix <- impute_covariance_matrix(dataObjectsPost[[i]]$vi, cluster = dataObjectsPost[[i]]$study, r = rho, smooth_vi = TRUE)
+  viMatrix <- impute_covariance_matrix(dataObjectsPost[[i]]$vi, cluster = dataObjectsPost[[i]]$study, r = rho)
   rmaObject <- rma.mv(yi ~ 0 + factor(timingEffect), V = viMatrix, data = dataObjectsPost[[i]], method = "REML", random = ~ 1|study/result, sparse = TRUE)
   RVEmodel <- coef_test(rmaObject, vcov = "CR2", test = "z", cluster = dataObjectsPost[[i]]$study)
   effTiming[[i]] <- list(table(dataObjectsPost[[i]]$timingEffect), "Model results" = RVEmodel, "RVE Wald test" = Wald_test(rmaObject, constraints = constrain_equal(c(1:2)), vcov = "CR2"))
@@ -294,7 +307,7 @@ effTiming
 
 #'## Subgroup analysis for type of source
 
-viMatrixSourceType <- impute_covariance_matrix(dataMind$vi, cluster = dataMind$study, r = rho, smooth_vi = TRUE)
+viMatrixSourceType <- impute_covariance_matrix(dataMind$vi, cluster = dataMind$study, r = rho)
 rmaObjectSourceType <- rma.mv(yi ~ 0 + factor(sourceType), V = viMatrixSourceType, data = dataMind, method = "REML", random = ~ 1|study/result, sparse = TRUE)
 effTimingSourceType <- list(table(dataMind$sourceType), "Model results" = rmaObjectSourceType, "RVE Wald test" = Wald_test(rmaObjectSourceType, constraints = constrain_equal(c(1:5)), vcov = "CR2"))
 effTimingSourceType
@@ -309,7 +322,7 @@ effTimingSourceType
 
 pubUnpub <- list(NA)
 for(i in 1:length(dataObjects)){
-  viMatrix <- impute_covariance_matrix(dataObjects[[i]]$vi, cluster = dataObjects[[i]]$study, r = rho, smooth_vi = TRUE)
+  viMatrix <- impute_covariance_matrix(dataObjects[[i]]$vi, cluster = dataObjects[[i]]$study, r = rho)
   rmaObject <- rma.mv(yi ~ 0 + factor(published), V = viMatrix, data = dataObjects[[i]], method = "REML", random = ~ 1|study/result, sparse = TRUE)
   RVEmodel <- conf_int(rmaObject, vcov = "CR2", test = "z", cluster = dataObjects[[i]]$study)
   pubUnpub[[i]] <- list(table(dataObjects[[i]]$published), "Model results" = RVEmodel, "RVE Wald test" = Wald_test(rmaObject, constraints = constrain_equal(1:2), vcov = "CR2"))
@@ -320,7 +333,7 @@ pubUnpub
 #'## Excluding effects from non-randomized designs
 rndNonrnd <- list(NA)
 for(i in 1:length(dataObjects)){
-  viMatrix <- impute_covariance_matrix(dataObjects[[i]]$vi, cluster = dataObjects[[i]]$study, r = rho, smooth_vi = TRUE)
+  viMatrix <- impute_covariance_matrix(dataObjects[[i]]$vi, cluster = dataObjects[[i]]$study, r = rho)
   rmaObject <- rma.mv(yi ~ 0 + factor(researchDesign == 1), V = viMatrix, data = dataObjects[[i]], method = "REML", random = ~ 1|study/result, sparse = TRUE)
   RVEmodel <- conf_int(rmaObject, vcov = "CR2", test = "z", cluster = dataObjects[[i]]$study)
   rndNonrnd[[i]] <- list(table(dataObjects[[i]]$researchDesign), "Model results" = RVEmodel, "RVE Wald test" = Wald_test(rmaObject, constraints = constrain_equal(1:2), vcov = "CR2"))
@@ -333,12 +346,12 @@ dataObjectsIncon <- list("Mind" = dataMindIncon, "Bio" = dataBioIncon)
 
 consIncons <- list(NA)
 i <- 2 # Only for biofeedback, since there were 0 inconsistent means or SDs for mindfulness studies.
-# for(i in 1:length(dataObjects)){
-  viMatrix <- impute_covariance_matrix(dataObjectsIncon[[i]]$vi, cluster = dataObjectsIncon[[i]]$study, r = rho, smooth_vi = TRUE)
+ #for(i in 1:length(dataObjectsIncon)){
+  viMatrix <- impute_covariance_matrix(dataObjectsIncon[[i]]$vi, cluster = dataObjectsIncon[[i]]$study, r = rho)
   rmaObject <- rma.mv(yi ~ 0 + factor(as.logical(inconsistenciesCountGRIMMER)), V = viMatrix, data = dataObjectsIncon[[i]], method = "REML", random = ~ 1|study/result, sparse = TRUE)
   RVEmodel <- conf_int(rmaObject, vcov = "CR2", test = "z", cluster = dataObjectsIncon[[i]]$study)
   consIncons[[i]] <- list("Count of GRIM/GRIMMER inconsistencies" = table(as.logical(dataObjectsIncon[[i]]$inconsistenciesCountGRIMMER)), "Model results" = RVEmodel, "RVE Wald test" = Wald_test(rmaObject, constraints = constrain_equal(1:2), vcov = "CR2"))
-# }
+ #}
 consIncons <- setNames(consIncons, nm = namesObjects)
 consIncons
 
@@ -352,10 +365,10 @@ dataObjectsRob <- list("Mind" = dataMindRob, "Bio" = dataBioRob)
 
 highRoB <- list(NA)
 for(i in 1:length(dataObjectsRob)){
-  viMatrix <- impute_covariance_matrix(dataObjectsRob[[i]]$vi, cluster = dataObjectsRob[[i]]$study, r = rho, smooth_vi = TRUE)
+  viMatrix <- impute_covariance_matrix(dataObjectsRob[[i]]$vi, cluster = dataObjectsRob[[i]]$study, r = rho)
   rmaObject <- rma.mv(yi ~ 0 + factor(robOverall > acceptableRiskOfBias), V = viMatrix, data = dataObjectsRob[[i]], method = "REML", random = ~ 1|study/result, sparse = TRUE)
   RVEmodel <- conf_int(rmaObject, vcov = "CR2", test = "z", cluster = dataObjectsRob[[i]]$study)
-  highRoB[[i]] <- list("Model results" = RVEmodel, "RVE Wald test" = Wald_test(rmaObject, constraints = constrain_equal(1:2), vcov = "CR2"))
+  highRoB[[i]] <- list("RoB" = table(as.logical(dataObjectsRob[[i]]$robOverall2)), "Model results" = RVEmodel, "RVE Wald test" = Wald_test(rmaObject, constraints = constrain_equal(1:2), vcov = "CR2"))
 }
 highRoB <- setNames(highRoB, nm = namesObjects)
 highRoB
@@ -363,23 +376,23 @@ highRoB
 #'## Comparison of strategies
 
 #'### Model without covariates
-viMatrixStratComp <- impute_covariance_matrix(dat$vi, cluster = dat$study, r = rho, smooth_vi = TRUE)
-rmaObjectStratComp <- rma.mv(yi ~ 0 + factor(strategy), V = viMatrixStratComp, data = dat, method = "REML", random = ~ 1|study/result, sparse = TRUE)
-RVEmodelStratComp <- conf_int(rmaObjectStratComp, vcov = "CR2", test = "z", cluster = dat$study)
+viMatrixStratComp <- impute_covariance_matrix(datIncluded$vi, cluster = datIncluded$study, r = rho)
+rmaObjectStratComp <- rma.mv(yi ~ 0 + factor(strategy), V = viMatrixStratComp, data = datIncluded, method = "REML", random = ~ 1|study/result, sparse = TRUE)
+RVEmodelStratComp <- conf_int(rmaObjectStratComp, vcov = "CR2", test = "z", cluster = datIncluded$study)
 list("Model results" = RVEmodelStratComp, "RVE Wald test" = Wald_test(rmaObjectStratComp, constraints = constrain_equal(1:2), vcov = "CR2"))
 
 #'### Model with covariates
 #' Controlling for design-related factors that are prognostic w.r.t. the effect sizes (i.e., might vary across moderator categories)
-viMatrixStratComp <- impute_covariance_matrix(dat$vi, cluster = dat$study, r = rho, smooth_vi = TRUE)
-rmaObjectStratComp <- rma.mv(yi ~ 0 + factor(strategy) + researchDesign + populationType + comparisonGroupType + published + robOverall, V = viMatrixStratComp, data = dat, method = "REML", random = ~ 1|study/result, sparse = TRUE)
-RVEmodelStratComp <- conf_int(rmaObjectStratComp, vcov = "CR2", test = "z", cluster = dat$study)
+viMatrixStratComp <- impute_covariance_matrix(datIncluded$vi, cluster = datIncluded$study, r = rho)
+rmaObjectStratComp <- rma.mv(yi ~ 0 + factor(strategy) + researchDesign + populationType + comparisonGroupType + published + robOverall, V = viMatrixStratComp, data = datIncluded, method = "REML", random = ~ 1|study/result, sparse = TRUE)
+RVEmodelStratComp <- conf_int(rmaObjectStratComp, vcov = "CR2", test = "z", cluster = datIncluded$study)
 list("Model results" = RVEmodelStratComp, "RVE Wald test" = Wald_test(rmaObjectStratComp, constraints = constrain_equal(1:2), vcov = "CR2"))
 
 #'## Subgroup analysis for stress vs affective consequences
 
 stressAffectConseq <- list(NA)
 for(i in 1:length(dataObjects)){
-  viMatrix <- impute_covariance_matrix(dataObjects[[i]]$vi, cluster = dataObjects[[i]]$study, r = rho, smooth_vi = TRUE)
+  viMatrix <- impute_covariance_matrix(dataObjects[[i]]$vi, cluster = dataObjects[[i]]$study, r = rho)
   rmaObject <- rma.mv(yi ~ 0 + as.factor(stressAffective), V = viMatrix, data = dataObjects[[i]], method = "REML", random = ~ 1|study/result, sparse = TRUE)
   RVEmodel <- conf_int(rmaObject, vcov = "CR2", test = "z", cluster = dataObjects[[i]]$study)
   stressAffectConseq[[i]] <- list("Number of included effects per category" = table(dataObjects[[i]]$stressAffective), "Model results" = RVEmodel, "RVE Wald test" = Wald_test(rmaObject, constraints = constrain_equal(1:2), vcov = "CR2"))
@@ -402,7 +415,7 @@ title("Biofeedback (AffectiveConsequences = 2)")
 #'## Subgroup analysis for stress vs affective consequences
 stressComponentClusters <- list(NA)
 for(i in 1:length(dataObjects)){
-  viMatrix <- impute_covariance_matrix(dataObjects[[i]]$vi, cluster = dataObjects[[i]]$study, r = rho, smooth_vi = TRUE)
+  viMatrix <- impute_covariance_matrix(dataObjects[[i]]$vi, cluster = dataObjects[[i]]$study, r = rho)
   rmaObject <- rma.mv(yi ~ 0 + as.factor(stressCompRecoded), V = viMatrix, data = dataObjects[[i]], method = "REML", random = ~ 1|study/result, sparse = TRUE)
   RVEmodel <- conf_int(rmaObject, vcov = "CR2", test = "z", cluster = dataObjects[[i]]$study)
   stressComponentClusters[[i]] <- list("Number of included effects per category" = table(dataObjects[[i]]$stressCompRecoded), "Model results" = RVEmodel, "RVE Wald test" = Wald_test(rmaObject, constraints = constrain_equal(1:3), vcov = "CR2"))
