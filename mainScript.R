@@ -167,29 +167,20 @@ results$Biofeedback
 
 #'## Contour enhanced funnel plot
 #'### Mindfulness
-dataMind %$% metafor::funnel.default(yi, vi, level=c(90, 95, 99), shade=c("white", "gray", "darkgray"), refline=0, pch = 20, yaxis = "sei")
+dataMind %$% metafor::funnel.default(yi, vi, level=c(90, 95, 99), shade=c("white", "gray", "darkgray"), refline = 0, pch = 20, yaxis = "sei", digits = c(1, 2), xlab = expression(paste("Hedges' ",italic("g"))))
 
 #'### Biofeedback
-dataBio %$% metafor::funnel.default(yi, vi, level=c(90, 95, 99), shade=c("white", "gray", "darkgray"), refline=0, pch = 20, yaxis = "sei")
+dataBio %$% metafor::funnel.default(yi, vi, level=c(90, 95, 99), shade=c("white", "gray", "darkgray"), refline = 0, pch = 20, yaxis = "sei", digits = c(1, 2), xlab = expression(paste("Hedges' ",italic("g"))))
 
 
 #'## Forest plots
 #'### Mindfulness
-dataMind %$% forest(x = yi, vi = vi,
-                    xlim=c(-2,2),            ### adjust horizontal plot region limits
-                    subset=order(vi),        ### order by size of yi
-                    slab=NA, annotate=FALSE, ### remove study labels and annotations
-                    efac=0,                  ### remove vertical bars at end of CIs
-                    pch=19,                  ### changing point symbol to filled circle
-                    col="gray40",            ### change color of points/CIs
-                    psize=2,                 ### increase point size
-                    cex.lab=.7, cex.axis=.7,   ### increase size of x-axis title/labels
-                    lty=c("solid","blank"))  ### remove horizontal line at top of plot
-title("Mindfulness")
+dataMind %$% forest(rmaObjects$`Self-administered mindfulness`$`RMA.MV object with RVE SEs with n/(n-p) small-sample correction`, order = "prec", slab = label, efac = 1, cex = .9, col="gray40", psize=1, cex.lab=1, cex.axis=1,
+                    xlab = expression(paste("Hedges' ",italic("g"))), header="PaperID/StudyID/EffectID", mlab="", addpred = T)
 
 #'### Biofeedback
-dataBio %$% forest(yi, vi, subset=order(vi), slab = label)
-title("Biofeedback")
+dataBio %$% forest(rmaObjects$Biofeedback$`RMA.MV object with RVE SEs with n/(n-p) small-sample correction`, order = "prec", slab = label, efac = 1, cex = 1, col="gray40", psize=1, cex.lab=1, cex.axis=1,
+                    xlab = expression(paste("Hedges' ",italic("g"))), header="PaperID/StudyID/EffectID", mlab="", addpred = T)
 
 #'## p-curve plots
 #'### Mindfulness
